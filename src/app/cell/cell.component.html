@@ -9,26 +9,27 @@
 <!--</a>-->
 <!--#popover="ngbPopover"-->
 <button
-  type="button" class="btn btn-outline-secondary"
-  [autoClose]="true" [ngbPopover]="pop"
-  style="width: 30px; height: 30px;"
+  id="cell"
+  type="button"
+  class="cell btn btn-outline-secondary"
+  [autoClose]="true"
+  [ngbPopover]="pop"
   placement="bottom"
-#cell>
+  #cell>{{cellText}}
 </button>
 <ng-template #pop>
-  <div>
-    <button (click)="cell.innerText='O'">O</button>
-    <button (click)="cell.innerText='X'">X</button>
-    <button (click)="cell.innerText=''" style="border: none" >x</button>
+  <div class="popover">
+    <div class="trapezoid"></div>
+    <div class="buttons">
+      <button (click)="onClick('O')">O</button>
+      <button (click)="onClick('X')">X</button>
+      <div class="clear">
+        <button
+          (click)="onClick('')"
+          style="border: none">clear
+        </button>
+      </div>
+    </div>
   </div>
 </ng-template>
-<!--&nbsp;-->
-<!--<button type="button" class="btn btn-outline-secondary mr-2" (click)="popover.toggle()">-->
-<!--  Click to toggle the external popover-->
-<!--</button>-->
-
-<!--<button type="button" class="btn btn-outline-secondary" ngbPopover-->
-<!--        [popoverClass]="">-->
-<!--  Popover with custom class-->
-<!--</button>-->
 

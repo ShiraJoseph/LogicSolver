@@ -1,4 +1,6 @@
-import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { DataService } from '../data.service';
+import { Cell } from '../model';
 
 @Component({
   selector: 'app-cell',
@@ -6,10 +8,17 @@ import { Component, OnInit, ViewContainerRef } from '@angular/core';
   styleUrls: ['./cell.component.css']
 })
 export class CellComponent implements OnInit {
+  cellText = '';
+  index = 0;
+  constructor(private dataService: DataService) {
 
-  constructor(private vcRef: ViewContainerRef) {
   }
 
   ngOnInit() {
+    this.dataService.cells[this.index] = new Cell();
+  }
+
+  onClick(text) {
+    this.cellText = text;
   }
 }

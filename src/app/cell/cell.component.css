@@ -1,3 +1,37 @@
-a {
-  border: black 1px;
+.cell {
+  border: black 1px solid;
+  width: 30px;
+  height: 30px;
+  align-content: center;
+  justify-content: center;
+  font-family: "arial";
+  font-size: 18px;
 }
+/*.popover{*/
+/*animation: ease-in 100ms forwards;*/
+/*}*/
+
+.buttons {
+  border: purple 1px solid;
+  padding: 5px;
+}
+
+.trapezoid {
+  border-bottom: 25px solid purple;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  /*border-top-width: 30px;*/
+
+}
+
+.cell:focus {
+  outline: purple 1px solid;
+}
+/*@keyframes rollDown{*/
+  /*from {*/
+    /*transform: scaleY(0)*/
+  /*}*/
+  /*to {*/
+    /*transform: scaleY(1);*/
+  /*}*/
+/*}*/
