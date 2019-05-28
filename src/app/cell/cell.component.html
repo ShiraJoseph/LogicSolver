@@ -1,21 +1,10 @@
-<!--<a-->
-<!--  tabindex="0"-->
-<!--  class="btn btn-lg btn-danger"-->
-<!--  role="button"-->
-<!--  data-toggle="popover"-->
-<!--  data-trigger="focus"-->
-<!--  title="Dismissible popover"-->
-<!--  data-content="cell-popover-component">-[   ]- -->
-<!--</a>-->
-<!--#popover="ngbPopover"-->
 <button
   id="cell"
   type="button"
   class="cell btn btn-outline-secondary"
   [autoClose]="true"
   [ngbPopover]="pop"
-  placement="bottom"
-  #cell>{{cellText}}
+  placement="bottom">{{cellText}}
 </button>
 <ng-template #pop>
   <div class="popover">
