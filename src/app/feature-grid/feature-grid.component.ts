@@ -1,4 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { Input } from '@angular/core/src/metadata/directives';
+import { forEach } from '@angular/router/src/utils/collection';
+import { DataService } from '../data.service';
+import { Cell } from '../model';
 
 @Component({
   selector: 'app-feature-grid',
@@ -6,10 +10,24 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./feature-grid.component.css']
 })
 export class FeatureGridComponent implements OnInit {
+  // size: number;
+  cells = [];
 
-  constructor() { }
+  constructor(private dataService: DataService) { }
 
   ngOnInit() {
+    // this.row = this.cells.filter((cell)=> {
+    //   cell.horizontalOption===
+    // })
+    // this.cells = this.dataService.cells;
+    const size = 5;
+    for (let i = 0; i < size; i++) {
+      const row = [];
+      for (let j = 0; j < size; j++) {
+        row.push(`${i}.${j}`);
+      }
+      this.cells.push(row);
+    }
   }
 
 }

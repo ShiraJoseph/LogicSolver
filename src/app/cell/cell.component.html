@@ -4,18 +4,19 @@
   class="cell btn btn-outline-secondary"
   [autoClose]="true"
   [ngbPopover]="pop"
-  placement="bottom">{{cellText}}
+  placement="bottom"
+[innerText]="cellText">
 </button>
 <ng-template #pop>
-  <div class="popover">
+  <div>
     <div class="trapezoid"></div>
-    <div class="buttons">
-      <button (click)="onClick('O')">O</button>
+    <div class="popover">
+      <button class="buttons" (click)="onClick('O')">O</button>
       <button (click)="onClick('X')">X</button>
-      <div class="clear">
+      <div>
         <button
-          (click)="onClick('')"
-          style="border: none">clear
+          (click)="onClick(' ')"
+          class="clear">clear
         </button>
       </div>
     </div>

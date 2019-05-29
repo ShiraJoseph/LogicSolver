@@ -1,3 +1,5 @@
-<app-cell ngFor="">
+<div class="row" *ngFor="let option of cells">
+  <app-cell *ngFor="let cell of option">
 
-</app-cell>
+  </app-cell>
+</div>

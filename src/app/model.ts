@@ -1,7 +1,8 @@
 export class Cell {
-  public option1: Option;
-  public option2: Option;
+  public horizontalOption: Option;
+  public verticalOption: Option;
   public value: string;
+  public index: string;
   public userEntered: boolean;
 
   public isEmpty() {

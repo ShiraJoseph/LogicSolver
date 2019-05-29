@@ -6,6 +6,4 @@ import { Cell } from './model';
 })
 export class DataService {
 
-  public cells: Cell[];
-
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { DataService } from '../data.service';
 import { Cell } from '../model';
 
@@ -8,14 +8,15 @@ import { Cell } from '../model';
   styleUrls: ['./cell.component.css']
 })
 export class CellComponent implements OnInit {
-  cellText = '';
-  index = 0;
+  cellText = ' ';
+  @Input() Option1;
+  @Input() Option2;
   constructor(private dataService: DataService) {
 
   }
 
   ngOnInit() {
-    this.dataService.cells[this.index] = new Cell();
+
   }
 
   onClick(text) {
