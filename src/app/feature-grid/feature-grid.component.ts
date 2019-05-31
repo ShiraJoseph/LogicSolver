@@ -10,16 +10,11 @@ import { Cell } from '../model';
   styleUrls: ['./feature-grid.component.css']
 })
 export class FeatureGridComponent implements OnInit {
-  // size: number;
   cells = [];
 
-  constructor(private dataService: DataService) { }
+  constructor() { }
 
   ngOnInit() {
-    // this.row = this.cells.filter((cell)=> {
-    //   cell.horizontalOption===
-    // })
-    // this.cells = this.dataService.cells;
     const size = 5;
     for (let i = 0; i < size; i++) {
       const row = [];

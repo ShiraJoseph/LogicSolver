@@ -1,51 +1,80 @@
+:host {
+  box-sizing: border-box;
+}
+
 .cell {
+  display: flex;
+  box-sizing: border-box;
   border: black 1px solid;
   width: 30px;
   height: 30px;
-  align-content: center;
+  align-items: center;
   justify-content: center;
   font-family: "arial";
   font-size: 18px;
   background-color: white;
-}
-/*.popover{*/
-/*animation: ease-in 100ms forwards;*/
-/*}*/
-
-.buttons {
-  border: purple 1px solid;
-  padding: 5px;
-  background-color: white;
-  font-size: 16px;
-}
-
-.clear {
-  text-align: center;
-  background-color: lavender;
-  border: none;
 }
 
 .trapezoid {
   border-bottom: 25px solid purple;
   border-left: 15px solid transparent;
   border-right: 15px solid transparent;
-  /*border-top-width: 30px;*/
+  border-top-width: 30px;
 
+}
+.buttons {
+  border: purple 1px solid;
+  background-color: white;
+  font-size: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.xoBtns {
+  flex-direction: row;
+  display: flex;
+  justify-content: center;
+}
+
+.button {
+  background-color: white;
+  font-size: 16px;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding: 5px;
+  border: transparent 1px solid;
+  color: purple;
+  margin: 2px;
+  padding: 5px;
+}
+
+.button:hover {
+  cursor: pointer;
+  border: purple 1px solid;
+}
+
+.clear {
+  text-align: center;
+  background-color: #800080;
+  align-self: center;
+  border: transparent 1px solid;
+  color: white;
+}
+
+.clear:hover {
+  cursor: pointer;
+  border: 1px purple solid;
+  background-color: white;
+  color: purple;
+  border-top: 2px purple solid;
 }
 
 .cell:focus {
-  outline: purple 1px solid;
+  border: purple 1px solid;
 }
 
-.popover {
-  align-content: center;
-  justify-content: center;
+.cell:hover {
+  cursor: pointer;
 }
-/*@keyframes rollDown{*/
-  /*from {*/
-    /*transform: scaleY(0)*/
-  /*}*/
-  /*to {*/
-    /*transform: scaleY(1);*/
-  /*}*/
-/*}*/
+

@@ -1,23 +1,24 @@
-<button
+<div
   id="cell"
-  type="button"
-  class="cell btn btn-outline-secondary"
+  class="cell"
   [autoClose]="true"
   [ngbPopover]="pop"
   placement="bottom"
-[innerText]="cellText">
-</button>
+  [textContent]="cellText">
+</div>
 <ng-template #pop>
   <div>
     <div class="trapezoid"></div>
-    <div class="popover">
-      <button class="buttons" (click)="onClick('O')">O</button>
-      <button (click)="onClick('X')">X</button>
+    <div class="buttons">
+      <div class="xoBtns">
+        <div class="button" (click)="onClick('O')">O</div>
+        <div class="button" (click)="onClick('X')">X</div>
+      </div>
       <div>
-        <button
+        <div
           (click)="onClick(' ')"
           class="clear">clear
-        </button>
+        </div>
       </div>
     </div>
   </div>
