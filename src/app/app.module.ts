@@ -1,3 +1,4 @@
+import { MatGridListModule } from '@angular/material';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -24,9 +25,14 @@ import { PopoverDirective } from './popover.directive';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    NgbModule
+    NgbModule,
+    MatGridListModule,
+    // MatGridListModule
   ],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  exports: [
+    // MatGridListModule
+  ]
 })
 export class AppModule { }

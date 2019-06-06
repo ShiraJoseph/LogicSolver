@@ -11,12 +11,12 @@
     <div class="trapezoid"></div>
     <div class="buttons">
       <div class="xoBtns">
-        <div class="button" (click)="onClick('O')">O</div>
-        <div class="button" (click)="onClick('X')">X</div>
+        <div class="button" (click)="cellText='O'">O</div>
+        <div class="button" (click)="cellText='X'">X</div>
       </div>
       <div>
         <div
-          (click)="onClick(' ')"
+          (click)="cellText=''"
           class="clear">clear
         </div>
       </div>

@@ -1,1 +1,35 @@
-<app-feature-grid></app-feature-grid>
+<mat-grid-list [cols]="cols" rowHeight="1:1" gutterSize="1">
+  <mat-grid-tile
+    *ngFor="let tile of tiles"
+    [colspan]="tile.cols"
+    [rowspan]="tile.rows"
+    [style.background]="tile.color">
+    <div *ngIf="tile.isCell"
+         id="cell"
+         class="cell"
+         [autoClose]="true"
+         [ngbPopover]="pop"
+         placement="bottom"
+         [textContent]="tile.text">
+    </div>
+    <div *ngIf="!tile.isCell">{{tile.text}}</div>
+
+    <ng-template #pop>
+      <div>
+        <div class="trapezoid"></div>
+        <div class="buttons">
+          <div class="xoBtns">
+            <div class="button" (click)="tile.text='O'">O</div>
+            <div class="button" (click)="tile.text='X'">X</div>
+          </div>
+          <div>
+            <div
+              (click)="tile.text=''"
+              class="clear">clear
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </mat-grid-tile>
+</mat-grid-list>

@@ -13,13 +13,13 @@ export class Cell {
 
 export class Feature {
   public name: string;
-  public options: Option[];
+  public options?: Option[];
 
 }
 
 export class Option {
   public name: string;
-  public feature: Feature;
+  public feature?: Feature;
 }
 
 
