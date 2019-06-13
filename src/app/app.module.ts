@@ -7,9 +7,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CellComponent } from './cell/cell.component';
 import { GridComponent } from './grid/grid.component';
-import { FeatureGridComponent } from './feature-grid/feature-grid.component';
-import { FeatureHeaderComponent } from './feature-header/feature-header.component';
-import { OptionHeaderComponent } from './option-header/option-header.component';
 import { PopoverDirective } from './popover.directive';
 
 @NgModule({
@@ -17,9 +14,6 @@ import { PopoverDirective } from './popover.directive';
     AppComponent,
     CellComponent,
     GridComponent,
-    FeatureGridComponent,
-    FeatureHeaderComponent,
-    OptionHeaderComponent,
     PopoverDirective,
   ],
   imports: [

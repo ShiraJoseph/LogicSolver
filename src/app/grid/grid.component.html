@@ -1,35 +1,22 @@
 <mat-grid-list [cols]="cols" rowHeight="1:1" gutterSize="1">
   <mat-grid-tile
     *ngFor="let tile of tiles"
+    [ngClass]="{tile: tile.isCell && !tile.active}"
     [colspan]="tile.cols"
     [rowspan]="tile.rows"
     [style.background]="tile.color">
-    <div *ngIf="tile.isCell"
-         id="cell"
-         class="cell"
-         [autoClose]="true"
-         [ngbPopover]="pop"
-         placement="bottom"
-         [textContent]="tile.text">
-    </div>
-    <div *ngIf="!tile.isCell">{{tile.text}}</div>
-
-    <ng-template #pop>
-      <div>
-        <div class="trapezoid"></div>
-        <div class="buttons">
-          <div class="xoBtns">
-            <div class="button" (click)="tile.text='O'">O</div>
-            <div class="button" (click)="tile.text='X'">X</div>
-          </div>
-          <div>
-            <div
-              (click)="tile.text=''"
-              class="clear">clear
-            </div>
-          </div>
-        </div>
+    <div class="cell-inactive" *ngIf="tile.isCell && !tile.active"
+         (click)="switchOut(tile)">{{tile.text}}</div>
+    <div class="cell-active" *ngIf="tile.isCell && tile.active">
+      <div class="xo-buttons">
+        <div class="button" (click)="tile.text='O'; tile.active=false">O</div>
+        <div class="button" (click)="tile.text='X'; tile.active=false">X</div>
       </div>
-    </ng-template>
+      <div class="clear-buttons">
+        <div class="clear" (click)="tile.text=''; tile.active=false">clear</div>
+        <div class="clear" (click)="tile.active=false">x</div>
+      </div>
+    </div>
+    <div class="other" *ngIf="!tile.isCell">{{tile.text}}</div>
   </mat-grid-tile>
 </mat-grid-list>

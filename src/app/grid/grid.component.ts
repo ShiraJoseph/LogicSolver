@@ -8,6 +8,8 @@ export interface Tile {
   rows: number;
   text: string;
   isCell?: boolean;
+  isHeader?: boolean;
+  active?: boolean;
 }
 @Component({
   selector: 'app-grid',
@@ -43,13 +45,13 @@ export class GridComponent implements OnInit {
   ngOnInit() {
     this.cols = this.optionNames.length * this.featureNames.length + 4;
     this.optionNames.forEach(option => {
-      this.verticalOptions.push({ text: option, cols: 1, rows: 3, color: 'lightgray' });
-      this.horizontalOptions.push({ text: option, cols: 3, rows: 1, color: 'lightgray' });
+      this.verticalOptions.push({ text: option, cols: 1, rows: 3, color: 'lightgray', isHeader: true });
+      this.horizontalOptions.push({ text: option, cols: 3, rows: 1, color: 'lightgray', isHeader: true });
     });
     this.featureNames.forEach(feature => {
-      this.verticalFeatures.push({ text: feature, cols: this.optionNames.length, rows: 1, color: 'gray' });
+      this.verticalFeatures.push({ text: feature, cols: this.optionNames.length, rows: 1, color: 'gray', isHeader: true });
       this.allVerticalOptions.push(...this.verticalOptions);
-      this.horizontalFeatures.push({ text: feature, cols: 1, rows: this.optionNames.length, color: 'gray' });
+      this.horizontalFeatures.push({ text: feature, cols: 1, rows: this.optionNames.length, color: 'gray', isHeader: true });
       this.allHorizontalOptions.push(...this.horizontalOptions);
     });
     this.tiles = [{ text: null, cols: 4, rows: 4, color: 'white' },
@@ -63,7 +65,7 @@ export class GridComponent implements OnInit {
 
         this.rows.push(option);
         this.allVerticalOptions.forEach(() => {
-          this.rows.push({ text: '', cols: 1, rows: 1, color: 'white', isCell: true });
+          this.rows.push({ text: '', cols: 1, rows: 1, color: 'white', isCell: true, active: false });
         });
         if (addBlank) {
           this.rows.push(...this.blanks);
@@ -73,8 +75,15 @@ export class GridComponent implements OnInit {
       this.allVerticalOptions.splice(this.allVerticalOptions.length - this.verticalOptions.length, this.verticalOptions.length);
       this.blanks.push({ text: null, cols: this.optionNames.length, rows: this.optionNames.length, color: 'black' });
     });
-
     this.tiles.push(...this.rows);
+  }
 
+  switchOut(newTile: Tile) {
+    this.tiles.forEach((tile) => {
+      if (tile.isCell) {
+        tile.active = false;
+      }
+    });
+    newTile.active = true;
   }
 }

@@ -31,7 +31,7 @@
   justify-content: center;
 }
 
-.xoBtns {
+.xo-buttons {
   flex-direction: row;
   display: flex;
   justify-content: center;
