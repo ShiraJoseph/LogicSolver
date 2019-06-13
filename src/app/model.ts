@@ -1,9 +1,9 @@
 export class Cell {
-  public horizontalOption: Option;
-  public verticalOption: Option;
-  public value: string;
-  public index: string;
-  public userEntered: boolean;
+  public horizontalOption?: Option;
+  public verticalOption?: Option;
+  public value?: string;
+  public index?: string;
+  public userEntered?: boolean;
 
   public isEmpty() {
     return /[xoXO]/g.test(this.value);

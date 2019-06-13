@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Feature, Option } from '../model';
+import { Cell, Feature, Option } from '../model';
 
 
 export interface Tile {
@@ -10,7 +10,9 @@ export interface Tile {
   isCell?: boolean;
   isHeader?: boolean;
   active?: boolean;
+  cell?: Cell;
 }
+
 @Component({
   selector: 'app-grid',
   templateUrl: './grid.component.html',
@@ -65,7 +67,7 @@ export class GridComponent implements OnInit {
 
         this.rows.push(option);
         this.allVerticalOptions.forEach(() => {
-          this.rows.push({ text: '', cols: 1, rows: 1, color: 'white', isCell: true, active: false });
+          this.rows.push({ text: '', cols: 1, rows: 1, color: 'white', isCell: true, active: false, cell: new Cell() });
         });
         if (addBlank) {
           this.rows.push(...this.blanks);
@@ -73,7 +75,7 @@ export class GridComponent implements OnInit {
         }
       });
       this.allVerticalOptions.splice(this.allVerticalOptions.length - this.verticalOptions.length, this.verticalOptions.length);
-      this.blanks.push({ text: null, cols: this.optionNames.length, rows: this.optionNames.length, color: 'black' });
+      this.blanks.push({ text: null, cols: this.optionNames.length, rows: this.optionNames.length, color: 'white' });
     });
     this.tiles.push(...this.rows);
   }
@@ -85,5 +87,21 @@ export class GridComponent implements OnInit {
       }
     });
     newTile.active = true;
+  }
+
+  getCellIndex(verticalOption: Option, horizontalOption: Option): number {
+    return this.tiles.findIndex(tile =>
+      tile.isCell && tile.cell
+      && tile.cell.horizontalOption && tile.cell.horizontalOption === horizontalOption
+      && tile.cell.verticalOption && tile.cell.verticalOption === verticalOption
+    )[0];
+  }
+
+  setCellValue(verticalOption: Option, horizontalOption: Option, value: string) {
+    const index = this.getCellIndex(verticalOption, horizontalOption);
+    if (this.tiles[index] && this.tiles[index].isCell && this.tiles[index].cell) {
+      this.tiles[index].cell.value = value;
+    }
+
   }
 }
