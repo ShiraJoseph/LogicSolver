@@ -1,22 +1,32 @@
 <mat-grid-list [cols]="cols" rowHeight="1:1" gutterSize="1">
+<!--               [style.height]="cols*50"-->
+<!--               [style.width]="cols*50"-->
+<!--&gt;-->
   <mat-grid-tile
     *ngFor="let tile of tiles"
     [ngClass]="{tile: tile.isCell && !tile.active}"
     [colspan]="tile.cols"
     [rowspan]="tile.rows"
-    [style.background]="tile.color">
-    <div class="cell-inactive" *ngIf="tile.isCell && !tile.active"
-         (click)="switchOut(tile)">{{tile.text}}</div>
-    <div class="cell-active" *ngIf="tile.isCell && tile.active">
+    [style.background]="tile.color"
+    [ngSwitch]="tile.type">
+    <div *ngSwitchCase="'CELL_INACTIVE'" class="cell-inactive" (click)="switchOut(tile)">{{tile.text}}</div>
+    <div *ngSwitchCase="'CELL_ACTIVE'" class="cell-active">
       <div class="xo-buttons">
-        <div class="button" (click)="tile.text='O'; tile.active=false">O</div>
-        <div class="button" (click)="tile.text='X'; tile.active=false">X</div>
+        <div class="xo-button" (click)="tile.text='O'; tile.type='CELL_INACTIVE'">O</div>
+        <div class="xo-button" (click)="tile.text='X'; tile.type='CELL_INACTIVE'">X</div>
       </div>
       <div class="clear-buttons">
-        <div class="clear" (click)="tile.text=''; tile.active=false">clear</div>
-        <div class="clear" (click)="tile.active=false">x</div>
+        <div class="clear-button" (click)="tile.text=''; tile.type='CELL_INACTIVE'">clear</div>
+        <div class="clear-button" (click)="tile.type='CELL_INACTIVE'">x</div>
       </div>
     </div>
-    <div class="other" *ngIf="!tile.isCell">{{tile.text}}</div>
+    <input *ngSwitchCase="'TOP_FEATURE_HEADER'" class="header feature" [value]="tile.text"/>
+    <input *ngSwitchCase="'TOP_OPTION_HEADER'" class="header vertical option" [value]="tile.text"/>
+    <input *ngSwitchCase="'LEFT_FEATURE_HEADER'" class="header vertical feature" [value]="tile.text"/>
+    <input *ngSwitchCase="'LEFT_OPTION_HEADER'" class="header option" [value]="tile.text"/>
+    <div *ngSwitchCase="'ADD_FEATURE'" class="other">{{tile.text}}</div>
+    <div *ngSwitchCase="'ADD_OPTION'" class="other">{{tile.text}}</div>
+    <div *ngSwitchDefault class="blank"></div>
   </mat-grid-tile>
 </mat-grid-list>
+

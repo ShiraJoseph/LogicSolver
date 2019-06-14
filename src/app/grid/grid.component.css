@@ -2,10 +2,33 @@
 :host {
   box-sizing: border-box;
   font-family: Arial;
+
 }
 
-.tile {
-  /*border: dimgray 1px double;*/
+.blank {
+ background-color: transparent;
+}
+
+.header {
+  background-color: transparent;
+  border: none;
+  text-align: center;
+  width: 70px;
+  height: 30px;
+}
+
+.header:hover {
+  border: 1px purple solid;
+}
+
+.header:focus {
+  background-color: white;
+  border: 1px transparent solid;
+  transform: none;
+}
+
+.vertical {
+  transform: rotate(290deg);
 }
 
 .other {
@@ -41,7 +64,7 @@
   font-size: 16px;
 }
 
-.button {
+.xo-button {
   background-color: white;
   align-items: center;
   text-align: center;
@@ -50,7 +73,7 @@
   color: purple;
 }
 
-.button:hover {
+.xo-button:hover {
   cursor: pointer;
   border: purple 1px solid;
 }
@@ -63,7 +86,7 @@
   font-size: 12px;
 }
 
-.clear {
+.clear-button {
   align-items: center;
   text-align: center;
   justify-content: center;
@@ -72,7 +95,7 @@
   border: transparent 2px solid;
 }
 
-.clear:hover {
+.clear-button:hover {
   cursor: pointer;
   border: 2px purple solid;
   background-color: white;
