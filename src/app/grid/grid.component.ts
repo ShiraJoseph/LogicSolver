@@ -60,6 +60,10 @@ export class GridComponent implements OnInit {
   tiles: Tile[] = [];
 
   ngOnInit() {
+    this.buildGrid();
+  }
+
+  buildGrid() {
     this.cols = this.optionNames.length * this.featureNames.length + 5;
     this.optionNames.forEach(option => {
       this.verticalOptions.push({
@@ -153,7 +157,7 @@ export class GridComponent implements OnInit {
     newTile.type = TileType.CELL_ACTIVE;
   }
 
-  getCellIndex(verticalOption: Option, horizontalOption: Option): number {
+  getTileIndex(verticalOption: Option, horizontalOption: Option): number {
     return this.tiles.findIndex(tile => tile.cell
       && tile.cell.horizontalOption && tile.cell.horizontalOption === horizontalOption
       && tile.cell.verticalOption && tile.cell.verticalOption === verticalOption
@@ -161,7 +165,7 @@ export class GridComponent implements OnInit {
   }
 
   setCellValue(verticalOption: Option, horizontalOption: Option, value: string) {
-    const index = this.getCellIndex(verticalOption, horizontalOption);
+    const index = this.getTileIndex(verticalOption, horizontalOption);
     if (this.tiles[index]) {
       this.tiles[index].cell.value = value;
     }

@@ -24,8 +24,8 @@
     <input *ngSwitchCase="'TOP_OPTION_HEADER'" class="header vertical option" [value]="tile.text"/>
     <input *ngSwitchCase="'LEFT_FEATURE_HEADER'" class="header vertical feature" [value]="tile.text"/>
     <input *ngSwitchCase="'LEFT_OPTION_HEADER'" class="header option" [value]="tile.text"/>
-    <div *ngSwitchCase="'ADD_FEATURE'" class="other">{{tile.text}}</div>
-    <div *ngSwitchCase="'ADD_OPTION'" class="other">{{tile.text}}</div>
+    <button *ngSwitchCase="'ADD_FEATURE'" class="other">{{tile.text}}</button>
+    <button *ngSwitchCase="'ADD_OPTION'" class="other">{{tile.text}}</button>
     <div *ngSwitchDefault class="blank"></div>
   </mat-grid-tile>
 </mat-grid-list>
