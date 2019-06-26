@@ -1,6 +1,6 @@
 export class Cell {
-  public horizontalOption?: Option;
-  public verticalOption?: Option;
+  public leftOption?: Option;
+  public topOption?: Option;
   public value?: string;
   // public index?: string;
   public userEntered?: boolean;
@@ -14,6 +14,7 @@ export class Cell {
 export class Feature {
   public name: string;
   public options?: Option[];
+  public index?: number;
 
 }
 

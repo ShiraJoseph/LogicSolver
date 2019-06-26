@@ -1,10 +1,7 @@
-<mat-grid-list [cols]="cols" rowHeight="1:1" gutterSize="1">
-<!--               [style.height]="cols*50"-->
-<!--               [style.width]="cols*50"-->
-<!--&gt;-->
+<mat-grid-list [cols]="cols" rowHeight="1:1" gutterSize="1"
+  [style.max-width.px]="cols*42">
   <mat-grid-tile
     *ngFor="let tile of tiles"
-    [ngClass]="{tile: tile.isCell && !tile.active}"
     [colspan]="tile.cols"
     [rowspan]="tile.rows"
     [style.background]="tile.color"
@@ -12,12 +9,12 @@
     <div *ngSwitchCase="'CELL_INACTIVE'" class="cell-inactive" (click)="switchOut(tile)">{{tile.text}}</div>
     <div *ngSwitchCase="'CELL_ACTIVE'" class="cell-active">
       <div class="xo-buttons">
-        <div class="xo-button" (click)="tile.text='O'; tile.type='CELL_INACTIVE'">O</div>
-        <div class="xo-button" (click)="tile.text='X'; tile.type='CELL_INACTIVE'">X</div>
+        <div class="xo-button" (click)="updateTile(tile, 'O')">O</div>
+        <div class="xo-button" (click)="updateTile(tile, 'X')">X</div>
       </div>
       <div class="clear-buttons">
-        <div class="clear-button" (click)="tile.text=''; tile.type='CELL_INACTIVE'">clear</div>
-        <div class="clear-button" (click)="tile.type='CELL_INACTIVE'">x</div>
+        <div class="clear-button" (click)="updateTile(tile, '')">clear</div>
+        <div class="clear-button" (click)="updateTile(tile, tile.text)">x</div>
       </div>
     </div>
     <input *ngSwitchCase="'TOP_FEATURE_HEADER'" class="header feature" [value]="tile.text"/>

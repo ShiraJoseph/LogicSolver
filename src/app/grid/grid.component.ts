@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DataService } from '../data.service';
 import { Cell, Feature, Option } from '../model';
 
 export enum TileType {
@@ -20,12 +21,9 @@ export interface Tile {
   cols: number;
   rows: number;
   text: string;
-  isCell?: boolean;
-  isHeader?: boolean;
-  isVertical?: boolean;
-  active?: boolean;
   cell?: Cell;
   type?: TileType;
+  object?: {};
 }
 
 @Component({
@@ -46,96 +44,107 @@ export class GridComponent implements OnInit {
   // features: Feature[] = [this.feature1, this.feature2, this.feature3, this.feature4];
   // allOptions: Option[] = [...this.options, ...this.options, ...this.options];
 
-  optionNames = ['O1', 'O2'];
-  featureNames = ['F1', 'F2', 'F3', 'F4'];
+  optionNames = ['option'];
+  featureNames = ['feature'];
   cols;
-  verticalFeatures = [];
-  verticalOptions = [];
-  horizontalOptions = [];
-  horizontalFeatures = [];
-  allVerticalOptions = [];
-  allHorizontalOptions = [];
+  topFeatures = [];
+  topOptions = [];
+  leftOptions = [];
+  leftFeatures = [];
+  allTopOptions = [];
+  allLeftOptions = [];
   rows = [];
   blanks = [];
   tiles: Tile[] = [];
+  features: Feature[] = [];
+
+  constructor(private dataService: DataService) { }
 
   ngOnInit() {
+    this.features = this.dataService.features;
     this.buildGrid();
   }
 
   buildGrid() {
     this.cols = this.optionNames.length * this.featureNames.length + 5;
+    // this.dataService.features[0].options.forEach(option => {
+    //
+    // });
+    // build fake option tile sets (uses the same option list for each set of options)
     this.optionNames.forEach(option => {
-      this.verticalOptions.push({
+      this.topOptions.push({
         text: option,
         cols: 1,
         rows: 3,
         color: 'lightgray',
-        isHeader: true,
-        isVertical: true,
         type: TileType.TOP_OPTION_HEADER
       });
-      this.horizontalOptions.push({
+      this.leftOptions.push({
         text: option,
         cols: 3,
         rows: 1,
         color: 'lightgray',
-        isHeader: true,
         type: TileType.LEFT_OPTION_HEADER
       });
     });
     this.featureNames.forEach(feature => {
-      this.verticalFeatures.push({
+      // push a feature to the top feature list
+      this.topFeatures.push({
         text: feature,
         cols: this.optionNames.length,
         rows: 1,
         color: 'gray',
-        isHeader: true,
         type: TileType.TOP_FEATURE_HEADER
       });
-      this.allVerticalOptions.push(...this.verticalOptions);
-      this.horizontalFeatures.push({
+      // push a set of options to the top options
+      this.allTopOptions.push(...this.topOptions);
+      // push a feature to the left feature list
+      this.leftFeatures.push({
         text: feature,
         cols: 1,
         rows: this.optionNames.length,
         color: 'gray',
         type: TileType.LEFT_FEATURE_HEADER,
-        isHeader: true,
-        isVertical: true
       });
-      this.allHorizontalOptions.push(...this.horizontalOptions);
+      // push a set of options to the left options
+      this.allLeftOptions.push(...this.leftOptions);
     });
-
+    // push the corner, all the top features, and a plus button
+    // push all the top options and a plus button
     this.tiles = [{ text: null, cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK },
-      ...this.verticalFeatures,
+      ...this.topFeatures,
       { text: '+', cols: 1, rows: 1, type: TileType.ADD_FEATURE },
-      ...this.allVerticalOptions,
+      ...this.allTopOptions,
       { text: '+', cols: 1, rows: 3, type: TileType.ADD_OPTION },
     ];
 
-    this.horizontalFeatures.forEach(feature => {
+    this.leftFeatures.forEach(feature => {
       let addBlank = true;
+      // push a left feature
       this.rows.push(feature);
-      this.horizontalOptions.forEach(option => {
+      this.leftOptions.forEach(option => {
+        // push the next left option in the option set
         this.rows.push(option);
-        this.allVerticalOptions.forEach(() => {
+        this.allTopOptions.forEach(() => {
+          // push a cell, one for each of the top options
           this.rows.push({
             text: '',
             cols: 1,
             rows: 1,
             color: 'white',
-            isCell: true,
-            active: false,
             cell: new Cell(),
             type: TileType.CELL_INACTIVE
           });
         });
+        // push any blanks needed to the end of the row, to fill the bottom right corner
         if (addBlank) {
-          this.rows.push(...this.blanks, { text: null, cols: 1, rows: this.horizontalOptions.length, type: TileType.RIGHT_BLANK });
+          this.rows.push(...this.blanks, { text: null, cols: 1, rows: this.leftOptions.length, type: TileType.RIGHT_BLANK });
           addBlank = false;
         }
       });
-      this.allVerticalOptions.splice(this.allVerticalOptions.length - this.verticalOptions.length, this.verticalOptions.length);
+      // take away one feature's worth of cells, so we don't have too many cells in the next row
+      this.allTopOptions.splice(this.allTopOptions.length - this.topOptions.length, this.topOptions.length);
+      // add another blank so the next row will have the right number of blanks
       this.blanks.push({
         text: null,
         cols: this.optionNames.length,
@@ -144,10 +153,11 @@ export class GridComponent implements OnInit {
         type: TileType.FILLER_BLANK
       });
     });
-
+    // add all the cells we just made to the mat-grid-list
     this.tiles.push(...this.rows);
   }
 
+  // deactivates all tiles except the currently selected one.
   switchOut(newTile: Tile) {
     this.tiles.forEach((tile) => {
       if (tile.type === TileType.CELL_ACTIVE) {
@@ -159,8 +169,8 @@ export class GridComponent implements OnInit {
 
   getTileIndex(verticalOption: Option, horizontalOption: Option): number {
     return this.tiles.findIndex(tile => tile.cell
-      && tile.cell.horizontalOption && tile.cell.horizontalOption === horizontalOption
-      && tile.cell.verticalOption && tile.cell.verticalOption === verticalOption
+      && tile.cell.leftOption && tile.cell.leftOption === horizontalOption
+      && tile.cell.topOption && tile.cell.topOption === verticalOption
     )[0];
   }
 
@@ -169,6 +179,10 @@ export class GridComponent implements OnInit {
     if (this.tiles[index]) {
       this.tiles[index].cell.value = value;
     }
+  }
 
+  updateTile(tile: Tile, text: string) {
+    tile.text = text;
+    tile.type = TileType.CELL_INACTIVE;
   }
 }
