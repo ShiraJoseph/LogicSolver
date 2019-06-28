@@ -6,6 +6,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CellComponent } from './cell/cell.component';
+import { DataService } from './data.service';
 import { GridComponent } from './grid/grid.component';
 import { PopoverDirective } from './popover.directive';
 
@@ -23,7 +24,7 @@ import { PopoverDirective } from './popover.directive';
     MatGridListModule,
     // MatGridListModule
   ],
-  providers: [],
+  providers: [DataService],
   bootstrap: [AppComponent],
   exports: [
     // MatGridListModule

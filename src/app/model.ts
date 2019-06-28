@@ -1,8 +1,7 @@
 export class Cell {
   public leftOption?: Option;
   public topOption?: Option;
-  public value?: string;
-  // public index?: string;
+  public value = '';
   public userEntered?: boolean;
 
   public isEmpty() {
@@ -14,7 +13,6 @@ export class Cell {
 export class Feature {
   public name: string;
   public options?: Option[];
-  public index?: number;
 
 }
 

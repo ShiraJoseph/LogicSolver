@@ -17,7 +17,7 @@ export enum TileType {
 }
 
 export interface Tile {
-  color: string;
+  color?: string;
   cols: number;
   rows: number;
   text: string;
@@ -32,27 +32,12 @@ export interface Tile {
   styleUrls: ['./grid.component.css']
 })
 export class GridComponent implements OnInit {
-  // headerDirection: 'vertical';
-  // option1: Option = { name: 'O1' };
-  // option2: Option = { name: 'O2' };
-  // option3: Option = { name: 'O3' };
-  // options: Option[] = [this.option1, this.option2, this.option3];
-  // feature1: Feature = { name: 'F1', options: this.options };
-  // feature2: Feature = { name: 'F2', options: this.options };
-  // feature3: Feature = { name: 'F3', options: this.options };
-  // feature4: Feature = { name: 'F4', options: this.options };
-  // features: Feature[] = [this.feature1, this.feature2, this.feature3, this.feature4];
-  // allOptions: Option[] = [...this.options, ...this.options, ...this.options];
-
-  optionNames = ['option'];
-  featureNames = ['feature'];
   cols;
-  topFeatures = [];
-  topOptions = [];
-  leftOptions = [];
-  leftFeatures = [];
+  topFeatureTiles = [];
+  topOptionTiles = [];
+  leftOptionTiles = [];
+  leftFeatureTiles = [];
   allTopOptions = [];
-  allLeftOptions = [];
   rows = [];
   blanks = [];
   tiles: Tile[] = [];
@@ -65,96 +50,105 @@ export class GridComponent implements OnInit {
     this.buildGrid();
   }
 
+  buildHeaderTiles() {
+    this.dataService.features.forEach((feature, index) => {
+      if (index > 0) {
+        this.topFeatureTiles.push({
+          text: feature.name,
+          cols: this.dataService.optionCount,
+          rows: 1,
+          color: 'gray',
+          type: TileType.TOP_FEATURE_HEADER
+        });
+        feature.options.forEach(option => {
+          this.topOptionTiles.push({
+            text: option.name,
+            cols: 1,
+            rows: 3,
+            color: 'lightgray',
+            type: TileType.TOP_OPTION_HEADER
+          });
+        });
+      }
+      if (index !== 1) {
+        this.leftFeatureTiles.push({
+          text: feature.name,
+          cols: 1,
+          rows: this.dataService.optionCount,
+          color: 'gray',
+          type: TileType.LEFT_FEATURE_HEADER,
+        });
+        feature.options.forEach(option => {
+          this.leftOptionTiles.push({
+            text: option.name,
+            cols: 3,
+            rows: 1,
+            color: 'lightgray',
+            type: TileType.LEFT_OPTION_HEADER
+          });
+        });
+      }
+    });
+  }
+
   buildGrid() {
-    this.cols = this.optionNames.length * this.featureNames.length + 5;
-    // this.dataService.features[0].options.forEach(option => {
-    //
-    // });
-    // build fake option tile sets (uses the same option list for each set of options)
-    this.optionNames.forEach(option => {
-      this.topOptions.push({
-        text: option,
-        cols: 1,
-        rows: 3,
-        color: 'lightgray',
-        type: TileType.TOP_OPTION_HEADER
-      });
-      this.leftOptions.push({
-        text: option,
-        cols: 3,
-        rows: 1,
-        color: 'lightgray',
-        type: TileType.LEFT_OPTION_HEADER
-      });
-    });
-    this.featureNames.forEach(feature => {
-      // push a feature to the top feature list
-      this.topFeatures.push({
-        text: feature,
-        cols: this.optionNames.length,
-        rows: 1,
-        color: 'gray',
-        type: TileType.TOP_FEATURE_HEADER
-      });
-      // push a set of options to the top options
-      this.allTopOptions.push(...this.topOptions);
-      // push a feature to the left feature list
-      this.leftFeatures.push({
-        text: feature,
-        cols: 1,
-        rows: this.optionNames.length,
-        color: 'gray',
-        type: TileType.LEFT_FEATURE_HEADER,
-      });
-      // push a set of options to the left options
-      this.allLeftOptions.push(...this.leftOptions);
-    });
+    this.cols = this.dataService.optionCount * (this.dataService.features.length - 2) + 5;
+    this.buildHeaderTiles();
+
     // push the corner, all the top features, and a plus button
     // push all the top options and a plus button
     this.tiles = [{ text: null, cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK },
-      ...this.topFeatures,
+      ...this.topFeatureTiles,
       { text: '+', cols: 1, rows: 1, type: TileType.ADD_FEATURE },
-      ...this.allTopOptions,
+      ...this.topOptionTiles,
       { text: '+', cols: 1, rows: 3, type: TileType.ADD_OPTION },
     ];
 
-    this.leftFeatures.forEach(feature => {
+    // TODO: error is happening somewhere in this set of code.  It has all the right cells and the header tiles should be good.
+    console.log('cells: ', this.dataService.cells);
+    let cellIndex = 0;
+    this.allTopOptions = this.topOptionTiles;
+    this.leftFeatureTiles.forEach(feature => {
       let addBlank = true;
       // push a left feature
-      this.rows.push(feature);
-      this.leftOptions.forEach(option => {
+      this.tiles.push(feature);
+      this.leftOptionTiles.forEach(option => {
         // push the next left option in the option set
-        this.rows.push(option);
-        this.allTopOptions.forEach(() => {
+        this.tiles.push(option);
+        this.allTopOptions.forEach(topOption => {
           // push a cell, one for each of the top options
-          this.rows.push({
-            text: '',
+          this.tiles.push({
+            text: this.dataService.cells[cellIndex].value,
             cols: 1,
             rows: 1,
             color: 'white',
-            cell: new Cell(),
+            cell: this.dataService.cells[cellIndex],
             type: TileType.CELL_INACTIVE
           });
+          if (cellIndex = 26){
+            debugger;
+          }
+          cellIndex++;
         });
         // push any blanks needed to the end of the row, to fill the bottom right corner
         if (addBlank) {
-          this.rows.push(...this.blanks, { text: null, cols: 1, rows: this.leftOptions.length, type: TileType.RIGHT_BLANK });
+          this.tiles.push(...this.blanks, { text: null, cols: 1, rows: this.leftOptionTiles.length, type: TileType.RIGHT_BLANK });
           addBlank = false;
         }
       });
       // take away one feature's worth of cells, so we don't have too many cells in the next row
-      this.allTopOptions.splice(this.allTopOptions.length - this.topOptions.length, this.topOptions.length);
+      this.allTopOptions.splice(this.allTopOptions.length - this.dataService.optionCount, this.allTopOptions.length);
       // add another blank so the next row will have the right number of blanks
       this.blanks.push({
         text: null,
-        cols: this.optionNames.length,
-        rows: this.optionNames.length,
+        cols: this.dataService.optionCount,
+        rows: this.dataService.optionCount,
         color: 'white',
         type: TileType.FILLER_BLANK
       });
     });
     // add all the cells we just made to the mat-grid-list
-    this.tiles.push(...this.rows);
+    // this.tiles.push(...this.rows);
   }
 
   // deactivates all tiles except the currently selected one.

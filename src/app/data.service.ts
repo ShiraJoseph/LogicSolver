@@ -4,76 +4,72 @@ import { Cell, Feature, Option } from './model';
 @Injectable({
   providedIn: 'root'
 })
-export class DataService implements OnInit {
+export class DataService {
   cells: Cell[] = [];
-  features: Feature[];
+  oldCells: Cell [] = [];
+  features: Feature[] = [];
   optionCount = 3;
+  cellCount = 0;
 
-  ngOnInit() {
+  constructor() {
     this.buildDataTemplate();
   }
 
   buildDataTemplate() {
     this.features.push(new Feature(), new Feature(), new Feature());
-    this.features.forEach((feature) => {
-      feature.name = 'Feature';
-      feature.options.push(new Option(), new Option(), new Option());
-      feature.options.forEach((option) => {
-        option.name = 'Option';
+    this.features.forEach((feature, index) => {
+      feature.name = `Feature${ index + 1 }`;
+      feature.options = [new Option(), new Option(), new Option()];
+      feature.options.forEach((option, i) => {
+        option.name = `Option${ index + 1 }${ i + 1 }`;
         option.feature = feature;
       });
     });
     this.updateCells();
   }
 
-  // link(option: Option, feature: Feature) {
-  //   option.feature = feature;
-  //   feature.options.push(option);
-  // };
-
   updateCells() {
-    // first row
-    this.features[0].options.forEach(leftFeature => {
-      for (let f = 1; f < this.features.length; f++) {
-        this.pushOptionCells(leftFeature, this.features[f]);
-      }
-    });
+    this.oldCells = this.cells;
+    this.cells = [];
 
-    // remaining rows
-    for (let d = this.features.length - 1; d > 1; d--) {
+    for (let d = 0; d !== 1; d--) {
       this.features[d].options.forEach(leftFeature => {
-        for (let f = 1; f < this.features.length - f; f++) {
+        for (let f = 1; f < this.features.length - (d === 0 ? 0 : f); f++) {
           this.pushOptionCells(leftFeature, this.features[f]);
         }
       });
+      if (d === 0) {
+        d = this.features.length;
+      }
     }
+    this.oldCells = [];
   }
 
   // push a single row of cells for one top feature
   pushOptionCells(leftOption: Option, topFeature: Feature) {
+    let cell;
     topFeature.options.forEach(topOption => {
-      if (!this.cellExists(leftOption, topOption)) {
-        const cell = new Cell();
+      cell = this.getCell(this.oldCells, leftOption, topOption);
+      if (!cell) {
+        cell = new Cell();
         cell.leftOption = leftOption;
         cell.topOption = topOption;
-        this.cells.push(cell);
       }
+      this.cells.push(cell);
+      console.log(`${this.cellCount} new cell leftOption=`, cell.leftOption.name, ' topOption=', cell.topOption.name);
+      this.cellCount++;
     });
   }
 
-  cellExists(option1: Option, option2: Option) {
+  getCell(arr: Cell [], option1: Option, option2: Option) {
     return this.cells.find(currCell => (currCell.leftOption === option1 && currCell.topOption === option2)
       || (currCell.leftOption === option2 && currCell.topOption === option1));
   }
 
   addFeature() {
     const feature = new Feature();
-    if (name) {
-      feature.name = name;
-    }
     const option = new Option();
     option.feature = feature;
-    option.name = '';
     for (let i = 0; i < this.optionCount; i++) {
       feature.options.push(option);
     }
