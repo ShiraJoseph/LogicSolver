@@ -92,7 +92,7 @@ export class GridComponent implements OnInit {
   }
 
   buildGrid() {
-    this.cols = this.dataService.optionCount * (this.dataService.features.length - 2) + 5;
+    this.cols = this.dataService.optionCount * (this.dataService.features.length - 1) + 5;
     this.buildHeaderTiles();
 
     // push the corner, all the top features, and a plus button
@@ -104,10 +104,13 @@ export class GridComponent implements OnInit {
       { text: '+', cols: 1, rows: 3, type: TileType.ADD_OPTION },
     ];
 
-    // TODO: error is happening somewhere in this set of code.  It has all the right cells and the header tiles should be good.
+    // TODO: error is happening somewhere in this set of code.
+    // It has all the right cells and the header tiles should be good.
     console.log('cells: ', this.dataService.cells);
     let cellIndex = 0;
+    let rowCellCount = this.dataService.cells.length;
     this.allTopOptions = this.topOptionTiles;
+    console.log('allTopOptions: ', this.allTopOptions);
     this.leftFeatureTiles.forEach(feature => {
       let addBlank = true;
       // push a left feature
@@ -115,8 +118,10 @@ export class GridComponent implements OnInit {
       this.leftOptionTiles.forEach(option => {
         // push the next left option in the option set
         this.tiles.push(option);
-        this.allTopOptions.forEach(topOption => {
+        for(let i=0; i< rowCellCount; rowCellCount++){
           // push a cell, one for each of the top options
+          console.log('cellIndex =', cellIndex);
+          console.log(this.dataService.cells[cellIndex]);
           this.tiles.push({
             text: this.dataService.cells[cellIndex].value,
             cols: 1,
@@ -125,19 +130,18 @@ export class GridComponent implements OnInit {
             cell: this.dataService.cells[cellIndex],
             type: TileType.CELL_INACTIVE
           });
-          if (cellIndex = 26){
-            debugger;
-          }
           cellIndex++;
-        });
+        };
         // push any blanks needed to the end of the row, to fill the bottom right corner
         if (addBlank) {
-          this.tiles.push(...this.blanks, { text: null, cols: 1, rows: this.leftOptionTiles.length, type: TileType.RIGHT_BLANK });
+          this.tiles.push(...this.blanks,
+          { text: null, cols: 1, rows: this.leftOptionTiles.length, type: TileType.RIGHT_BLANK });
           addBlank = false;
         }
       });
       // take away one feature's worth of cells, so we don't have too many cells in the next row
-      this.allTopOptions.splice(this.allTopOptions.length - this.dataService.optionCount, this.allTopOptions.length);
+      rowCellCount-=this.dataService.optionCount;
+      // this.allTopOptions.splice(this.allTopOptions.length - this.dataService.optionCount, this.allTopOptions.length);
       // add another blank so the next row will have the right number of blanks
       this.blanks.push({
         text: null,
