@@ -54,6 +54,7 @@ export class DataService {
         cell = new Cell();
         cell.leftOption = leftOption;
         cell.topOption = topOption;
+        cell.value = this.cells.length;
       }
       this.cells.push(cell);
       console.log(`${this.cellCount} new cell leftOption=`, cell.leftOption.name, ' topOption=', cell.topOption.name);

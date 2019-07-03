@@ -118,7 +118,7 @@ export class GridComponent implements OnInit {
       this.leftOptionTiles.forEach(option => {
         // push the next left option in the option set
         this.tiles.push(option);
-        for(let i=0; i< rowCellCount; rowCellCount++){
+        for(let i=0; i< this.allTopOptions.length; i++){
           // push a cell, one for each of the top options
           console.log('cellIndex =', cellIndex);
           console.log(this.dataService.cells[cellIndex]);
@@ -135,13 +135,13 @@ export class GridComponent implements OnInit {
         // push any blanks needed to the end of the row, to fill the bottom right corner
         if (addBlank) {
           this.tiles.push(...this.blanks,
-          { text: null, cols: 1, rows: this.leftOptionTiles.length, type: TileType.RIGHT_BLANK });
+          { text: null, cols: 1, rows: this.dataService.optionCount, type: TileType.RIGHT_BLANK });
           addBlank = false;
         }
       });
       // take away one feature's worth of cells, so we don't have too many cells in the next row
       rowCellCount-=this.dataService.optionCount;
-      // this.allTopOptions.splice(this.allTopOptions.length - this.dataService.optionCount, this.allTopOptions.length);
+      this.allTopOptions.splice(this.allTopOptions.length - this.dataService.optionCount, this.allTopOptions.length);
       // add another blank so the next row will have the right number of blanks
       this.blanks.push({
         text: null,
