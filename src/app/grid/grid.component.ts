@@ -43,11 +43,12 @@ export class GridComponent implements OnInit {
   tiles: Tile[] = [];
   features: Feature[] = [];
 
-  constructor(private dataService: DataService) { }
+  constructor(private dataService: DataService) {
+  }
 
   ngOnInit() {
     this.features = this.dataService.features;
-   // this.buildGrid();
+    this.buildGrid();
   }
 
   buildHeaderTiles() {
@@ -89,6 +90,11 @@ export class GridComponent implements OnInit {
         });
       }
     });
+
+    console.log('topFeatures=', this.topFeatureTiles);
+    console.log('topOptions=', this.topOptionTiles);
+    console.log('leftFeatures=', this.leftFeatureTiles);
+    console.log('leftOptions=', this.leftOptionTiles);
   }
 
   buildGrid() {
@@ -106,19 +112,22 @@ export class GridComponent implements OnInit {
 
     // TODO: error is happening somewhere in this set of code.
     let cellIndex = 0;
-    let rowCellCount = this.dataService.cells.length;
+    let rowCellCount = (this.dataService.features.length - 1) * this.dataService.optionCount;
     this.allTopOptions = this.topOptionTiles;
     this.leftFeatureTiles.forEach(feature => {
       let addBlank = true;
       // push a left feature
       this.tiles.push(feature);
+      // Here's the problem!  I'm reusing the same, full list of left option tiles, when I should be using only the option tiles for that left feature!  it's doing 6 instead of 3, in my case.
       this.leftOptionTiles.forEach(option => {
+        console.log('leftOption ', option.text);
         // push the next left option in the option set
         this.tiles.push(option);
-        for(let i=0; i< this.allTopOptions.length; i++){
+        // this.allTopOptions.forEach(i => {
+        for (let i = 0; i < rowCellCount && cellIndex < this.dataService.cells.length; i++) {
           // push a cell, one for each of the top options
-          console.log('cellIndex =', cellIndex);
-          console.log(this.dataService.cells[cellIndex]);
+          console.log('cells[', cellIndex, '] = ', this.dataService.cells[cellIndex].leftOption.name,
+            ', ', this.dataService.cells[cellIndex].topOption.name);
           this.tiles.push({
             text: this.dataService.cells[cellIndex].value,
             cols: 1,
@@ -128,17 +137,21 @@ export class GridComponent implements OnInit {
             type: TileType.CELL_INACTIVE
           });
           cellIndex++;
-        };
+        }
+        // );
+
         // push any blanks needed to the end of the row, to fill the bottom right corner
         if (addBlank) {
+          console.log('add filler blanks and right blank');
           this.tiles.push(...this.blanks,
-          { text: null, cols: 1, rows: this.dataService.optionCount, type: TileType.RIGHT_BLANK });
+            { text: null, cols: 1, rows: this.dataService.optionCount, type: TileType.RIGHT_BLANK });
           addBlank = false;
         }
       });
       // take away one feature's worth of cells, so we don't have too many cells in the next row
-      rowCellCount-=this.dataService.optionCount;
-      this.allTopOptions.splice(this.allTopOptions.length - this.dataService.optionCount, this.allTopOptions.length);
+      rowCellCount -= this.dataService.optionCount;
+      console.log('rowCellCount is now ', rowCellCount);
+      // this.allTopOptions.splice(this.allTopOptions.length - this.dataService.optionCount, this.allTopOptions.length);
       // add another blank so the next row will have the right number of blanks
       this.blanks.push({
         text: null,
