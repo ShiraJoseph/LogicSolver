@@ -47,7 +47,7 @@ export class GridComponent implements OnInit {
 
   ngOnInit() {
     this.features = this.dataService.features;
-    this.buildGrid();
+   // this.buildGrid();
   }
 
   buildHeaderTiles() {
@@ -95,7 +95,7 @@ export class GridComponent implements OnInit {
     this.cols = this.dataService.optionCount * (this.dataService.features.length - 1) + 5;
     this.buildHeaderTiles();
 
-    // push the corner, all the top features, and a plus button
+    // push the corner, all the top features, and a plus button then
     // push all the top options and a plus button
     this.tiles = [{ text: null, cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK },
       ...this.topFeatureTiles,
@@ -105,12 +105,9 @@ export class GridComponent implements OnInit {
     ];
 
     // TODO: error is happening somewhere in this set of code.
-    // It has all the right cells and the header tiles should be good.
-    console.log('cells: ', this.dataService.cells);
     let cellIndex = 0;
     let rowCellCount = this.dataService.cells.length;
     this.allTopOptions = this.topOptionTiles;
-    console.log('allTopOptions: ', this.allTopOptions);
     this.leftFeatureTiles.forEach(feature => {
       let addBlank = true;
       // push a left feature
@@ -153,6 +150,7 @@ export class GridComponent implements OnInit {
     });
     // add all the cells we just made to the mat-grid-list
     // this.tiles.push(...this.rows);
+    console.log('tiles: ', this.tiles);
   }
 
   // deactivates all tiles except the currently selected one.
