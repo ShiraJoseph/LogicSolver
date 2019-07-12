@@ -57,21 +57,23 @@ export class DataService {
         cell.value = this.cells.length;
       }
       this.cells.push(cell);
-      console.log(`${this.cellCount} new cell leftOption=`, cell.leftOption.name, ' topOption=', cell.topOption.name);
       this.cellCount++;
     });
   }
 
   getCell(arr: Cell [], option1: Option, option2: Option) {
-    return this.cells.find(currCell => (currCell.leftOption === option1 && currCell.topOption === option2)
+    return arr.find(currCell => (currCell.leftOption === option1 && currCell.topOption === option2)
       || (currCell.leftOption === option2 && currCell.topOption === option1));
   }
 
   addFeature() {
     const feature = new Feature();
-    const option = new Option();
-    option.feature = feature;
+    feature.name = 'new feature';
+    feature.options = [];
     for (let i = 0; i < this.optionCount; i++) {
+      const option = new Option();
+      option.feature = feature;
+      option.name = 'new option';
       feature.options.push(option);
     }
     this.features.push(feature);
@@ -80,8 +82,11 @@ export class DataService {
 
   addOption() {
     this.features.forEach(feature => {
-      feature.options.push(new Option());
+      const option = new Option();
+      option.name = 'new option';
+      feature.options.push(option);
     });
+    console.log('features=', this.features);
     this.optionCount++;
     this.updateCells();
   }
@@ -93,11 +98,19 @@ export class DataService {
     this.optionCount--;
   }
 
-  getFeatures() {
-    return this.features;
+  setOption(id: string, value: string) {
+    this.features.forEach(feature => {
+      const index = feature.options.findIndex(option => option.id === id);
+      if (index > -1) {
+        feature.options[index].name = value;
+      }
+    });
   }
 
-  setFeatures(features: Feature[]) {
-    this.features = features;
+  setFeature(id: string, value: string) {
+    const index = this.features.findIndex(option => option.id === id);
+    if (index > -1) {
+      this.features[index].name = value;
+    }
   }
 }

@@ -21,9 +21,8 @@ export interface Tile {
   cols: number;
   rows: number;
   text: string;
-  cell?: Cell;
   type?: TileType;
-  object?: {};
+  object?: Cell | Feature | Option;
 }
 
 @Component({
@@ -33,41 +32,45 @@ export interface Tile {
 })
 export class GridComponent implements OnInit {
   cols;
-  topFeatureTiles = [];
-  topOptionTiles = [];
-  leftOptionTiles = [];
   leftFeatureTiles = [];
-  allTopOptions = [];
-  rows = [];
-  blanks = [];
   tiles: Tile[] = [];
-  features: Feature[] = [];
 
   constructor(private dataService: DataService) {
   }
 
   ngOnInit() {
-    this.features = this.dataService.features;
     this.buildGrid();
   }
 
+  buildGrid() {
+    this.cols = this.dataService.optionCount * (this.dataService.features.length - 1) + 5;
+    this.buildHeaderTiles();
+    this.buildRows();
+  }
+
   buildHeaderTiles() {
+    const topOptionTiles = [];
+    const topFeatureTiles = [];
+    this.leftFeatureTiles = [];
+    this.tiles = [];
     this.dataService.features.forEach((feature, index) => {
       if (index > 0) {
-        this.topFeatureTiles.push({
+        topFeatureTiles.push({
           text: feature.name,
           cols: this.dataService.optionCount,
           rows: 1,
           color: 'gray',
-          type: TileType.TOP_FEATURE_HEADER
+          type: TileType.TOP_FEATURE_HEADER,
+          object: feature,
         });
         feature.options.forEach(option => {
-          this.topOptionTiles.push({
+          topOptionTiles.push({
             text: option.name,
             cols: 1,
             rows: 3,
             color: 'lightgray',
-            type: TileType.TOP_OPTION_HEADER
+            type: TileType.TOP_OPTION_HEADER,
+            object: option,
           });
         });
       }
@@ -78,82 +81,63 @@ export class GridComponent implements OnInit {
           rows: this.dataService.optionCount,
           color: 'gray',
           type: TileType.LEFT_FEATURE_HEADER,
-        });
-        feature.options.forEach(option => {
-          this.leftOptionTiles.push({
-            text: option.name,
-            cols: 3,
-            rows: 1,
-            color: 'lightgray',
-            type: TileType.LEFT_OPTION_HEADER
-          });
+          object: feature,
         });
       }
     });
 
-    console.log('topFeatures=', this.topFeatureTiles);
-    console.log('topOptions=', this.topOptionTiles);
-    console.log('leftFeatures=', this.leftFeatureTiles);
-    console.log('leftOptions=', this.leftOptionTiles);
+    this.tiles.push(
+      { text: null, cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK },
+      ...topFeatureTiles,
+      { text: '+', cols: 1, rows: 1, type: TileType.ADD_FEATURE },
+      ...topOptionTiles,
+      { text: '+', cols: 1, rows: 3, type: TileType.ADD_OPTION },
+    );
   }
 
-  buildGrid() {
-    this.cols = this.dataService.optionCount * (this.dataService.features.length - 1) + 5;
-    this.buildHeaderTiles();
-
-    // push the corner, all the top features, and a plus button then
-    // push all the top options and a plus button
-    this.tiles = [{ text: null, cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK },
-      ...this.topFeatureTiles,
-      { text: '+', cols: 1, rows: 1, type: TileType.ADD_FEATURE },
-      ...this.topOptionTiles,
-      { text: '+', cols: 1, rows: 3, type: TileType.ADD_OPTION },
-    ];
-
-    // TODO: error is happening somewhere in this set of code.
+  buildRows() {
     let cellIndex = 0;
     let rowCellCount = (this.dataService.features.length - 1) * this.dataService.optionCount;
-    this.allTopOptions = this.topOptionTiles;
-    this.leftFeatureTiles.forEach(feature => {
+    const blanks = [];
+    this.leftFeatureTiles.forEach(featureTile => {
       let addBlank = true;
       // push a left feature
-      this.tiles.push(feature);
-      // Here's the problem!  I'm reusing the same, full list of left option tiles, when I should be using only the option tiles for that left feature!  it's doing 6 instead of 3, in my case.
-      this.leftOptionTiles.forEach(option => {
-        console.log('leftOption ', option.text);
-        // push the next left option in the option set
-        this.tiles.push(option);
-        // this.allTopOptions.forEach(i => {
-        for (let i = 0; i < rowCellCount && cellIndex < this.dataService.cells.length; i++) {
-          // push a cell, one for each of the top options
-          console.log('cells[', cellIndex, '] = ', this.dataService.cells[cellIndex].leftOption.name,
-            ', ', this.dataService.cells[cellIndex].topOption.name);
+      this.tiles.push(featureTile);
+      featureTile.object.options.forEach(option => {
+        // push a left option
+        this.tiles.push({
+          text: option.name,
+          cols: 3,
+          rows: 1,
+          color: 'lightgray',
+          type: TileType.LEFT_OPTION_HEADER,
+          object: option,
+        });
+        for (let cell = 0; cell < rowCellCount && cellIndex < this.dataService.cells.length; cell++) {
+          // push a cell
           this.tiles.push({
-            text: this.dataService.cells[cellIndex].value,
+            text: '',
             cols: 1,
             rows: 1,
             color: 'white',
-            cell: this.dataService.cells[cellIndex],
-            type: TileType.CELL_INACTIVE
+            object: this.dataService.cells[cellIndex],
+            type: TileType.CELL_INACTIVE,
           });
           cellIndex++;
         }
-        // );
-
         // push any blanks needed to the end of the row, to fill the bottom right corner
         if (addBlank) {
-          console.log('add filler blanks and right blank');
-          this.tiles.push(...this.blanks,
-            { text: null, cols: 1, rows: this.dataService.optionCount, type: TileType.RIGHT_BLANK });
+          this.tiles.push(
+            ...blanks,
+            { text: null, cols: 1, rows: this.dataService.optionCount, type: TileType.RIGHT_BLANK }
+            );
           addBlank = false;
         }
       });
       // take away one feature's worth of cells, so we don't have too many cells in the next row
       rowCellCount -= this.dataService.optionCount;
-      console.log('rowCellCount is now ', rowCellCount);
-      // this.allTopOptions.splice(this.allTopOptions.length - this.dataService.optionCount, this.allTopOptions.length);
       // add another blank so the next row will have the right number of blanks
-      this.blanks.push({
+      blanks.push({
         text: null,
         cols: this.dataService.optionCount,
         rows: this.dataService.optionCount,
@@ -161,9 +145,6 @@ export class GridComponent implements OnInit {
         type: TileType.FILLER_BLANK
       });
     });
-    // add all the cells we just made to the mat-grid-list
-    // this.tiles.push(...this.rows);
-    console.log('tiles: ', this.tiles);
   }
 
   // deactivates all tiles except the currently selected one.
@@ -176,22 +157,29 @@ export class GridComponent implements OnInit {
     newTile.type = TileType.CELL_ACTIVE;
   }
 
-  getTileIndex(verticalOption: Option, horizontalOption: Option): number {
-    return this.tiles.findIndex(tile => tile.cell
-      && tile.cell.leftOption && tile.cell.leftOption === horizontalOption
-      && tile.cell.topOption && tile.cell.topOption === verticalOption
-    )[0];
-  }
-
-  setCellValue(verticalOption: Option, horizontalOption: Option, value: string) {
-    const index = this.getTileIndex(verticalOption, horizontalOption);
-    if (this.tiles[index]) {
-      this.tiles[index].cell.value = value;
-    }
-  }
-
   updateTile(tile: Tile, text: string) {
     tile.text = text;
+    (<Cell>tile.object).value = text;
     tile.type = TileType.CELL_INACTIVE;
+  }
+
+  addFeature() {
+    this.dataService.addFeature();
+    this.buildGrid();
+  }
+
+  addOption() {
+    this.dataService.addOption();
+    this.buildGrid();
+  }
+
+  updateOption(tile: Tile, text: string) {
+    this.dataService.setOption(tile.object.id, text);
+    this.buildGrid();
+  }
+
+  updateFeature(tile: Tile, text: string) {
+    this.dataService.setFeature(tile.object.id, text);
+    this.buildGrid();
   }
 }
