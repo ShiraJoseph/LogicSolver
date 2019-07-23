@@ -23,6 +23,7 @@ export interface Tile {
   text: string;
   type?: TileType;
   object?: Cell | Feature | Option;
+  objectId?: number;
 }
 
 @Component({
@@ -63,7 +64,7 @@ export class GridComponent implements OnInit {
           type: TileType.TOP_FEATURE_HEADER,
           object: feature,
         });
-        feature.options.forEach(option => {
+        this.dataService.getFeatureOptions(feature.id).forEach(option => {
           topOptionTiles.push({
             text: option.name,
             cols: 1,
@@ -145,6 +146,10 @@ export class GridComponent implements OnInit {
         type: TileType.FILLER_BLANK
       });
     });
+  }
+
+  pushCell(option1?: Option, option2?: Option, text?: string, ){
+
   }
 
   // deactivates all tiles except the currently selected one.

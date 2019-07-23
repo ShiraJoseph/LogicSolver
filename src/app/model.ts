@@ -1,10 +1,10 @@
 export class Cell {
   constructor () {
-    this.id = `${Math.random()}`;
+    this.id = Math.random();
   }
-  readonly id: string;
-  public leftOption?: Option;
-  public topOption?: Option;
+  public id: number;
+  public leftOptionId?: number;
+  public topOptionId?: number;
   public value = '';
   public userEntered?: boolean;
 
@@ -16,21 +16,22 @@ export class Cell {
 
 export class Feature {
   constructor () {
-    this.id = `${Math.random()}`;
+    this.id = Math.random();
   }
-  readonly id: string;
+  public id: number;
   public name: string;
-  public options?: Option[];
+  public optionsIds?: number [];
 
 }
 
 export class Option {
   constructor () {
-    this.id = `${Math.random()}`;
+    this.id = Math.random();
   }
-  readonly id: string;
+  public id: number;
   public name: string;
-  public feature?: Feature;
+  public featureId?: number;
+  // public cells?: Cell[];
 }
 
 
