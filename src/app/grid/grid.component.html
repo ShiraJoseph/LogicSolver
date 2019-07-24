@@ -1,13 +1,21 @@
 <mat-grid-list [cols]="cols" rowHeight="1:1" gutterSize="1"
   [style.max-width.px]="cols*42">
   <mat-grid-tile
+
     *ngFor="let tile of tiles"
     [colspan]="tile.cols"
     [rowspan]="tile.rows"
     [style.background]="tile.color"
     [ngSwitch]="tile.type">
-    <div *ngSwitchCase="'CELL_INACTIVE'" class="cell-inactive" (click)="switchOut(tile)">{{tile.text}}</div>
-    <div *ngSwitchCase="'CELL_ACTIVE'" class="cell-active">
+    <div
+      *ngSwitchCase="'CELL_INACTIVE'"
+      class="cell-inactive"
+      (click)="switchOut(tile)">
+      {{tile.text}}
+    </div>
+    <div
+      *ngSwitchCase="'CELL_ACTIVE'"
+      class="cell-active">
       <div class="xo-buttons">
         <div class="xo-button" (click)="updateTile(tile, 'O')">O</div>
         <div class="xo-button" (click)="updateTile(tile, 'X')">X</div>
@@ -17,12 +25,53 @@
         <div class="clear-button" (click)="updateTile(tile, tile.text)">x</div>
       </div>
     </div>
-    <input *ngSwitchCase="'TOP_FEATURE_HEADER'" (keydown.enter)="$event.target.blur();" (blur)="updateFeature(tile, tile.text)"class="header feature" [value]="tile.text"/>
-    <input *ngSwitchCase="'TOP_OPTION_HEADER'" (keydown.enter)="$event.target.blur();" (blur)="updateOption(tile, tile.text)" class="header vertical option" [value]="tile.text"/>
-    <input *ngSwitchCase="'LEFT_FEATURE_HEADER'" (keydown.enter)="$event.target.blur();" (blur)="updateFeature(tile, tile.text)" class="header vertical feature" [value]="tile.text"/>
-    <input *ngSwitchCase="'LEFT_OPTION_HEADER'" (keydown.enter)="$event.target.blur();" (blur)="updateOption(tile, tile.text)" class="header option" [value]="tile.text"/>
-    <button *ngSwitchCase="'ADD_FEATURE'" class="other" (click)="addFeature()">{{tile.text}}</button>
-    <button *ngSwitchCase="'ADD_OPTION'" class="other" (click)="addOption()">{{tile.text}}</button>
+
+    <div *ngSwitchCase="'TOP_FEATURE_HEADER'" id="top-feature">
+      <input
+        (keydown.enter)="$event.target.blur();"
+        (blur)="updateFeature(tile, tile.text); tile.showMinus = false;"
+        class="header feature"
+        [value]="tile.text"
+        (focus)="tile.showMinus = true">
+      <button *ngIf="tile.showMinus" (click)="deleteFeature(tile)">-</button>
+    </div>
+    <div *ngSwitchCase="'TOP_OPTION_HEADER'" id="top-option">
+      <input
+        class="header vertical option"
+        (keydown.enter)="$event.target.blur();"
+        (blur)="updateOption(tile, tile.text); tile.showMinus = false;"
+        (focus)="tile.showMinus = true"
+        [value]="tile.text"/>
+      <button *ngIf="tile.showMinus" (click)="deleteOption(tile)">-</button>
+    </div>
+    <div *ngSwitchCase="'LEFT_FEATURE_HEADER'" id="left-feature">
+      <input
+        class="header vertical feature"
+        (keydown.enter)="$event.target.blur();"
+        (blur)="updateFeature(tile, tile.text); tile.showMinus = false;"
+        (focus)="tile.showMinus = true"
+        [value]="tile.text"/>
+      <button *ngIf="tile.showMinus" (click)="deleteFeature(tile)">-</button>
+    </div>
+    <div *ngSwitchCase="'LEFT_OPTION_HEADER'" id="left-option">
+      <input
+        (keydown.enter)="$event.target.blur();"
+        (blur)="updateOption(tile, tile.text); tile.showMinus = false;"
+        (focus)="tile.showMinus = true"
+        class="header option"
+        [value]="tile.text"/>
+      <button *ngIf="tile.showMinus" (click)="deleteOption(tile)">-</button>
+    </div>
+    <button
+      *ngSwitchCase="'ADD_FEATURE'"
+      class="other"
+      (click)="addFeature()">{{tile.text}}
+    </button>
+    <button
+      *ngSwitchCase="'ADD_OPTION'"
+      class="other"
+      (click)="addOption()">{{tile.text}}
+    </button>
     <div *ngSwitchDefault class="blank"></div>
   </mat-grid-tile>
 </mat-grid-list>

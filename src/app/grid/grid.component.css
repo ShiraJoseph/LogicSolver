@@ -28,10 +28,20 @@ mat-grid-list {
   background-color: white;
   border: 1px transparent solid;
   transform: none;
+  width: fit-content;
 }
 
 .vertical {
   transform: rotate(290deg);
+}
+
+#left-feature:focus #top-option:focus {
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#left-option:focus #top-feature:focus {
+  justify-content: space-between;
 }
 
 .other {

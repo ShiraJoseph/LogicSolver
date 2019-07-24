@@ -14,6 +14,8 @@ export enum TileType {
   CORNER_BLANK = 'CORNER_BLANK',
   RIGHT_BLANK = 'RIGHT_BLANK',
   FILLER_BLANK = 'FILLER_BLANK',
+  DELETE_FEATURE = 'DELETE_FEATURE',
+  DELETE_OPTION = 'DELETE_OPTION',
 }
 
 export interface Tile {
@@ -24,6 +26,7 @@ export interface Tile {
   type?: TileType;
   object?: Cell | Feature | Option;
   objectId?: number;
+  showMinus?: boolean;
 }
 
 @Component({
@@ -63,6 +66,7 @@ export class GridComponent implements OnInit {
           color: 'gray',
           type: TileType.TOP_FEATURE_HEADER,
           object: feature,
+          objectId: feature.id,
         });
         this.dataService.getFeatureOptions(feature.id).forEach(option => {
           topOptionTiles.push({
@@ -72,6 +76,7 @@ export class GridComponent implements OnInit {
             color: 'lightgray',
             type: TileType.TOP_OPTION_HEADER,
             object: option,
+            objectId: option.id
           });
         });
       }
@@ -83,6 +88,7 @@ export class GridComponent implements OnInit {
           color: 'gray',
           type: TileType.LEFT_FEATURE_HEADER,
           object: feature,
+          objectId: feature.id,
         });
       }
     });
@@ -104,7 +110,9 @@ export class GridComponent implements OnInit {
       let addBlank = true;
       // push a left feature
       this.tiles.push(featureTile);
-      featureTile.object.options.forEach(option => {
+      this.dataService.getFeatureOptions(featureTile.objectId)
+      // featureTile.object.options
+        .forEach(option => {
         // push a left option
         this.tiles.push({
           text: option.name,
@@ -113,6 +121,7 @@ export class GridComponent implements OnInit {
           color: 'lightgray',
           type: TileType.LEFT_OPTION_HEADER,
           object: option,
+          objectId: option.id,
         });
         for (let cell = 0; cell < rowCellCount && cellIndex < this.dataService.cells.length; cell++) {
           // push a cell
@@ -123,6 +132,7 @@ export class GridComponent implements OnInit {
             color: 'white',
             object: this.dataService.cells[cellIndex],
             type: TileType.CELL_INACTIVE,
+            objectId: this.dataService.cells[cellIndex].id,
           });
           cellIndex++;
         }
@@ -148,7 +158,7 @@ export class GridComponent implements OnInit {
     });
   }
 
-  pushCell(option1?: Option, option2?: Option, text?: string, ){
+  pushCell(option1?: Option, option2?: Option, text?: string,) {
 
   }
 
@@ -173,6 +183,16 @@ export class GridComponent implements OnInit {
     this.buildGrid();
   }
 
+  deleteFeature(tile: Tile) {
+    this.dataService.deleteFeature(tile.objectId);
+    this.buildGrid();
+  }
+
+  deleteOption(tile: Tile) {
+    this.dataService.deleteOption(tile.objectId);
+    this.buildGrid();
+  }
+
   addOption() {
     this.dataService.addOption();
     this.buildGrid();
@@ -187,4 +207,36 @@ export class GridComponent implements OnInit {
     this.dataService.setFeature(tile.object.id, text);
     this.buildGrid();
   }
+
+  // showMinus(tile: Tile) {
+    // const index = this.tiles.findIndex(foundTile => foundTile === tile);
+    // const deleteTile = <Tile>{ text: '-', cols: 1, rows: 1 };
+    //
+    // switch (tile.type) {
+    //   case TileType.LEFT_FEATURE_HEADER: {
+    //     deleteTile.type = TileType.DELETE_FEATURE;
+    //     tile.rows--;
+    //     this.tiles.splice(index, 0, deleteTile);
+    //     break;
+    //   }
+    //   case TileType.LEFT_OPTION_HEADER: {
+    //     deleteTile.type = TileType.DELETE_OPTION;
+    //     tile.cols--;
+    //     this.tiles.splice(index, 0, deleteTile);
+    //     break;
+    //   }
+    //   case TileType.TOP_FEATURE_HEADER: {
+    //     deleteTile.type = TileType.DELETE_FEATURE;
+    //     tile.cols--;
+    //     this.tiles.splice(index, 0, deleteTile);
+    //     break;
+    //   }
+    //   case TileType.TOP_OPTION_HEADER: {
+    //     deleteTile.type = TileType.DELETE_OPTION;
+    //     tile.rows--;
+    //     this.tiles.splice(index, 0, deleteTile);
+    //     break;
+    //   }
+    // }
+  // }
 }
