@@ -24,7 +24,7 @@ export interface Tile {
   rows: number;
   text: string;
   type?: TileType;
-  object?: Cell | Feature | Option;
+  // object?: Cell | Feature | Option;
   objectId?: number;
   showMinus?: boolean;
 }
@@ -39,7 +39,7 @@ export class GridComponent implements OnInit {
   leftFeatureTiles = [];
   tiles: Tile[] = [];
 
-  constructor(private dataService: DataService) {
+  constructor(private dS: DataService) {
   }
 
   ngOnInit() {
@@ -47,7 +47,7 @@ export class GridComponent implements OnInit {
   }
 
   buildGrid() {
-    this.cols = this.dataService.optionCount * (this.dataService.features.length - 1) + 5;
+    this.cols = this.dS.optionCount * (this.dS.features.length - 1) + 5;
     this.buildHeaderTiles();
     this.buildRows();
   }
@@ -57,25 +57,24 @@ export class GridComponent implements OnInit {
     const topFeatureTiles = [];
     this.leftFeatureTiles = [];
     this.tiles = [];
-    this.dataService.features.forEach((feature, index) => {
+    this.dS.features.forEach((feature, index) => {
       if (index > 0) {
         topFeatureTiles.push({
           text: feature.name,
-          cols: this.dataService.optionCount,
+          cols: this.dS.optionCount,
           rows: 1,
           color: 'gray',
           type: TileType.TOP_FEATURE_HEADER,
           object: feature,
           objectId: feature.id,
         });
-        this.dataService.getFeatureOptions(feature.id).forEach(option => {
+        this.dS.getFeatureOptions(feature.id).forEach(option => {
           topOptionTiles.push({
             text: option.name,
             cols: 1,
             rows: 3,
             color: 'lightgray',
             type: TileType.TOP_OPTION_HEADER,
-            object: option,
             objectId: option.id
           });
         });
@@ -84,10 +83,9 @@ export class GridComponent implements OnInit {
         this.leftFeatureTiles.push({
           text: feature.name,
           cols: 1,
-          rows: this.dataService.optionCount,
+          rows: this.dS.optionCount,
           color: 'gray',
           type: TileType.LEFT_FEATURE_HEADER,
-          object: feature,
           objectId: feature.id,
         });
       }
@@ -104,13 +102,13 @@ export class GridComponent implements OnInit {
 
   buildRows() {
     let cellIndex = 0;
-    let rowCellCount = (this.dataService.features.length - 1) * this.dataService.optionCount;
+    let rowCellCount = (this.dS.features.length - 1) * this.dS.optionCount;
     const blanks = [];
     this.leftFeatureTiles.forEach(featureTile => {
       let addBlank = true;
       // push a left feature
       this.tiles.push(featureTile);
-      this.dataService.getFeatureOptions(featureTile.objectId)
+      this.dS.getFeatureOptions(featureTile.objectId)
       // featureTile.object.options
         .forEach(option => {
         // push a left option
@@ -120,19 +118,19 @@ export class GridComponent implements OnInit {
           rows: 1,
           color: 'lightgray',
           type: TileType.LEFT_OPTION_HEADER,
-          object: option,
+          // object: option,
           objectId: option.id,
         });
-        for (let cell = 0; cell < rowCellCount && cellIndex < this.dataService.cells.length; cell++) {
+        for (let cell = 0; cell < rowCellCount && cellIndex < this.dS.cells.length; cell++) {
           // push a cell
           this.tiles.push({
-            text: '',
+            text: this.dS.cells[cellIndex].value,
             cols: 1,
             rows: 1,
             color: 'white',
-            object: this.dataService.cells[cellIndex],
+            // object: this.dS.cells[cellIndex],
             type: TileType.CELL_INACTIVE,
-            objectId: this.dataService.cells[cellIndex].id,
+            objectId: this.dS.cells[cellIndex].id,
           });
           cellIndex++;
         }
@@ -140,26 +138,22 @@ export class GridComponent implements OnInit {
         if (addBlank) {
           this.tiles.push(
             ...blanks,
-            { text: null, cols: 1, rows: this.dataService.optionCount, type: TileType.RIGHT_BLANK }
+            { text: null, cols: 1, rows: this.dS.optionCount, type: TileType.RIGHT_BLANK }
             );
           addBlank = false;
         }
       });
       // take away one feature's worth of cells, so we don't have too many cells in the next row
-      rowCellCount -= this.dataService.optionCount;
+      rowCellCount -= this.dS.optionCount;
       // add another blank so the next row will have the right number of blanks
       blanks.push({
         text: null,
-        cols: this.dataService.optionCount,
-        rows: this.dataService.optionCount,
+        cols: this.dS.optionCount,
+        rows: this.dS.optionCount,
         color: 'white',
         type: TileType.FILLER_BLANK
       });
     });
-  }
-
-  pushCell(option1?: Option, option2?: Option, text?: string,) {
-
   }
 
   // deactivates all tiles except the currently selected one.
@@ -174,37 +168,37 @@ export class GridComponent implements OnInit {
 
   updateTile(tile: Tile, text: string) {
     tile.text = text;
-    (<Cell>tile.object).value = text;
+    this.dS.setCell(tile.objectId, text);
     tile.type = TileType.CELL_INACTIVE;
   }
 
   addFeature() {
-    this.dataService.addFeature();
+    this.dS.addFeature();
     this.buildGrid();
   }
 
   deleteFeature(tile: Tile) {
-    this.dataService.deleteFeature(tile.objectId);
+    this.dS.deleteFeature(tile.objectId);
     this.buildGrid();
   }
 
   deleteOption(tile: Tile) {
-    this.dataService.deleteOption(tile.objectId);
+    this.dS.deleteOption(tile.objectId);
     this.buildGrid();
   }
 
   addOption() {
-    this.dataService.addOption();
+    this.dS.addOption();
     this.buildGrid();
   }
 
   updateOption(tile: Tile, text: string) {
-    this.dataService.setOption(tile.object.id, text);
+    this.dS.setOption(tile.objectId, text);
     this.buildGrid();
   }
 
   updateFeature(tile: Tile, text: string) {
-    this.dataService.setFeature(tile.object.id, text);
+    this.dS.setFeature(tile.objectId, text);
     this.buildGrid();
   }
 
