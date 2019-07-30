@@ -61,10 +61,11 @@ export class DataService {
             cell = new Cell();
             cell.leftOptionId = leftOptionID;
             cell.topOptionId = topOptionID;
+
             cell.value = `${ this.cells.length }`;
-            console.log('New Cell! id = ', cell.id.toFixed(3), '; value = ', cell.value);
+            // console.log('New Cell! id = ', cell.id.toFixed(3), '; value = ', cell.value);
           } else {
-            console.log('old cell, id = ', cell.id.toFixed(3), '; value = ', cell.value);
+            // console.log('old cell, id = ', cell.id.toFixed(3), '; value = ', cell.value);
           }
           this.cells.push(cell);
           cell = null;
@@ -73,7 +74,6 @@ export class DataService {
         });
       }
     });
-    console.log('')
 
     // then start with the last feature going backwards until feature 2, as left feature
     for (let leftFeatureI = this.features.length - 1; leftFeatureI > 1; leftFeatureI--) {
@@ -90,9 +90,9 @@ export class DataService {
               cell.leftOptionId = leftOptionId;
               cell.topOptionId = topOptionId;
               cell.value = `${ this.cells.length }`;
-              console.log('New Cell! id = ', cell.id.toFixed(3), '; value = ', cell.value);
+              // console.log('New Cell! id = ', cell.id.toFixed(3), '; value = ', cell.value);
             } else {
-              console.log('old cell, id = ', cell.id.toFixed(3), '; value = ', cell.value);
+              // console.log('old cell, id = ', cell.id.toFixed(3), '; value = ', cell.value);
             }
             this.cells.push(cell);
             this.cellCount++;
@@ -159,7 +159,7 @@ export class DataService {
 
   addFeature() {
     const feature = new Feature();
-    feature.name = 'new feature';
+    feature.name = `new feature${this.features.length}`;
     feature.optionsIds = [];
     for (let i = 0; i < this.optionCount; i++) {
       const option = new Option();
@@ -169,19 +169,19 @@ export class DataService {
       this.options.push(option);
     }
     this.features.push(feature);
-    console.log('Add feature. this.features=', this.features, ' this.options=', this.options);
     this.updateCells();
   }
 
   addOption() {
+    this.optionCount++;
     this.features.forEach(feature => {
       const option = new Option();
-      option.name = 'new option';
+      option.name = `new option${this.optionCount}`;
       option.featureId = feature.id;
       feature.optionsIds.push(option.id);
+      this.options.push(option);
     });
-    console.log('features=', this.features);
-    this.optionCount++;
+
     this.updateCells();
   }
 

@@ -44,12 +44,13 @@ export class GridComponent implements OnInit {
 
   ngOnInit() {
     this.buildGrid();
+
   }
 
   buildGrid() {
-    this.cols = this.dS.optionCount * (this.dS.features.length - 1) + 5;
     this.buildHeaderTiles();
     this.buildRows();
+    this.cols = this.dS.optionCount * (this.dS.features.length - 1) + 5;
   }
 
   buildHeaderTiles() {
@@ -79,24 +80,34 @@ export class GridComponent implements OnInit {
           });
         });
       }
-      if (index !== 1) {
-        this.leftFeatureTiles.push({
-          text: feature.name,
-          cols: 1,
-          rows: this.dS.optionCount,
-          color: 'gray',
-          type: TileType.LEFT_FEATURE_HEADER,
-          objectId: feature.id,
-        });
-      }
     });
+    // push the first feature row
+    this.leftFeatureTiles.push({
+      text: this.dS.features[0].name,
+      cols: 1,
+      rows: this.dS.optionCount,
+      color: 'gray',
+      type: TileType.LEFT_FEATURE_HEADER,
+      objectId: this.dS.features[0].id,
+    });
+    // push the remaining rows using the features in reverse order
+    for (let fCount = this.dS.features.length - 1; fCount > 1; fCount--) {
+      this.leftFeatureTiles.push({
+        text: this.dS.features[fCount].name,
+        cols: 1,
+        rows: this.dS.optionCount,
+        color: 'gray',
+        type: TileType.LEFT_FEATURE_HEADER,
+        objectId: this.dS.features[fCount].id,
+      });
+    }
 
     this.tiles.push(
-      { text: null, cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK },
+      {text: null, cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK},
       ...topFeatureTiles,
-      { text: '+', cols: 1, rows: 1, type: TileType.ADD_FEATURE },
+      {text: '+', cols: 1, rows: 1, type: TileType.ADD_FEATURE},
       ...topOptionTiles,
-      { text: '+', cols: 1, rows: 3, type: TileType.ADD_OPTION },
+      {text: '+', cols: 1, rows: 3, type: TileType.ADD_OPTION},
     );
   }
 
@@ -108,9 +119,7 @@ export class GridComponent implements OnInit {
       let addBlank = true;
       // push a left feature
       this.tiles.push(featureTile);
-      this.dS.getFeatureOptions(featureTile.objectId)
-      // featureTile.object.options
-        .forEach(option => {
+      this.dS.getFeatureOptions(featureTile.objectId).forEach(option => {
         // push a left option
         this.tiles.push({
           text: option.name,
@@ -118,7 +127,6 @@ export class GridComponent implements OnInit {
           rows: 1,
           color: 'lightgray',
           type: TileType.LEFT_OPTION_HEADER,
-          // object: option,
           objectId: option.id,
         });
         for (let cell = 0; cell < rowCellCount && cellIndex < this.dS.cells.length; cell++) {
@@ -128,7 +136,6 @@ export class GridComponent implements OnInit {
             cols: 1,
             rows: 1,
             color: 'white',
-            // object: this.dS.cells[cellIndex],
             type: TileType.CELL_INACTIVE,
             objectId: this.dS.cells[cellIndex].id,
           });
@@ -138,8 +145,8 @@ export class GridComponent implements OnInit {
         if (addBlank) {
           this.tiles.push(
             ...blanks,
-            { text: null, cols: 1, rows: this.dS.optionCount, type: TileType.RIGHT_BLANK }
-            );
+            {text: null, cols: 1, rows: this.dS.optionCount, type: TileType.RIGHT_BLANK}
+          );
           addBlank = false;
         }
       });
@@ -203,34 +210,34 @@ export class GridComponent implements OnInit {
   }
 
   // showMinus(tile: Tile) {
-    // const index = this.tiles.findIndex(foundTile => foundTile === tile);
-    // const deleteTile = <Tile>{ text: '-', cols: 1, rows: 1 };
-    //
-    // switch (tile.type) {
-    //   case TileType.LEFT_FEATURE_HEADER: {
-    //     deleteTile.type = TileType.DELETE_FEATURE;
-    //     tile.rows--;
-    //     this.tiles.splice(index, 0, deleteTile);
-    //     break;
-    //   }
-    //   case TileType.LEFT_OPTION_HEADER: {
-    //     deleteTile.type = TileType.DELETE_OPTION;
-    //     tile.cols--;
-    //     this.tiles.splice(index, 0, deleteTile);
-    //     break;
-    //   }
-    //   case TileType.TOP_FEATURE_HEADER: {
-    //     deleteTile.type = TileType.DELETE_FEATURE;
-    //     tile.cols--;
-    //     this.tiles.splice(index, 0, deleteTile);
-    //     break;
-    //   }
-    //   case TileType.TOP_OPTION_HEADER: {
-    //     deleteTile.type = TileType.DELETE_OPTION;
-    //     tile.rows--;
-    //     this.tiles.splice(index, 0, deleteTile);
-    //     break;
-    //   }
-    // }
+  // const index = this.tiles.findIndex(foundTile => foundTile === tile);
+  // const deleteTile = <Tile>{ text: '-', cols: 1, rows: 1 };
+  //
+  // switch (tile.type) {
+  //   case TileType.LEFT_FEATURE_HEADER: {
+  //     deleteTile.type = TileType.DELETE_FEATURE;
+  //     tile.rows--;
+  //     this.tiles.splice(index, 0, deleteTile);
+  //     break;
+  //   }
+  //   case TileType.LEFT_OPTION_HEADER: {
+  //     deleteTile.type = TileType.DELETE_OPTION;
+  //     tile.cols--;
+  //     this.tiles.splice(index, 0, deleteTile);
+  //     break;
+  //   }
+  //   case TileType.TOP_FEATURE_HEADER: {
+  //     deleteTile.type = TileType.DELETE_FEATURE;
+  //     tile.cols--;
+  //     this.tiles.splice(index, 0, deleteTile);
+  //     break;
+  //   }
+  //   case TileType.TOP_OPTION_HEADER: {
+  //     deleteTile.type = TileType.DELETE_OPTION;
+  //     tile.rows--;
+  //     this.tiles.splice(index, 0, deleteTile);
+  //     break;
+  //   }
+  // }
   // }
 }
