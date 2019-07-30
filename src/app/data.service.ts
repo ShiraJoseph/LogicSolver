@@ -49,7 +49,7 @@ export class DataService {
     this.oldCells = this.cells;
     this.cells = [];
     this.cellCount = 0;
-    // for each option in left feature0
+    // for each left option in left feature0
     this.features[0].optionsIds.forEach(leftOptionID => {
       // for each feature greater than left feature, as top feature
       for (let topFeatureIx = 1; topFeatureIx < this.features.length; topFeatureIx++) {
@@ -73,14 +73,14 @@ export class DataService {
         });
       }
     });
-
+    console.log('')
 
     // then start with the last feature going backwards until feature 2, as left feature
     for (let leftFeatureI = this.features.length - 1; leftFeatureI > 1; leftFeatureI--) {
       // for each option in left feature
       this.features[leftFeatureI].optionsIds.forEach(leftOptionId => {
         // for each feature after 1 until left feature exclusive, as top feature
-        for (let topFeatureI = 2; topFeatureI < leftFeatureI; topFeatureI++) {
+        for (let topFeatureI = 1; topFeatureI < leftFeatureI; topFeatureI++) {
           // for each option in top feature
           this.features[topFeatureI].optionsIds.forEach(topOptionId => {
             // create/push a cell with those two options
