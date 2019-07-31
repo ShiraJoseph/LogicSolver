@@ -14,8 +14,6 @@ export enum TileType {
   CORNER_BLANK = 'CORNER_BLANK',
   RIGHT_BLANK = 'RIGHT_BLANK',
   FILLER_BLANK = 'FILLER_BLANK',
-  DELETE_FEATURE = 'DELETE_FEATURE',
-  DELETE_OPTION = 'DELETE_OPTION',
 }
 
 export interface Tile {
@@ -24,9 +22,8 @@ export interface Tile {
   rows: number;
   text: string;
   type?: TileType;
-  // object?: Cell | Feature | Option;
   objectId?: number;
-  showMinus?: boolean;
+  shouldShowMinus?: boolean;
 }
 
 @Component({
@@ -38,13 +35,13 @@ export class GridComponent implements OnInit {
   cols;
   leftFeatureTiles = [];
   tiles: Tile[] = [];
+  disableDelete = false;
 
   constructor(private dS: DataService) {
   }
 
   ngOnInit() {
     this.buildGrid();
-
   }
 
   buildGrid() {
@@ -81,7 +78,7 @@ export class GridComponent implements OnInit {
         });
       }
     });
-    // push the first feature row
+    // push the first left feature
     this.leftFeatureTiles.push({
       text: this.dS.features[0].name,
       cols: 1,
@@ -90,7 +87,7 @@ export class GridComponent implements OnInit {
       type: TileType.LEFT_FEATURE_HEADER,
       objectId: this.dS.features[0].id,
     });
-    // push the remaining rows using the features in reverse order
+    // push the remaining left features using the feature list in reverse order
     for (let fCount = this.dS.features.length - 1; fCount > 1; fCount--) {
       this.leftFeatureTiles.push({
         text: this.dS.features[fCount].name,
@@ -101,7 +98,7 @@ export class GridComponent implements OnInit {
         objectId: this.dS.features[fCount].id,
       });
     }
-
+    // insert all the headers and the add buttons to the grid
     this.tiles.push(
       {text: null, cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK},
       ...topFeatureTiles,
@@ -163,6 +160,58 @@ export class GridComponent implements OnInit {
     });
   }
 
+
+
+  addFeature() {
+    this.dS.addFeature();
+    this.buildGrid();
+  }
+
+
+  addOption() {
+    this.dS.addOption();
+    this.buildGrid();
+  }
+
+  updateFeature(event, tile: Tile) {
+    setTimeout(() => {
+      if (tile.shouldShowMinus) {
+        console.log(event.target.value);
+        this.dS.setFeature(tile.objectId, event.target.value);
+        this.buildGrid();
+        tile.shouldShowMinus = false;
+      }
+    }, 100);
+  }
+
+  updateOption(event, tile: Tile) {
+    setTimeout(() => {
+      if (tile.shouldShowMinus) {
+        console.log(event.target.value);
+        this.dS.setOption(tile.objectId, event.target.value);
+        this.buildGrid();
+        tile.shouldShowMinus = false;
+      }
+    }, 100);
+  }
+
+  deleteFeature(tile: Tile) {
+    console.log('deleteFeature');
+    tile.shouldShowMinus = false;
+    this.dS.deleteFeature(tile.objectId);
+    if (this.dS.features.length <= 2) {
+      this.disableDelete = true;
+    }
+    this.buildGrid();
+  }
+
+  deleteOption(tile: Tile) {
+    console.log('deleteOption');
+    tile.shouldShowMinus = false;
+    this.dS.deleteOption(tile.objectId);
+    this.buildGrid();
+  }
+
   // deactivates all tiles except the currently selected one.
   switchOut(newTile: Tile) {
     this.tiles.forEach((tile) => {
@@ -178,66 +227,4 @@ export class GridComponent implements OnInit {
     this.dS.setCell(tile.objectId, text);
     tile.type = TileType.CELL_INACTIVE;
   }
-
-  addFeature() {
-    this.dS.addFeature();
-    this.buildGrid();
-  }
-
-  deleteFeature(tile: Tile) {
-    this.dS.deleteFeature(tile.objectId);
-    this.buildGrid();
-  }
-
-  deleteOption(tile: Tile) {
-    this.dS.deleteOption(tile.objectId);
-    this.buildGrid();
-  }
-
-  addOption() {
-    this.dS.addOption();
-    this.buildGrid();
-  }
-
-  updateOption(tile: Tile, text: string) {
-    this.dS.setOption(tile.objectId, text);
-    this.buildGrid();
-  }
-
-  updateFeature(tile: Tile, text: string) {
-    this.dS.setFeature(tile.objectId, text);
-    this.buildGrid();
-  }
-
-  // showMinus(tile: Tile) {
-  // const index = this.tiles.findIndex(foundTile => foundTile === tile);
-  // const deleteTile = <Tile>{ text: '-', cols: 1, rows: 1 };
-  //
-  // switch (tile.type) {
-  //   case TileType.LEFT_FEATURE_HEADER: {
-  //     deleteTile.type = TileType.DELETE_FEATURE;
-  //     tile.rows--;
-  //     this.tiles.splice(index, 0, deleteTile);
-  //     break;
-  //   }
-  //   case TileType.LEFT_OPTION_HEADER: {
-  //     deleteTile.type = TileType.DELETE_OPTION;
-  //     tile.cols--;
-  //     this.tiles.splice(index, 0, deleteTile);
-  //     break;
-  //   }
-  //   case TileType.TOP_FEATURE_HEADER: {
-  //     deleteTile.type = TileType.DELETE_FEATURE;
-  //     tile.cols--;
-  //     this.tiles.splice(index, 0, deleteTile);
-  //     break;
-  //   }
-  //   case TileType.TOP_OPTION_HEADER: {
-  //     deleteTile.type = TileType.DELETE_OPTION;
-  //     tile.rows--;
-  //     this.tiles.splice(index, 0, deleteTile);
-  //     break;
-  //   }
-  // }
-  // }
 }

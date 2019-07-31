@@ -22,16 +22,16 @@ export class DataService {
     const f3 = new Feature();
     this.features.push(f1, f2, f3);
     this.features.forEach((feature, index) => {
-      feature.name = `Feature${ index }`;
+      feature.name = '';
       feature.optionsIds = [];
       const o1 = new Option();
       const o2 = new Option();
       const o3 = new Option();
-      o1.name = `${ feature.name }blue`;
+      o1.name = '';
       o1.featureId = feature.id;
-      o2.name = `${ feature.name }yellow`;
+      o2.name = '';
       o2.featureId = feature.id;
-      o3.name = `${ feature.name }green`;
+      o3.name = '';
       o3.featureId = feature.id;
       // `Option${ index + 1 }${ i + 1 }`
       this.options.push(o1, o2, o3);
@@ -61,16 +61,10 @@ export class DataService {
             cell = new Cell();
             cell.leftOptionId = leftOptionID;
             cell.topOptionId = topOptionID;
-
-            cell.value = `${ this.cells.length }`;
-            // console.log('New Cell! id = ', cell.id.toFixed(3), '; value = ', cell.value);
-          } else {
-            // console.log('old cell, id = ', cell.id.toFixed(3), '; value = ', cell.value);
           }
           this.cells.push(cell);
           cell = null;
           this.cellCount++;
-
         });
       }
     });
@@ -89,10 +83,6 @@ export class DataService {
               cell = new Cell();
               cell.leftOptionId = leftOptionId;
               cell.topOptionId = topOptionId;
-              cell.value = `${ this.cells.length }`;
-              // console.log('New Cell! id = ', cell.id.toFixed(3), '; value = ', cell.value);
-            } else {
-              // console.log('old cell, id = ', cell.id.toFixed(3), '; value = ', cell.value);
             }
             this.cells.push(cell);
             this.cellCount++;
@@ -100,57 +90,8 @@ export class DataService {
         }
       });
     }
-
-    // this.features[0].optionsIds.forEach(leftOptionId => {
-    //   // console.log('leftOption = ', leftOptionId.toFixed(3), ' ... ', this.getOption(leftOptionId).name);
-    //   // for (let f2 = 1; f2 < this.features.length - (f1 === 0 ? 1 : f2); f2++) {
-    //   //   console.log('feature 2 = ', this.features[1]);
-    //   console.log('top feature = ', this.features[1].name);
-    //   this.pushOptionCells(leftOptionId, this.features[1].id);
-    //   // }
-    // });
-    // // this.features[0].optionsIds
-    // for (let f1 = this.features.length - 1; f1 > 1; f1--) {
-    //   console.log('left feature = ', this.features[f1].name);
-    //   this.features[f1].optionsIds.forEach(leftOptionId => {
-    //     // console.log('leftOption = ', leftOptionId.toFixed(3), ' ... ', this.getOption(leftOptionId).name);
-    //     for (let f2 = 1; f2 < this.features.length - (f1 === 0 ? 1 : f2); f2++) {
-    //       console.log('top feature ', this.features[f2]);
-    //       this.pushOptionCells(leftOptionId, this.features[f2].id);
-    //     }
-    //   });
-    //   if (f1 === 0) {
-    //     f1 = this.features.length;
-    //   }
-    // }
     this.oldCells = [];
   }
-
-  // // push a single row of cells for one top feature
-  // pushOptionCells(leftOptionId: number, topFeatureId: number) {
-  //   let cell;
-  //   console.log('leftOption = ', this.getOption(leftOptionId).name);
-  //   this.getFeature(topFeatureId).optionsIds.forEach(topOptionId => {
-  //     console.log('topOption = ', this.getOption(topOptionId).name);
-  //     // this.features.find(feature => feature.id === topFeatureId)
-  //     //   .optionsIds.forEach(topOptionId => {
-  //     cell = this.getCellFromOptions(this.oldCells, leftOptionId, topOptionId);
-  //     if (!cell) {
-  //       cell = new Cell();
-  //       cell.leftOptionId = leftOptionId;
-  //       cell.topOptionId = topOptionId;
-  //       cell.value = this.cells.length;
-  //       console.log('New Cell!');
-  //     } else {
-  //       // , ' ... ', this.getOption(topOptionId).name);
-  //       console.log('old cell, id = ', cell.id.toFixed(3), '; value = ', cell.value);
-  //     }
-  //     //
-  //     this.cells.push(cell);
-  //     this.cellCount++;
-  //     console.log('cell count: ', this.cellCount);
-  //   });
-  // }
 
   getCellFromOptions(arr: Cell[], option1Id: number, option2Id: number) {
     return arr.find(currCell => (currCell.leftOptionId === option1Id && currCell.topOptionId === option2Id)
@@ -159,11 +100,11 @@ export class DataService {
 
   addFeature() {
     const feature = new Feature();
-    feature.name = `new feature${this.features.length}`;
+    feature.name = '';
     feature.optionsIds = [];
     for (let i = 0; i < this.optionCount; i++) {
       const option = new Option();
-      option.name = `new option${ i }`;
+      option.name = '';
       option.featureId = feature.id;
       feature.optionsIds.push(option.id);
       this.options.push(option);
@@ -176,7 +117,7 @@ export class DataService {
     this.optionCount++;
     this.features.forEach(feature => {
       const option = new Option();
-      option.name = `new option${this.optionCount}`;
+      option.name = '';
       option.featureId = feature.id;
       feature.optionsIds.push(option.id);
       this.options.push(option);
@@ -236,6 +177,7 @@ export class DataService {
       if (optionsIds) {
         this.features.find(feature => feature.id === id).optionsIds = optionsIds;
       }
+      this.updateCells();
     }
   }
 
@@ -248,7 +190,7 @@ export class DataService {
   }
 
   getFeature(id) {
-    return this.features.find(feature => feature.id = id);
+    return this.features.find(feature => feature.id === id);
   }
 
   getFeatureOptions(featureId: number) {

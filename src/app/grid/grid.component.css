@@ -16,7 +16,7 @@ mat-grid-list {
   background-color: transparent;
   border: none;
   text-align: center;
-  width: 70px;
+  width: 90px;
   height: 30px;
 }
 
@@ -27,8 +27,8 @@ mat-grid-list {
 .header:focus {
   background-color: white;
   border: 1px transparent solid;
-  transform: none;
-  width: fit-content;
+  /*transform: none;*/
+  width: 60px;
 }
 
 .vertical {
@@ -36,7 +36,7 @@ mat-grid-list {
 }
 
 #left-feature:focus #top-option:focus {
-  flex-direction: column;
+  /*flex-direction: column;*/
   justify-content: space-between;
 }
 
@@ -47,6 +47,12 @@ mat-grid-list {
 .other {
   width: 100%;
   height: 100%;
+}
+
+.delete {
+  display: inline;
+  width: 30px;
+  height: 30px;
 }
 
 .cell-active {
