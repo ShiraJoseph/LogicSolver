@@ -35,7 +35,8 @@ export class GridComponent implements OnInit {
   cols;
   leftFeatureTiles = [];
   tiles: Tile[] = [];
-  disableDelete = false;
+  disableFeatureDelete = false;
+  disableOptionDelete = false;
 
   constructor(private dS: DataService) {
   }
@@ -164,51 +165,44 @@ export class GridComponent implements OnInit {
 
   addFeature() {
     this.dS.addFeature();
+    this.disableFeatureDelete = false;
     this.buildGrid();
   }
 
 
   addOption() {
     this.dS.addOption();
+    this.disableOptionDelete = false;
     this.buildGrid();
   }
 
   updateFeature(event, tile: Tile) {
-    setTimeout(() => {
-      if (tile.shouldShowMinus) {
         console.log(event.target.value);
         this.dS.setFeature(tile.objectId, event.target.value);
         this.buildGrid();
         tile.shouldShowMinus = false;
-      }
-    }, 100);
   }
 
   updateOption(event, tile: Tile) {
-    setTimeout(() => {
-      if (tile.shouldShowMinus) {
         console.log(event.target.value);
         this.dS.setOption(tile.objectId, event.target.value);
         this.buildGrid();
         tile.shouldShowMinus = false;
-      }
-    }, 100);
   }
 
   deleteFeature(tile: Tile) {
-    console.log('deleteFeature');
-    tile.shouldShowMinus = false;
     this.dS.deleteFeature(tile.objectId);
     if (this.dS.features.length <= 2) {
-      this.disableDelete = true;
+      this.disableFeatureDelete = true;
     }
     this.buildGrid();
   }
 
   deleteOption(tile: Tile) {
-    console.log('deleteOption');
-    tile.shouldShowMinus = false;
     this.dS.deleteOption(tile.objectId);
+    if (this.dS.optionCount <= 1) {
+      this.disableOptionDelete = true;
+    }
     this.buildGrid();
   }
 

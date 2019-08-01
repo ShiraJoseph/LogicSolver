@@ -126,12 +126,13 @@ export class DataService {
     this.updateCells();
   }
 
-  deleteOption(index: number) {
+  deleteOption(id: number) {
+    const indexToRemove = this.getFeature(this.getOption(id).featureId).optionsIds.findIndex(optionId => optionId === id);
     this.features.forEach( feature => {
-      const id = feature.optionsIds[index];
-      this.cells = this.cells.filter(cell => cell.leftOptionId !== id && cell.topOptionId !== id);
-      this.options = this.options.filter(option => option.id !== id);
-      feature.optionsIds.splice(index, 1);
+      const nextId = feature.optionsIds[indexToRemove];
+      this.cells = this.cells.filter(cell => cell.leftOptionId !== nextId && cell.topOptionId !== nextId);
+      this.options = this.options.filter(option => option.id !== nextId);
+      feature.optionsIds.splice(indexToRemove, 1);
     });
     this.optionCount--;
   }

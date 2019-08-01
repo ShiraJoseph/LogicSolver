@@ -38,62 +38,74 @@
       </div>
     </div>
     <span *ngSwitchCase="'TOP_FEATURE_HEADER'"
-      id="top-feature">
+      id="top-feature"
+      (mouseover)="tile.shouldShowMinus=true"
+      (mouseleave)="tile.shouldShowMinus=false"
+    (blur)="tile.shouldShowMinus=false">
       <input
         class="header feature"
         (keyup.enter)="updateFeature($event, tile)"
         (blur)="updateFeature($event, tile)"
-        (focus)="tile.shouldShowMinus=true"
         [value]="tile.text">
+      <!--(focus)="tile.shouldShowMinus=true"-->
       <button
         *ngIf="tile.shouldShowMinus"
         class="delete"
-        [disabled]="disableDelete"
+        [disabled]="disableFeatureDelete"
         (click)="deleteFeature(tile)">-
       </button>
     </span>
     <div *ngSwitchCase="'TOP_OPTION_HEADER'"
-      id="top-option">
+      id="top-option"
+      (mouseover)="tile.shouldShowMinus=true"
+      (mouseleave)="tile.shouldShowMinus=false"
+      (blur)="tile.shouldShowMinus=false">
+      <button
+        *ngIf="tile.shouldShowMinus"
+        class="delete"
+        [disabled]="disableOptionDelete"
+        (click)="deleteOption(tile)">-
+      </button>
       <input
         class="header vertical option"
         (keyup.enter)="updateOption($event, tile)"
         (blur)="updateOption($event, tile)"
-        (focus)="tile.shouldShowMinus=true"
         [value]="tile.text"/>
+      <!--(focus)="tile.shouldShowMinus=true"-->
+    </div>
+    <div *ngSwitchCase="'LEFT_FEATURE_HEADER'"
+      id="left-feature"
+      (mouseover)="tile.shouldShowMinus=true"
+      (mouseleave)="tile.shouldShowMinus=false"
+    (blur)="tile.shouldShowMinus=false">
       <button
         *ngIf="tile.shouldShowMinus"
         class="delete"
-        [disabled]="disableDelete"
-        (click)="deleteOption(tile)">-
+        [disabled]="disableFeatureDelete"
+        (click)="deleteFeature(tile)">-
       </button>
-    </div>
-    <div *ngSwitchCase="'LEFT_FEATURE_HEADER'"
-      id="left-feature">
       <input
         class="header vertical feature"
         (keyup.enter)="updateFeature($event, tile)"
         (blur)="updateFeature($event, tile)"
-        (focus)="tile.shouldShowMinus=true"
         [value]="tile.text"/>
-      <button
-        *ngIf="tile.shouldShowMinus"
-        class="delete"
-        [disabled]="disableDelete"
-        (click)="deleteFeature(tile)">-
-      </button>
+      <!--(focus)="tile.shouldShowMinus=true"-->
     </div>
     <div *ngSwitchCase="'LEFT_OPTION_HEADER'"
-      id="left-option">
+      id="left-option"
+      (mouseover)="tile.shouldShowMinus=true"
+      (mouseleave)="tile.shouldShowMinus=false"
+    (blur)="tile.shouldShowMinus=false">
       <input
         class="header option"
         (keyup.enter)="updateOption($event, tile)"
         (blur)="updateOption($event, tile)"
-        (focus)="tile.shouldShowMinus=true"
         [value]="tile.text"/>
+      <!--(focus)="tile.shouldShowMinus=true"-->
       <button
         *ngIf="tile.shouldShowMinus"
         class="delete"
-        [disabled]="disableDelete"
+        [disabled]="disableOptionDelete"
         (click)="deleteOption(tile)">-
       </button>
     </div>
