@@ -1,6 +1,6 @@
 
 :host {
-  box-sizing: border-box;
+  /*box-sizing: border-box;*/
   font-family: Arial;
 }
 
@@ -12,48 +12,10 @@ mat-grid-list {
  background-color: transparent;
 }
 
-/*.header {*/
-  /*background-color: transparent;*/
-  /*border: none;*/
-  /*text-align: center;*/
-  /*width: 90px;*/
-  /*height: 30px;*/
-/*}*/
-
-/*.header:hover {*/
-  /*border: 1px purple solid;*/
-/*}*/
-
-/*.header:focus {*/
-  /*background-color: white;*/
-  /*border: 1px transparent solid;*/
-  /*!*transform: none;*!*/
-  /*width: 60px;*/
-/*}*/
-
-/*.vertical {*/
-  /*transform: rotate(290deg);*/
-/*}*/
-
-/*#left-feature:focus #top-option:focus {*/
-  /*!*flex-direction: column;*!*/
-  /*justify-content: space-between;*/
-/*}*/
-
-/*#left-option:focus #top-feature:focus {*/
-  /*justify-content: space-between;*/
-/*}*/
-
 .other {
   width: 100%;
   height: 100%;
 }
-
-/*.delete {*/
-  /*display: inline;*/
-  /*width: 30px;*/
-  /*height: 30px;*/
-/*}*/
 
 .cell-active {
   display: flex;
@@ -128,4 +90,11 @@ mat-grid-list {
 .cell-inactive:hover {
   cursor: pointer;
   border: purple 1px solid;
+}
+
+app-header {
+  justify-content: space-between;
+  align-items: stretch;
+  height: 100%;
+  width: 100%;
 }
