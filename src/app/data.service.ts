@@ -12,6 +12,14 @@ export class DataService {
   optionCount = 3;
   cellCount = 0;
 
+  getAllowDeleteFeatures() {
+      return this.features.length > 2;
+  }
+
+  getAllowDeleteOptions() {
+    return this.optionCount > 1;
+  }
+
   constructor() {
     this.buildDataTemplate();
   }

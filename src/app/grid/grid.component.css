@@ -12,48 +12,48 @@ mat-grid-list {
  background-color: transparent;
 }
 
-.header {
-  background-color: transparent;
-  border: none;
-  text-align: center;
-  width: 90px;
-  height: 30px;
-}
+/*.header {*/
+  /*background-color: transparent;*/
+  /*border: none;*/
+  /*text-align: center;*/
+  /*width: 90px;*/
+  /*height: 30px;*/
+/*}*/
 
-.header:hover {
-  border: 1px purple solid;
-}
+/*.header:hover {*/
+  /*border: 1px purple solid;*/
+/*}*/
 
-.header:focus {
-  background-color: white;
-  border: 1px transparent solid;
-  /*transform: none;*/
-  width: 60px;
-}
+/*.header:focus {*/
+  /*background-color: white;*/
+  /*border: 1px transparent solid;*/
+  /*!*transform: none;*!*/
+  /*width: 60px;*/
+/*}*/
 
-.vertical {
-  transform: rotate(290deg);
-}
+/*.vertical {*/
+  /*transform: rotate(290deg);*/
+/*}*/
 
-#left-feature:focus #top-option:focus {
-  /*flex-direction: column;*/
-  justify-content: space-between;
-}
+/*#left-feature:focus #top-option:focus {*/
+  /*!*flex-direction: column;*!*/
+  /*justify-content: space-between;*/
+/*}*/
 
-#left-option:focus #top-feature:focus {
-  justify-content: space-between;
-}
+/*#left-option:focus #top-feature:focus {*/
+  /*justify-content: space-between;*/
+/*}*/
 
 .other {
   width: 100%;
   height: 100%;
 }
 
-.delete {
-  display: inline;
-  width: 30px;
-  height: 30px;
-}
+/*.delete {*/
+  /*display: inline;*/
+  /*width: 30px;*/
+  /*height: 30px;*/
+/*}*/
 
 .cell-active {
   display: flex;

@@ -9,6 +9,7 @@ import { CellComponent } from './cell/cell.component';
 import { DataService } from './data.service';
 import { GridComponent } from './grid/grid.component';
 import { PopoverDirective } from './popover.directive';
+import { HeaderComponent } from './header/header.component';
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { PopoverDirective } from './popover.directive';
     CellComponent,
     GridComponent,
     PopoverDirective,
+    HeaderComponent,
   ],
   imports: [
     BrowserModule,

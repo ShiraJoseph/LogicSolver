@@ -1,0 +1,68 @@
+<span *ngIf="tile.type === 'TOP_FEATURE_HEADER'"
+  id="top-feature"
+  (mouseover)="tile.shouldShowMinus=true"
+  (mouseleave)="tile.shouldShowMinus=false"
+  (blur)="tile.shouldShowMinus=false">
+      <input
+        class="header feature"
+        (keyup.enter)="updateFeature($event, tile)"
+        (blur)="updateFeature($event, tile)"
+        [value]="tile.text">
+      <button
+        *ngIf="tile.shouldShowMinus"
+        class="delete"
+        [disabled]="getDisabledDelete()"
+        (click)="deleteFeature(tile)">-
+      </button>
+    </span>
+<div  *ngIf="tile.type === 'TOP_OPTION_HEADER'"
+  id="top-option"
+  (mouseover)="tile.shouldShowMinus=true"
+  (mouseleave)="tile.shouldShowMinus=false"
+  (blur)="tile.shouldShowMinus=false">
+  <button
+    *ngIf="tile.shouldShowMinus"
+    class="delete"
+    [disabled]="disableOptionDelete"
+    (click)="deleteOption(tile)">-
+  </button>
+  <input
+    class="header vertical option"
+    (keyup.enter)="updateOption($event, tile)"
+    (blur)="updateOption($event, tile)"
+    [value]="tile.text"/>
+</div>
+<div *ngIf="tile.type === 'LEFT_FEATURE_HEADER'"
+  id="left-feature"
+  (mouseover)="tile.shouldShowMinus=true"
+  (mouseleave)="tile.shouldShowMinus=false"
+  (blur)="tile.shouldShowMinus=false">
+  <button
+    *ngIf="tile.shouldShowMinus"
+    class="delete"
+    [disabled]="getDisabledDelete()"
+    (click)="deleteFeature(tile)">-
+  </button>
+  <input
+    class="header vertical feature"
+    (keyup.enter)="updateFeature($event, tile)"
+    (blur)="updateFeature($event, tile)"
+    [value]="tile.text"/>
+</div>
+<div *ngIf="tile.type === 'LEFT_OPTION_HEADER'"
+  id="left-option"
+  (mouseover)="tile.shouldShowMinus=true"
+  (mouseleave)="tile.shouldShowMinus=false"
+  (blur)="tile.shouldShowMinus=false">
+  <input
+    class="header option"
+    (keyup.enter)="updateOption($event, tile)"
+    (blur)="updateOption($event, tile)"
+    [value]="tile.text"/>
+  <button
+    *ngIf="tile.shouldShowMinus"
+    class="delete"
+    [disabled]="disableOptionDelete"
+    (click)="deleteOption(tile)">-
+  </button>
+</div>

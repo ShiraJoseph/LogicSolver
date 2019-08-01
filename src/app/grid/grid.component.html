@@ -1,10 +1,10 @@
 <mat-grid-list
-  [cols]="cols"
+  [cols]="getColumnCount()"
   rowHeight="1:1"
   gutterSize="1"
   [style.max-width.px]="cols*42">
   <mat-grid-tile
-    *ngFor="let tile of tiles"
+    *ngFor="let tile of getTiles()"
     [colspan]="tile.cols"
     [rowspan]="tile.rows"
     [style.background]="tile.color"
@@ -37,78 +37,82 @@
         </div>
       </div>
     </div>
-    <span *ngSwitchCase="'TOP_FEATURE_HEADER'"
-      id="top-feature"
-      (mouseover)="tile.shouldShowMinus=true"
-      (mouseleave)="tile.shouldShowMinus=false"
-    (blur)="tile.shouldShowMinus=false">
-      <input
-        class="header feature"
-        (keyup.enter)="updateFeature($event, tile)"
-        (blur)="updateFeature($event, tile)"
-        [value]="tile.text">
-      <!--(focus)="tile.shouldShowMinus=true"-->
-      <button
-        *ngIf="tile.shouldShowMinus"
-        class="delete"
-        [disabled]="disableFeatureDelete"
-        (click)="deleteFeature(tile)">-
-      </button>
-    </span>
-    <div *ngSwitchCase="'TOP_OPTION_HEADER'"
-      id="top-option"
-      (mouseover)="tile.shouldShowMinus=true"
-      (mouseleave)="tile.shouldShowMinus=false"
-      (blur)="tile.shouldShowMinus=false">
-      <button
-        *ngIf="tile.shouldShowMinus"
-        class="delete"
-        [disabled]="disableOptionDelete"
-        (click)="deleteOption(tile)">-
-      </button>
-      <input
-        class="header vertical option"
-        (keyup.enter)="updateOption($event, tile)"
-        (blur)="updateOption($event, tile)"
-        [value]="tile.text"/>
-      <!--(focus)="tile.shouldShowMinus=true"-->
-    </div>
-    <div *ngSwitchCase="'LEFT_FEATURE_HEADER'"
-      id="left-feature"
-      (mouseover)="tile.shouldShowMinus=true"
-      (mouseleave)="tile.shouldShowMinus=false"
-    (blur)="tile.shouldShowMinus=false">
-      <button
-        *ngIf="tile.shouldShowMinus"
-        class="delete"
-        [disabled]="disableFeatureDelete"
-        (click)="deleteFeature(tile)">-
-      </button>
-      <input
-        class="header vertical feature"
-        (keyup.enter)="updateFeature($event, tile)"
-        (blur)="updateFeature($event, tile)"
-        [value]="tile.text"/>
-      <!--(focus)="tile.shouldShowMinus=true"-->
-    </div>
-    <div *ngSwitchCase="'LEFT_OPTION_HEADER'"
-      id="left-option"
-      (mouseover)="tile.shouldShowMinus=true"
-      (mouseleave)="tile.shouldShowMinus=false"
-    (blur)="tile.shouldShowMinus=false">
-      <input
-        class="header option"
-        (keyup.enter)="updateOption($event, tile)"
-        (blur)="updateOption($event, tile)"
-        [value]="tile.text"/>
-      <!--(focus)="tile.shouldShowMinus=true"-->
-      <button
-        *ngIf="tile.shouldShowMinus"
-        class="delete"
-        [disabled]="disableOptionDelete"
-        (click)="deleteOption(tile)">-
-      </button>
-    </div>
+    <app-header *ngSwitchCase="'LEFT_FEATURE_HEADER'" [tile]="tile"></app-header>
+    <app-header *ngSwitchCase="'LEFT_OPTION_HEADER'" [tile]="tile"></app-header>
+    <app-header *ngSwitchCase="'TOP_FEATURE_HEADER'" [tile]="tile"></app-header>
+    <app-header *ngSwitchCase="'TOP_OPTION_HEADER'" [tile]="tile"></app-header>
+    <!--<span *ngSwitchCase="'TOP_FEATURE_HEADER'"-->
+      <!--id="top-feature"-->
+      <!--(mouseover)="tile.shouldShowMinus=true"-->
+      <!--(mouseleave)="tile.shouldShowMinus=false"-->
+    <!--(blur)="tile.shouldShowMinus=false">-->
+      <!--<input-->
+        <!--class="header feature"-->
+        <!--(keyup.enter)="updateFeature($event, tile)"-->
+        <!--(blur)="updateFeature($event, tile)"-->
+        <!--[value]="tile.text">-->
+      <!--&lt;!&ndash;(focus)="tile.shouldShowMinus=true"&ndash;&gt;-->
+      <!--<button-->
+        <!--*ngIf="tile.shouldShowMinus"-->
+        <!--class="delete"-->
+        <!--[disabled]="disableFeatureDelete"-->
+        <!--(click)="deleteFeature(tile)">- -->
+      <!--</button>-->
+    <!--</span>-->
+    <!--<div *ngSwitchCase="'TOP_OPTION_HEADER'"-->
+      <!--id="top-option"-->
+      <!--(mouseover)="tile.shouldShowMinus=true"-->
+      <!--(mouseleave)="tile.shouldShowMinus=false"-->
+      <!--(blur)="tile.shouldShowMinus=false">-->
+      <!--<button-->
+        <!--*ngIf="tile.shouldShowMinus"-->
+        <!--class="delete"-->
+        <!--[disabled]="disableOptionDelete"-->
+        <!--(click)="deleteOption(tile)">- -->
+      <!--</button>-->
+      <!--<input-->
+        <!--class="header vertical option"-->
+        <!--(keyup.enter)="updateOption($event, tile)"-->
+        <!--(blur)="updateOption($event, tile)"-->
+        <!--[value]="tile.text"/>-->
+      <!--&lt;!&ndash;(focus)="tile.shouldShowMinus=true"&ndash;&gt;-->
+    <!--</div>-->
+    <!--<div *ngSwitchCase="'LEFT_FEATURE_HEADER'"-->
+      <!--id="left-feature"-->
+      <!--(mouseover)="tile.shouldShowMinus=true"-->
+      <!--(mouseleave)="tile.shouldShowMinus=false"-->
+    <!--(blur)="tile.shouldShowMinus=false">-->
+      <!--<button-->
+        <!--*ngIf="tile.shouldShowMinus"-->
+        <!--class="delete"-->
+        <!--[disabled]="disableFeatureDelete"-->
+        <!--(click)="deleteFeature(tile)">- -->
+      <!--</button>-->
+      <!--<input-->
+        <!--class="header vertical feature"-->
+        <!--(keyup.enter)="updateFeature($event, tile)"-->
+        <!--(blur)="updateFeature($event, tile)"-->
+        <!--[value]="tile.text"/>-->
+      <!--&lt;!&ndash;(focus)="tile.shouldShowMinus=true"&ndash;&gt;-->
+    <!--</div>-->
+    <!--<div *ngSwitchCase="'LEFT_OPTION_HEADER'"-->
+      <!--id="left-option"-->
+      <!--(mouseover)="tile.shouldShowMinus=true"-->
+      <!--(mouseleave)="tile.shouldShowMinus=false"-->
+    <!--(blur)="tile.shouldShowMinus=false">-->
+      <!--<input-->
+        <!--class="header option"-->
+        <!--(keyup.enter)="updateOption($event, tile)"-->
+        <!--(blur)="updateOption($event, tile)"-->
+        <!--[value]="tile.text"/>-->
+      <!--&lt;!&ndash;(focus)="tile.shouldShowMinus=true"&ndash;&gt;-->
+      <!--<button-->
+        <!--*ngIf="tile.shouldShowMinus"-->
+        <!--class="delete"-->
+        <!--[disabled]="disableOptionDelete"-->
+        <!--(click)="deleteOption(tile)">- -->
+      <!--</button>-->
+    <!--</div>-->
     <button *ngSwitchCase="'ADD_FEATURE'"
       class="other"
       (click)="addFeature()">{{tile.text}}

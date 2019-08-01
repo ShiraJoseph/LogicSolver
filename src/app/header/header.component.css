@@ -1,0 +1,41 @@
+.header {
+  background-color: transparent;
+  border: none;
+  text-align: center;
+  width: 90px;
+  height: 30px;
+}
+
+.header:hover {
+  border: 1px purple solid;
+}
+
+.header:focus {
+  background-color: white;
+  border: 1px transparent solid;
+  /*transform: none;*/
+  width: 60px;
+}
+
+.vertical {
+  transform: rotate(290deg);
+}
+
+#left-feature:focus #top-option:focus {
+  /*flex-direction: column;*/
+  justify-content: space-between;
+}
+
+#left-option:focus #top-feature:focus {
+  justify-content: space-between;
+}
+
+.delete {
+  display: inline;
+  width: 30px;
+  height: 30px;
+}
+
+button, input {
+  display: inline;
+}
