@@ -5,6 +5,7 @@
   align-items: stretch;
   width: 100%;
   height: 100%;
+
 }
 
 .header:hover, .header:focus {
@@ -16,6 +17,9 @@ input {
   width: 100%;
   height: 100%;
   background-color: transparent;
+  font-family: Chalkboard;
+  font-size: 16px;
+  text-wrap: normal;
 }
 
 .input:focus, input:hover {

@@ -6,7 +6,6 @@ export class Cell {
   public leftOptionId?: number;
   public topOptionId?: number;
   public value = '';
-  public userEntered?: boolean;
 }
 
 export class Feature {
@@ -28,6 +27,10 @@ export class Option {
   public featureId?: number;
 }
 
+export class Match {
+  public optionsIds: number [] = [];
+  public antiOptionsIds: number [] = [];
+}
 
 
 

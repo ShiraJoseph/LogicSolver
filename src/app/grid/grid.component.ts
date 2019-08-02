@@ -46,7 +46,9 @@ export class GridComponent implements OnInit {
 
   updateTile(tile: Tile, text: string) {
     tile.text = text;
-    this.dataService.setCell(tile.objectId, text);
     tile.type = TileType.CELL_INACTIVE;
+    this.dataService.setCell(tile.objectId, text);
+    this.dataService.updateCells();
+    this.tileService.buildGrid();
   }
 }
