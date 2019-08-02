@@ -29,26 +29,16 @@ export class DataService {
     const f2 = new Feature();
     const f3 = new Feature();
     this.features.push(f1, f2, f3);
-    this.features.forEach((feature, index) => {
-      feature.name = '';
+    this.features.forEach((feature) => {
       feature.optionsIds = [];
       const o1 = new Option();
       const o2 = new Option();
       const o3 = new Option();
-      o1.name = '';
       o1.featureId = feature.id;
-      o2.name = '';
       o2.featureId = feature.id;
-      o3.name = '';
       o3.featureId = feature.id;
-      // `Option${ index + 1 }${ i + 1 }`
       this.options.push(o1, o2, o3);
       feature.optionsIds.push(o1.id, o2.id, o3.id);
-      // this.setFeature(feature.id, `Feature${ index + 1 }`, [o1.id, o2.id, o3.id]);
-      // feature.optionsIds.forEach((id, i) => {
-      //   this.setOption(id, `Option${ index }${ i }`, feature.id);
-      // });
-
     });
     this.updateCells();
   }

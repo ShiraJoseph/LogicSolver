@@ -7,11 +7,6 @@ export class Cell {
   public topOptionId?: number;
   public value = '';
   public userEntered?: boolean;
-
-  // public isEmpty() {
-  //   return /[xoXO]/g.test(this.value);
-  // }
-
 }
 
 export class Feature {
@@ -19,8 +14,8 @@ export class Feature {
     this.id = Math.random();
   }
   public id: number;
-  public name: string;
-  public optionsIds?: number [];
+  public name = '';
+  public optionsIds?: number [] = [];
 
 }
 
@@ -29,9 +24,8 @@ export class Option {
     this.id = Math.random();
   }
   public id: number;
-  public name: string;
+  public name = '';
   public featureId?: number;
-  // public cells?: Cell[];
 }
 
 

@@ -10,8 +10,6 @@ import { Tile, TileService, TileType } from '../tile.service';
 export class HeaderComponent implements OnInit {
   @Input() tile: Tile;
   isFeatureHeader = true;
-  disableFeatureDelete = false;
-  disableOptionDelete = false;
 
   constructor(private dataService: DataService, private tileService: TileService) {
   }
@@ -34,36 +32,12 @@ export class HeaderComponent implements OnInit {
     this.tile.shouldShowMinus = false;
   }
 
-  // updateFeature(event) {
-  //   console.log(event.target.value);
-  //   this.dataService.setFeature(this.tile.objectId, event.target.value);
-  //   this.tileService.buildGrid();
-  //   this.tile.shouldShowMinus = false;
-  // }
-  //
-  // updateOption(event, tile: Tile) {
-  //   console.log(event.target.value);
-  //   this.dataService.setOption(tile.objectId, event.target.value);
-  //   this.tileService.buildGrid();
-  //   tile.shouldShowMinus = false;
-  // }
-
   deleteHeader() {
     if (this.isFeatureHeader) {
       this.dataService.deleteFeature(this.tile.objectId);
-      this.disableFeatureDelete = this.dataService.features.length < 3;
     } else {
       this.dataService.deleteOption(this.tile.objectId);
-      this.disableOptionDelete = this.dataService.optionCount < 2;
     }
     this.tileService.buildGrid();
   }
-
-  // deleteOption(tile: Tile) {
-  //   this.dataService.deleteOption(tile.objectId);
-  //   if (this.dataService.optionCount <= 1) {
-  //     this.disableOptionDelete = true;
-  //   }
-  //   this.tileService.buildGrid();
-  // }
 }

@@ -1,71 +1,14 @@
-<!--*ngIf="tile.type === 'TOP_FEATURE_HEADER'"-->
-<!--id="top-feature"-->
 <div
   (mouseover)="tile.shouldShowMinus=true"
   (mouseleave)="tile.shouldShowMinus=false"
   (blur)="tile.shouldShowMinus=false"
-class="header"
-[ngClass]="{vertical: tile.type==='TOP_OPTION_HEADER' || tile.type==='LEFT_FEATURE_HEADER'}">
+  class="header"
+  [ngClass]="{vertical: tile.type==='TOP_OPTION_HEADER' || tile.type==='LEFT_FEATURE_HEADER'}">
   <input
     [id]="tile.type"
     (keyup.enter)="updateHeader($event)"
     (blur)="updateHeader($event)"
     [value]="tile.text">
-  <!--<button-->
-  <!--*ngIf="tile.shouldShowMinus"-->
-  <!--class="delete"-->
-  <!--[disabled]="getDisabledDelete()"-->
-  <!--(click)="deleteFeature(tile)">- -->
-  <!--</button>-->
-
-  <!--<span-->
-  <!--*ngIf="tile.type === 'TOP_OPTION_HEADER'"-->
-  <!--id="top-option"-->
-  <!--(mouseover)="tile.shouldShowMinus=true"-->
-  <!--(mouseleave)="tile.shouldShowMinus=false"-->
-  <!--(blur)="tile.shouldShowMinus=false">-->
-  <!--&lt;!&ndash;<button&ndash;&gt;-->
-  <!--&lt;!&ndash;*ngIf="tile.shouldShowMinus"&ndash;&gt;-->
-  <!--&lt;!&ndash;class="delete"&ndash;&gt;-->
-  <!--&lt;!&ndash;[disabled]="disableOptionDelete"&ndash;&gt;-->
-  <!--&lt;!&ndash;(click)="deleteOption(tile)">- &ndash;&gt;-->
-  <!--&lt;!&ndash;</button>&ndash;&gt;-->
-  <!--<input-->
-  <!--class="header vertical option"-->
-  <!--(keyup.enter)="updateOption($event, tile)"-->
-  <!--(blur)="updateOption($event, tile)"-->
-  <!--[value]="tile.text"/>-->
-  <!--</span>-->
-  <!--<span-->
-  <!--*ngIf="tile.type === 'LEFT_FEATURE_HEADER'"-->
-  <!--id="left-feature"-->
-  <!--(mouseover)="tile.shouldShowMinus=true"-->
-  <!--(mouseleave)="tile.shouldShowMinus=false"-->
-  <!--(blur)="tile.shouldShowMinus=false">-->
-  <!--&lt;!&ndash;<button&ndash;&gt;-->
-  <!--&lt;!&ndash;*ngIf="tile.shouldShowMinus"&ndash;&gt;-->
-  <!--&lt;!&ndash;class="delete"&ndash;&gt;-->
-  <!--&lt;!&ndash;[disabled]="getDisabledDelete()"&ndash;&gt;-->
-  <!--&lt;!&ndash;(click)="deleteFeature(tile)">- &ndash;&gt;-->
-  <!--&lt;!&ndash;</button>&ndash;&gt;-->
-  <!--<input-->
-  <!--class="header vertical feature"-->
-  <!--(keyup.enter)="updateFeature($event, tile)"-->
-  <!--(blur)="updateFeature($event, tile)"-->
-  <!--[value]="tile.text"/>-->
-  <!--</span>-->
-  <!--<span-->
-  <!--*ngIf="tile.type === 'LEFT_OPTION_HEADER'"-->
-  <!--id="left-option"-->
-  <!--(mouseover)="tile.shouldShowMinus=true"-->
-  <!--(mouseleave)="tile.shouldShowMinus=false"-->
-  <!--(blur)="tile.shouldShowMinus=false">-->
-  <!--<input-->
-  <!--class="header option"-->
-  <!--(keyup.enter)="updateOption($event, tile)"-->
-  <!--(blur)="updateOption($event, tile)"-->
-  <!--[value]="tile.text"/>-->
-  <!--</span>-->
   <button
     *ngIf="tile.shouldShowMinus"
     (mouseover)="tile.shouldShowMinus=true"
