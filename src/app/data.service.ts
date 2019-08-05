@@ -174,6 +174,7 @@ export class DataService {
         if (withLogic) {
           this.runBasicRowLogic();
           this.runBasicColumnLogic();
+          this.fillDeductions();
         }
       }
       if (topOptionId) {
@@ -272,7 +273,10 @@ export class DataService {
                 cCells.forEach(colCell => {
                   // if a cell in that column has a value, add its leftOption to the master column (but no duplicates)
                   if (colCell.value && !masterColumn.find(recordLine => recordLine.leftOptionId === colCell.leftOptionId)) {
-                    const recordToPush: { leftOptionId: number, value: string } = {leftOptionId: colCell.leftOptionId, value: colCell.value};
+                    const recordToPush: { leftOptionId: number, value: string } = {
+                      leftOptionId: colCell.leftOptionId,
+                      value: colCell.value
+                    };
                     masterColumn.push(recordToPush);
                   }
                 });
@@ -351,6 +355,21 @@ export class DataService {
               }
             });
           });
+        }
+      }
+    });
+  }
+
+  fillDeductions() {
+    this.cells.forEach(cell => {
+      if (!cell.value) {
+        const rowOptionCells = this.cells.filter(rowCell => rowCell.id !== cell.id && cell.topOptionId === rowCell.topOptionId &&
+          this.getOption(cell.leftOptionId).featureId === this.getOption(rowCell.leftOptionId).featureId);
+        const colOptionCells = this.cells.filter(colCell => colCell.id !== cell.id && cell.leftOptionId === colCell.leftOptionId &&
+          this.getOption(cell.topOptionId).featureId === this.getOption(colCell.topOptionId).featureId);
+        if (rowOptionCells.every(crossCell => crossCell.value === 'X') ||
+          colOptionCells.every(crossCell => crossCell.value === 'X')) {
+          this.setCell(cell.id, 'O', null, null, false);
         }
       }
     });
