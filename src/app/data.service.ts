@@ -11,13 +11,13 @@ export class DataService {
   options: Option[] = [];
   optionCount = 3;
   cellCount = 0;
-  matches: Match [] = [];
+  matches: Match[] = [];
 
-  getAllowDeleteFeatures() {
+  getAllowDeleteFeatures(): boolean {
     return this.features.length > 2;
   }
 
-  getAllowDeleteOptions() {
+  getAllowDeleteOptions(): boolean {
     return this.optionCount > 1;
   }
 
@@ -60,11 +60,11 @@ export class DataService {
     this.oldCells = this.cells;
     this.cells = [];
     this.cellCount = 0;
-    // for each left option in left feature0
+    // for each left leftOptionId in left feature0
     this.features[0].optionsIds.forEach(leftOptionID => {
       // for each feature greater than left feature, as top feature
       for (let topFeatureIx = 1; topFeatureIx < this.features.length; topFeatureIx++) {
-        // for each top option in top feature
+        // for each top leftOptionId in top feature
         this.features[topFeatureIx].optionsIds.forEach(topOptionID => {
           // create/push a cell with those two options
           let cell = this.getCellFromOptions(this.oldCells, leftOptionID, topOptionID);
@@ -82,11 +82,11 @@ export class DataService {
 
     // then start with the last feature going backwards until feature 2, as left feature
     for (let leftFeatureI = this.features.length - 1; leftFeatureI > 1; leftFeatureI--) {
-      // for each option in left feature
+      // for each leftOptionId in left feature
       this.features[leftFeatureI].optionsIds.forEach(leftOptionId => {
         // for each feature after 1 until left feature exclusive, as top feature
         for (let topFeatureI = 1; topFeatureI < leftFeatureI; topFeatureI++) {
-          // for each option in top feature
+          // for each leftOptionId in top feature
           this.features[topFeatureI].optionsIds.forEach(topOptionId => {
             // create/push a cell with those two options
             let cell = this.getCellFromOptions(this.oldCells, leftOptionId, topOptionId);
@@ -104,7 +104,7 @@ export class DataService {
     this.oldCells = [];
   }
 
-  getCellFromOptions(arr: Cell[], option1Id: number, option2Id: number) {
+  getCellFromOptions(arr: Cell[], option1Id: number, option2Id: number): Cell {
     return arr.find(currCell => (currCell.leftOptionId === option1Id && currCell.topOptionId === option2Id)
       || (currCell.leftOptionId === option2Id && currCell.topOptionId === option1Id));
   }
@@ -156,11 +156,19 @@ export class DataService {
     this.features = this.features.filter(feature => feature.id !== id);
   }
 
-  setCell(id: number, value ?: string, topOptionId ?: number, leftOptionId ?: number) {
+  setCell(id: number, value ?: string, topOptionId ?: number, leftOptionId ?: number, withLogic = true) {
     if (this.getCell(id)) {
       if (value !== this.getCell(id).value) {
         this.cells.find(cell => cell.id === id).value = value;
-        this.runLogic(id);
+        if (value === 'O') {
+          const crossCells = this.getCrossCellIds(id);
+          crossCells.forEach(cellId => {
+            this.setCell(cellId, 'X');
+          });
+        }
+        if (withLogic) {
+          this.runBasicLogic();
+        }
       }
       if (topOptionId) {
         this.cells.find(cell => cell.id === id).topOptionId = topOptionId;
@@ -194,23 +202,23 @@ export class DataService {
     }
   }
 
-  getCell(id) {
+  getCell(id): Cell {
     return this.cells.find(cell => cell.id === id);
   }
 
-  getOption(id) {
+  getOption(id): Option {
     return this.options.find(option => option.id === id);
   }
 
-  getFeature(id) {
+  getFeature(id): Feature {
     return this.features.find(feature => feature.id === id);
   }
 
-  getFeatureOptions(featureId: number) {
+  getFeatureOptions(featureId: number): Option[] {
     return this.options.filter(option => option.featureId === featureId);
   }
 
-  getCrossCells(cellId: number) {
+  getCrossCellIds(cellId: number): number [] {
     const leftOptionId = this.getCell(cellId).leftOptionId;
     const leftFeatureId = this.getOption(leftOptionId).featureId;
     const topOptionId = this.getCell(cellId).topOptionId;
@@ -227,59 +235,128 @@ export class DataService {
     return crossCellIds;
   }
 
-  getMatchedCells(cellId) {
-
-    const matchedCells = this.matches.find(match => match.optionsIds.includes(this.getCell(cellId)));
-    // find cells that share an option that are 'O' and are not already found
-    this.cells.forEach(cell => {
-      if (cell.value === 'O' && [cell.leftOptionId, cell.topOptionId].find(id => id === this.get)) {
-        matchedCells.push(cell.id);
+  runBasicLogic() {
+    const changedCellIds: number[] = [];
+    this.options.forEach((leftOption) => {
+      if (!changedCellIds.find(cellId => this.getCell(cellId).leftOptionId === leftOption.id)) {
+        // const firstCellWithO = this.cells.find(cell => cell.value === 'O');
+        // Find the 'O's in the next row
+        const rowOfOs: Cell [] = this.cells.filter(cell =>
+          cell.leftOptionId === leftOption.id &&
+          cell.value === 'O');
+        if (rowOfOs.length > 0) {
+          console.log('Os in this leftOptionId row: ', rowOfOs);
+          const masterColumn: { leftOptionId: number, value: string }[] = [];
+          // for each 'O', collect all the cells in that column
+          rowOfOs.forEach(match => {
+            const columnCells: Cell [] = this.cells.filter(compare => compare.topOptionId === match.topOptionId);
+            // console.log(`${this.getOption(match.topOptionId).name}'s column = ${columnCells}`);
+            columnCells.forEach(colCell => {
+              // if a cell in that column has a value, add its leftOption to the master column (but no duplicates)
+              if (colCell.value && !masterColumn.find(record => record.leftOptionId === colCell.leftOptionId)) {
+                console.log(
+                  `(${colCell.value}) found for ` +
+                  `${this.getOption(colCell.leftOptionId).name} in ` +
+                  `${this.getOption(match.topOptionId).name}'s column`);
+                const record: { leftOptionId: number, value: string } = {leftOptionId: colCell.leftOptionId, value: colCell.value};
+                masterColumn.push(record);
+              }
+            });
+          });
+          console.log('absolute column:', masterColumn);
+          // Go through each of the 'O's in the current row again, this time applying the master column data to each of their columns
+          rowOfOs.forEach(OinTheRow => {
+            console.log('O in the row=', this.cellAddress(OinTheRow.id));
+            console.log('O in the row\'s topOptionId=', OinTheRow.topOptionId);
+            masterColumn.forEach(record => {
+              console.log('record leftOption=', this.getOption(record.leftOptionId).name);
+              // console.log('record.leftOptionId=', record.leftOptionId);
+              const fill = this.getCellFromOptions(this.cells, OinTheRow.topOptionId, record.leftOptionId);
+              if (fill && !changedCellIds.find(id => id === fill.id)) {
+                console.log('found a cell to fill at ', this.cellAddress(fill.id));
+                if (!fill.value) {
+                  console.log('which was empty, so set it to', record.value);
+                  this.setCell(fill.id, record.value, null, null, false);
+                  // this.cells.find(filler => filler.id = fill.id).value = record.value;
+                  changedCellIds.push(fill.id);
+                } else {
+                  console.log('which was full, so skip it');
+                }
+              }
+            });
+          });
+        }
       }
     });
-    const leftOptionId = this.getCell(cellId).leftOptionId;
-  }
-
-  runLogic(id) {
-    const cell = this.getCell(id);
-    if (cell) {
-      if (cell.value === 'O') {
-        const crossCells = this.getCrossCells(id);
-        crossCells.forEach(cellId => {
-          this.setCell(cellId, 'X');
-        });
-      }
-      this.updateMatches(cell);
-      this.applyMatchesToData();
-    }
   }
 
   updateMatches(cell: Cell) {
-    this.matches.forEach((currMatch) => {
-      const hasLeft = currMatch.optionsIds.includes(cell.leftOptionId);
-      const hasTop = currMatch.optionsIds.includes(cell.topOptionId);
-      const antiLeft = currMatch.antiOptionsIds.includes(cell.leftOptionId);
-      const antiTop = currMatch.antiOptionsIds.includes(cell.topOptionId);
+    if (this.matches.length === 0 && cell.value === 'O') {
+      const firstMatch = new Match();
+      firstMatch.optionsIds.push(cell.leftOptionId, cell.topOptionId);
+      this.matches.push(firstMatch);
+    } else {
+      this.matches.forEach((currMatch) => {
+        console.log('currMatch = ', currMatch);
+        const hasLeft = currMatch.optionsIds.includes(cell.leftOptionId);
+        const hasTop = currMatch.optionsIds.includes(cell.topOptionId);
+        const antiLeft = currMatch.antiOptionsIds.includes(cell.leftOptionId);
+        const antiTop = currMatch.antiOptionsIds.includes(cell.topOptionId);
 
-      if (hasLeft && !hasTop) {
-        if (cell.value === 'O') {
-          currMatch.optionsIds.push(cell.topOptionId);
+        if (hasLeft && !hasTop) {
+          console.log('hasLeft and !hasTop');
+          if (cell.value === 'O') {
+            currMatch.optionsIds.push(cell.topOptionId);
+          } else if (cell.value === 'X') {
+            currMatch.antiOptionsIds.push(cell.topOptionId);
+          }
+        } else if (hasTop && !hasLeft) {
+          console.log('hasTop and !hasLeft');
+          if (cell.value === 'O') {
+            currMatch.optionsIds.push(cell.leftOptionId);
+          } else if (cell.value === 'X') {
+            currMatch.antiOptionsIds.push(cell.leftOptionId);
+          }
         } else if (cell.value === 'X') {
-          currMatch.antiOptionsIds.push(cell.topOptionId);
+          if (antiLeft && !antiTop) {
+            currMatch.antiOptionsIds.push(cell.topOptionId);
+          } else if (antiTop && !antiLeft) {
+            currMatch.antiOptionsIds.push(cell.leftOptionId);
+          }
+          this.matches.forEach(match => {
+            if (match.optionsIds.includes(cell.leftOptionId)) {
+              console.log('found match with left');
+              match.antiOptionsIds.push(cell.topOptionId);
+              match.optionsIds.forEach(option => {
+                if (option !== cell.leftOptionId) {
+                  const antiCell = this.getCellFromOptions(this.cells, option, cell.topOptionId);
+                  if (antiCell && !antiCell.value) {
+                    console.log('found antiCell, options=', this.getCell(antiCell.id).leftOptionId, ', ', this.getCell(antiCell.id).topOptionId);
+                    this.setCell(antiCell.id, 'X');
+                  }
+                }
+              });
+            }
+            if (match.optionsIds.includes(cell.topOptionId)) {
+              console.log('found match with top');
+              match.antiOptionsIds.push(cell.leftOptionId);
+              match.optionsIds.forEach(option => {
+                if (option !== cell.topOptionId) {
+                  const antiCell = this.getCellFromOptions(this.cells, option, cell.leftOptionId);
+                  if (antiCell && !antiCell.value) {
+                    console.log('found antiCell, options=', this.getCell(antiCell.id).topOptionId, ',', this.getCell(antiCell.id).leftOptionId);
+                    this.setCell(antiCell.id, 'X');
+                  }
+                }
+              });
+            }
+          });
+        } else if (!hasLeft && !hasTop && !antiLeft && !antiTop) {
+          const newMatch = new Match();
+          newMatch.optionsIds.push(cell.topOptionId, cell.leftOptionId);
         }
-      } else if (hasTop && !hasLeft) {
-        if (cell.value === 'O') {
-          currMatch.optionsIds.push(cell.leftOptionId);
-        } else if (cell.value === 'X') {
-          currMatch.antiOptionsIds.push(cell.leftOptionId);
-        }
-      } else if (cell.value === 'X') {
-        if (antiLeft && !antiTop) {
-          currMatch.antiOptionsIds.push(cell.topOptionId);
-        } else if (antiTop && !antiLeft) {
-          currMatch.antiOptionsIds.push(cell.leftOptionId);
-        }
-      }
-    });
+      });
+    }
     // if ()
     // match 1:
     // ids = green, missy
@@ -287,16 +364,21 @@ export class DataService {
     // put o in johnson, missy, add johnson to ids
     // put x in johnson, missy, add johnson to antiIds
     // any cell that shares two options in a match's ids should get an O, ay cell that share two options in a match's anti ids should get an X
-    // id of left option is in ids, but topOption is antiId, so for every other id other than missy and johnson
+    // id of left leftOptionId is in ids, but topOption is antiId, so for every other id other than missy and johnson
   }
 
-  applyMatchesToData() {
-    this.matches.forEach(match => {
-      for (let id1 = 0; id1 < match.optionsIds.length - 1; id1++) {
-        for (let id2 = id1 + 1; id2 < match.optionsIds.length; id2++) {
-          const cellId = this.getCellFromOptions(this.cells, match[id1], match[id2]).id;
-          if (cellId && !this.getCell(cellId).value) {
-            this.setCell(cellId, 'O');
+
+  applyMatchesToCellValues() {
+    this.matches.forEach((match, index) => {
+      console.log('match ', index);
+      for (let index1 = 0; index1 < match.optionsIds.length - 1; index1++) {
+        console.log('id[', index1, '] points to', this.getOption(match.optionsIds[index1]).name);
+        for (let index2 = index1 + 1; index2 < match.optionsIds.length; index2++) {
+          console.log('id[', index2, '] points to', this.getOption(match.optionsIds[index2]).name);
+          const cell = this.getCellFromOptions(this.cells, match[index1], match[index2]);
+          if (cell && !this.getCell(cell.id).value) {
+            console.log('found empty cell ', cell.id.toFixed(3));
+            this.setCell(cell.id, 'O');
           }
         }
       }
@@ -310,5 +392,44 @@ export class DataService {
       //   }
       // }
     });
+  }
+
+  matchMatches() {
+    // a = 123
+    // b = 245
+    // c = 678
+    // d = 179
+    this.matches.forEach(match1 => {
+      match1.optionsIds.forEach(opt => {
+        this.matches.forEach((match2, index) => {
+          if (match1 !== match2 && match2.optionsIds.includes(opt)) {
+            // join the matches
+            // const jointMatch = new Match();
+            // jointMatch.optionsIds = match1.optionsIds;
+            match2.optionsIds.forEach(option => {
+              if (!match1.optionsIds.includes(option)) {
+                match1.optionsIds.push(option);
+              }
+            });
+            match2.antiOptionsIds.forEach(anti => {
+              if (!match1.antiOptionsIds.includes(anti)) {
+                match1.antiOptionsIds.push(anti);
+              }
+            });
+            this.matches.splice(index, 1);
+          }
+        });
+      });
+    });
+  }
+
+  cellAddress(cellId): string {
+    const cell = this.getCell(cellId);
+    if (cell) {
+      const leftOptionId = cell.leftOptionId;
+      const topOptionId = cell.topOptionId;
+      return `${this.getOption(leftOptionId).name}, ${this.getOption(topOptionId).name}`;
+    }
+    return '[not found]';
   }
 }

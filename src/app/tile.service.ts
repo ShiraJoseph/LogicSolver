@@ -110,7 +110,7 @@ export class TileService {
       // push a left feature
       this.tiles.push(featureTile);
       this.dataService.getFeatureOptions(featureTile.objectId).forEach(option => {
-        // push a left option
+        // push a left leftOptionId
         this.tiles.push({
           text: option.name,
           cols: 3,
