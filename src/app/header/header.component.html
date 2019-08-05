@@ -7,6 +7,7 @@
   <input
     [id]="tile.type"
     (keyup.enter)="updateHeader($event)"
+    (keyup.tab)="moveNext($event)"
     (blur)="updateHeader($event)"
     [value]="tile.text">
   <button

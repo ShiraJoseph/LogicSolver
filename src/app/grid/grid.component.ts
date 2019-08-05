@@ -51,4 +51,10 @@ export class GridComponent implements OnInit {
     this.dataService.updateCells();
     this.tileService.buildGrid();
   }
+
+  clearCells() {
+    console.log('clearing');
+    this.dataService.clearCells();
+    this.tileService.buildGrid();
+  }
 }

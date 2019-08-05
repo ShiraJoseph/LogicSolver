@@ -11,7 +11,6 @@ export class DataService {
   options: Option[] = [];
   optionCount = 3;
   cellCount = 0;
-  matches: Match[] = [];
 
   getAllowDeleteFeatures(): boolean {
     return this.features.length > 2;
@@ -107,6 +106,11 @@ export class DataService {
       });
     }
     this.oldCells = [];
+  }
+
+  clearCells() {
+  this.cells.forEach(cell => cell.value = '');
+  this.updateCells();
   }
 
   getCellFromOptions(arr: Cell[], option1Id: number, option2Id: number): Cell {

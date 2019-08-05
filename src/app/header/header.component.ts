@@ -40,4 +40,13 @@ export class HeaderComponent implements OnInit {
     }
     this.tileService.buildGrid();
   }
+
+  moveNext(event) {
+    let nextElem = event;
+    while (nextElem.tag !== ('app-header')) {
+      nextElem = event.target.nextSibling;
+      console.log(nextElem);
+    }
+
+  }
 }
