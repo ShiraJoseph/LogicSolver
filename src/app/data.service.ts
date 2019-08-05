@@ -261,6 +261,23 @@ export class DataService {
               }
             });
           });
+
+          masterColumn.forEach(record => {
+            if (record.value === 'O') {
+              const cCells = this.cells.filter(cell => cell.topOptionId === record.leftOptionId);
+              if (cCells.length > 0) {
+                rowOfOs.push(cCells[0]);
+                cCells.forEach(colCell => {
+                  // if a cell in that column has a value, add its leftOption to the master column (but no duplicates)
+                  if (colCell.value && !masterColumn.find(recordLine => recordLine.leftOptionId === colCell.leftOptionId)) {
+                    const recordToPush: { leftOptionId: number, value: string } = {leftOptionId: colCell.leftOptionId, value: colCell.value};
+                    masterColumn.push(recordToPush);
+                  }
+                });
+              }
+            }
+          });
+
           // Go through each of the 'O's in the current row again
           rowOfOs.forEach(OinTheRow => {
             // apply the master column data to each of the 'O''s columns
@@ -299,9 +316,26 @@ export class DataService {
               }
             });
           });
-          // Go through each of the 'O's in the current row again
+
+          masterRow.forEach(record => {
+            if (record.value === 'O') {
+              const rCells = this.cells.filter(cell => cell.leftOptionId === record.topOptionId);
+              if (rCells.length > 0) {
+                columnOfOs.push(rCells[0]);
+                rCells.forEach(rowCell => {
+                  // if a cell in that column has a value, add its leftOption to the master column (but no duplicates)
+                  if (rowCell.value && !masterRow.find(recordLine => recordLine.topOptionId === rowCell.topOptionId)) {
+                    const recordToPush: { topOptionId: number, value: string } = {topOptionId: rowCell.topOptionId, value: rowCell.value};
+                    masterRow.push(recordToPush);
+                  }
+                });
+              }
+            }
+          });
+
+          // Go through each of the 'O's in the current column again
           columnOfOs.forEach(OinTheColumn => {
-            // apply the master column data to each of the 'O''s columns
+            // apply the master row data to each of the 'O''s rows
             masterRow.forEach(record => {
               const fill = this.getCellFromOptions(this.cells, OinTheColumn.leftOptionId, record.topOptionId);
               if (fill && !changedCellIds.find(id => id === fill.id)) {
@@ -315,139 +349,6 @@ export class DataService {
           });
         }
       }
-    });
-  }
-
-  updateMatches(cell: Cell) {
-    if (this.matches.length === 0 && cell.value === 'O') {
-      const firstMatch = new Match();
-      firstMatch.optionsIds.push(cell.leftOptionId, cell.topOptionId);
-      this.matches.push(firstMatch);
-    } else {
-      this.matches.forEach((currMatch) => {
-        console.log('currMatch = ', currMatch);
-        const hasLeft = currMatch.optionsIds.includes(cell.leftOptionId);
-        const hasTop = currMatch.optionsIds.includes(cell.topOptionId);
-        const antiLeft = currMatch.antiOptionsIds.includes(cell.leftOptionId);
-        const antiTop = currMatch.antiOptionsIds.includes(cell.topOptionId);
-
-        if (hasLeft && !hasTop) {
-          console.log('hasLeft and !hasTop');
-          if (cell.value === 'O') {
-            currMatch.optionsIds.push(cell.topOptionId);
-          } else if (cell.value === 'X') {
-            currMatch.antiOptionsIds.push(cell.topOptionId);
-          }
-        } else if (hasTop && !hasLeft) {
-          console.log('hasTop and !hasLeft');
-          if (cell.value === 'O') {
-            currMatch.optionsIds.push(cell.leftOptionId);
-          } else if (cell.value === 'X') {
-            currMatch.antiOptionsIds.push(cell.leftOptionId);
-          }
-        } else if (cell.value === 'X') {
-          if (antiLeft && !antiTop) {
-            currMatch.antiOptionsIds.push(cell.topOptionId);
-          } else if (antiTop && !antiLeft) {
-            currMatch.antiOptionsIds.push(cell.leftOptionId);
-          }
-          this.matches.forEach(match => {
-            if (match.optionsIds.includes(cell.leftOptionId)) {
-              console.log('found match with left');
-              match.antiOptionsIds.push(cell.topOptionId);
-              match.optionsIds.forEach(option => {
-                if (option !== cell.leftOptionId) {
-                  const antiCell = this.getCellFromOptions(this.cells, option, cell.topOptionId);
-                  if (antiCell && !antiCell.value) {
-                    console.log('found antiCell, options=', this.getCell(antiCell.id).leftOptionId, ', ', this.getCell(antiCell.id).topOptionId);
-                    this.setCell(antiCell.id, 'X');
-                  }
-                }
-              });
-            }
-            if (match.optionsIds.includes(cell.topOptionId)) {
-              console.log('found match with top');
-              match.antiOptionsIds.push(cell.leftOptionId);
-              match.optionsIds.forEach(option => {
-                if (option !== cell.topOptionId) {
-                  const antiCell = this.getCellFromOptions(this.cells, option, cell.leftOptionId);
-                  if (antiCell && !antiCell.value) {
-                    console.log('found antiCell, options=', this.getCell(antiCell.id).topOptionId, ',', this.getCell(antiCell.id).leftOptionId);
-                    this.setCell(antiCell.id, 'X');
-                  }
-                }
-              });
-            }
-          });
-        } else if (!hasLeft && !hasTop && !antiLeft && !antiTop) {
-          const newMatch = new Match();
-          newMatch.optionsIds.push(cell.topOptionId, cell.leftOptionId);
-        }
-      });
-    }
-    // if ()
-    // match 1:
-    // ids = green, missy
-    // antiIds = []
-    // put o in johnson, missy, add johnson to ids
-    // put x in johnson, missy, add johnson to antiIds
-    // any cell that shares two options in a match's ids should get an O, ay cell that share two options in a match's anti ids should get an X
-    // id of left leftOptionId is in ids, but topOption is antiId, so for every other id other than missy and johnson
-  }
-
-
-  applyMatchesToCellValues() {
-    this.matches.forEach((match, index) => {
-      console.log('match ', index);
-      for (let index1 = 0; index1 < match.optionsIds.length - 1; index1++) {
-        console.log('id[', index1, '] points to', this.getOption(match.optionsIds[index1]).name);
-        for (let index2 = index1 + 1; index2 < match.optionsIds.length; index2++) {
-          console.log('id[', index2, '] points to', this.getOption(match.optionsIds[index2]).name);
-          const cell = this.getCellFromOptions(this.cells, match[index1], match[index2]);
-          if (cell && !this.getCell(cell.id).value) {
-            console.log('found empty cell ', cell.id.toFixed(3));
-            this.setCell(cell.id, 'O');
-          }
-        }
-      }
-      //
-      // for (let anti1 = 0; anti1 < match.optionsIds.length - 1; anti1++) {
-      //   for (let anti2 = anti1 + 1; anti2 < match.optionsIds.length; anti2++) {
-      //     const cellId = this.getCellFromOptions(this.cells, match[anti1], match[anti2]).id;
-      //     if (cellId && !this.getCell(cellId).value) {
-      //       this.setCell(cellId, '');
-      //     }
-      //   }
-      // }
-    });
-  }
-
-  matchMatches() {
-    // a = 123
-    // b = 245
-    // c = 678
-    // d = 179
-    this.matches.forEach(match1 => {
-      match1.optionsIds.forEach(opt => {
-        this.matches.forEach((match2, index) => {
-          if (match1 !== match2 && match2.optionsIds.includes(opt)) {
-            // join the matches
-            // const jointMatch = new Match();
-            // jointMatch.optionsIds = match1.optionsIds;
-            match2.optionsIds.forEach(option => {
-              if (!match1.optionsIds.includes(option)) {
-                match1.optionsIds.push(option);
-              }
-            });
-            match2.antiOptionsIds.forEach(anti => {
-              if (!match1.antiOptionsIds.includes(anti)) {
-                match1.antiOptionsIds.push(anti);
-              }
-            });
-            this.matches.splice(index, 1);
-          }
-        });
-      });
     });
   }
 
