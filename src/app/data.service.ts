@@ -1,4 +1,4 @@
-import { Injectable, OnInit } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Cell, Feature, Match, Option } from './model';
 
 @Injectable({
@@ -235,52 +235,36 @@ export class DataService {
     return crossCellIds;
   }
 
+  // one row at a time, make sure that any parallel Os have the same values in each of their columns
   runBasicLogic() {
     const changedCellIds: number[] = [];
     this.options.forEach((leftOption) => {
       if (!changedCellIds.find(cellId => this.getCell(cellId).leftOptionId === leftOption.id)) {
-        // const firstCellWithO = this.cells.find(cell => cell.value === 'O');
         // Find the 'O's in the next row
-        const rowOfOs: Cell [] = this.cells.filter(cell =>
-          cell.leftOptionId === leftOption.id &&
-          cell.value === 'O');
+        const rowOfOs: Cell [] = this.cells.filter(cell => cell.leftOptionId === leftOption.id && cell.value === 'O');
         if (rowOfOs.length > 0) {
-          console.log('Os in this leftOptionId row: ', rowOfOs);
           const masterColumn: { leftOptionId: number, value: string }[] = [];
           // for each 'O', collect all the cells in that column
           rowOfOs.forEach(match => {
             const columnCells: Cell [] = this.cells.filter(compare => compare.topOptionId === match.topOptionId);
-            // console.log(`${this.getOption(match.topOptionId).name}'s column = ${columnCells}`);
             columnCells.forEach(colCell => {
               // if a cell in that column has a value, add its leftOption to the master column (but no duplicates)
               if (colCell.value && !masterColumn.find(record => record.leftOptionId === colCell.leftOptionId)) {
-                console.log(
-                  `(${colCell.value}) found for ` +
-                  `${this.getOption(colCell.leftOptionId).name} in ` +
-                  `${this.getOption(match.topOptionId).name}'s column`);
                 const record: { leftOptionId: number, value: string } = {leftOptionId: colCell.leftOptionId, value: colCell.value};
                 masterColumn.push(record);
               }
             });
           });
-          console.log('absolute column:', masterColumn);
-          // Go through each of the 'O's in the current row again, this time applying the master column data to each of their columns
+          // Go through each of the 'O's in the current row again
           rowOfOs.forEach(OinTheRow => {
-            console.log('O in the row=', this.cellAddress(OinTheRow.id));
-            console.log('O in the row\'s topOptionId=', OinTheRow.topOptionId);
+            // apply the master column data to each of the 'O''s columns
             masterColumn.forEach(record => {
-              console.log('record leftOption=', this.getOption(record.leftOptionId).name);
-              // console.log('record.leftOptionId=', record.leftOptionId);
               const fill = this.getCellFromOptions(this.cells, OinTheRow.topOptionId, record.leftOptionId);
               if (fill && !changedCellIds.find(id => id === fill.id)) {
-                console.log('found a cell to fill at ', this.cellAddress(fill.id));
                 if (!fill.value) {
-                  console.log('which was empty, so set it to', record.value);
                   this.setCell(fill.id, record.value, null, null, false);
-                  // this.cells.find(filler => filler.id = fill.id).value = record.value;
+                  // keep track so we don't repeat anything
                   changedCellIds.push(fill.id);
-                } else {
-                  console.log('which was full, so skip it');
                 }
               }
             });
@@ -423,6 +407,7 @@ export class DataService {
     });
   }
 
+  // for logging purposes
   cellAddress(cellId): string {
     const cell = this.getCell(cellId);
     if (cell) {
