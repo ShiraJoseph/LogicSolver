@@ -172,7 +172,8 @@ export class DataService {
           });
         }
         if (withLogic) {
-          this.runBasicLogic();
+          this.runBasicRowLogic();
+          this.runBasicColumnLogic();
         }
       }
       if (topOptionId) {
@@ -241,7 +242,7 @@ export class DataService {
   }
 
   // one row at a time, make sure that any parallel Os have the same values in each of their columns
-  runBasicLogic() {
+  runBasicRowLogic() {
     const changedCellIds: number[] = [];
     this.options.forEach((leftOption) => {
       if (!changedCellIds.find(cellId => this.getCell(cellId).leftOptionId === leftOption.id)) {
@@ -265,6 +266,44 @@ export class DataService {
             // apply the master column data to each of the 'O''s columns
             masterColumn.forEach(record => {
               const fill = this.getCellFromOptions(this.cells, OinTheRow.topOptionId, record.leftOptionId);
+              if (fill && !changedCellIds.find(id => id === fill.id)) {
+                if (!fill.value) {
+                  this.setCell(fill.id, record.value, null, null, false);
+                  // keep track so we don't repeat anything
+                  changedCellIds.push(fill.id);
+                }
+              }
+            });
+          });
+        }
+      }
+    });
+  }
+
+  runBasicColumnLogic() {
+    const changedCellIds: number[] = [];
+    this.options.forEach((topOption) => {
+      if (!changedCellIds.find(cellId => this.getCell(cellId).topOptionId === topOption.id)) {
+        // Find the 'O's in the next row
+        const columnOfOs: Cell [] = this.cells.filter(cell => cell.topOptionId === topOption.id && cell.value === 'O');
+        if (columnOfOs.length > 0) {
+          const masterRow: { topOptionId: number, value: string }[] = [];
+          // for each 'O', collect all the cells in that column
+          columnOfOs.forEach(match => {
+            const rowCells: Cell [] = this.cells.filter(compare => compare.leftOptionId === match.leftOptionId);
+            rowCells.forEach(rowCell => {
+              // if a cell in that column has a value, add its leftOption to the master column (but no duplicates)
+              if (rowCell.value && !masterRow.find(record => record.topOptionId === rowCell.topOptionId)) {
+                const record: { topOptionId: number, value: string } = {topOptionId: rowCell.topOptionId, value: rowCell.value};
+                masterRow.push(record);
+              }
+            });
+          });
+          // Go through each of the 'O's in the current row again
+          columnOfOs.forEach(OinTheColumn => {
+            // apply the master column data to each of the 'O''s columns
+            masterRow.forEach(record => {
+              const fill = this.getCellFromOptions(this.cells, OinTheColumn.leftOptionId, record.topOptionId);
               if (fill && !changedCellIds.find(id => id === fill.id)) {
                 if (!fill.value) {
                   this.setCell(fill.id, record.value, null, null, false);
