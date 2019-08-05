@@ -29,7 +29,8 @@ export class DataService {
     const f1 = new Feature();
     const f2 = new Feature();
     const f3 = new Feature();
-    this.features.push(f1, f2, f3);
+    const f4 = new Feature();
+    this.features.push(f1, f2, f3, f4);
     this.features.forEach((feature) => {
       feature.optionsIds = [];
       const o1 = new Option();
@@ -44,6 +45,7 @@ export class DataService {
     this.features[0].name = 'First Name';
     this.features[1].name = 'Last Name';
     this.features[2].name = 'Color';
+    this.features[3].name = 'Vehicle';
     this.options[0].name = 'Bob';
     this.options[1].name = 'Missy';
     this.options[2].name = 'Jo';
@@ -53,6 +55,9 @@ export class DataService {
     this.options[6].name = 'red';
     this.options[7].name = 'green';
     this.options[8].name = 'blue';
+    this.options[9].name = 'car';
+    this.options[10].name = 'boat';
+    this.options[11].name = 'plane';
     this.updateCells();
   }
 
