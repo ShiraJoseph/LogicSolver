@@ -248,8 +248,10 @@ export class DataService {
       if (!changedCellIds.find(cellId => this.getCell(cellId).leftOptionId === leftOption.id)) {
         // Find the 'O's in the next row
         const rowOfOs: Cell [] = this.cells.filter(cell => cell.leftOptionId === leftOption.id && cell.value === 'O');
+        const rowOfXs: Cell [] = this.cells.filter(cell => cell.leftOptionId === leftOption.id && cell.value === 'X');
+        const masterColumn: { leftOptionId: number, value: string }[] = [];
+        rowOfXs.forEach(rowX => masterColumn.push({leftOptionId: rowX.topOptionId, value: rowX.value}));
         if (rowOfOs.length > 0) {
-          const masterColumn: { leftOptionId: number, value: string }[] = [];
           // for each 'O', collect all the cells in that column
           rowOfOs.forEach(match => {
             const columnCells: Cell [] = this.cells.filter(compare => compare.topOptionId === match.topOptionId);
@@ -303,8 +305,10 @@ export class DataService {
       if (!changedCellIds.find(cellId => this.getCell(cellId).topOptionId === topOption.id)) {
         // Find the 'O's in the next row
         const columnOfOs: Cell [] = this.cells.filter(cell => cell.topOptionId === topOption.id && cell.value === 'O');
+        const columnOfXs: Cell [] = this.cells.filter(cell => cell.topOptionId === topOption.id && cell.value === 'X');
+        const masterRow: { topOptionId: number, value: string }[] = [];
+        columnOfXs.forEach(colX => masterRow.push({topOptionId: colX.leftOptionId, value: colX.value}));
         if (columnOfOs.length > 0) {
-          const masterRow: { topOptionId: number, value: string }[] = [];
           // for each 'O', collect all the cells in that column
           columnOfOs.forEach(match => {
             const rowCells: Cell [] = this.cells.filter(compare => compare.leftOptionId === match.leftOptionId);
