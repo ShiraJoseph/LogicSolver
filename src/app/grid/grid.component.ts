@@ -52,6 +52,37 @@ export class GridComponent implements OnInit {
     this.tileService.buildGrid();
   }
 
+  getBorder(tile: Tile) {
+    let topCellIndex = -1;
+    let leftCellIndex = -1;
+    let optionIndex = -1;
+    const top = tile.type === TileType.TOP_OPTION_HEADER;
+    const left = tile.type === TileType.LEFT_OPTION_HEADER;
+    const last = this.dataService.optionCount - 1;
+
+    const cell = this.dataService.getCell(tile.objectId);
+    const option = this.dataService.getOption(tile.objectId);
+    const feature = this.dataService.getFeature(tile.objectId);
+
+    const all = feature || tile.type === TileType.ADD_OPTION || tile.type === TileType.ADD_FEATURE;
+    if (cell) {
+      topCellIndex = this.dataService.getFeatureOptions(this.dataService.getOption(cell.topOptionId).featureId)
+        .findIndex(topOption => topOption.id === cell.topOptionId);
+      leftCellIndex = this.dataService.getFeatureOptions(this.dataService.getOption(cell.leftOptionId).featureId)
+        .findIndex(leftOption => leftOption.id === cell.leftOptionId);
+    }
+    if (option) {
+      optionIndex = this.dataService.getFeature(option.featureId).optionsIds.findIndex(id => id === option.id);
+    }
+
+    return {
+      left: all || (cell && topCellIndex === 0) || (option && (left || (top && optionIndex === 0))),
+      right: all || (cell && topCellIndex === last) || (option && (left || (top && optionIndex === last))),
+      top: all || (cell && leftCellIndex === 0) || (option && (top || (left && optionIndex === 0))),
+      bottom: all || (cell && leftCellIndex === last) || (option && (top || (left && optionIndex === last))),
+    };
+  }
+
   clearCells() {
     console.log('clearing');
     this.dataService.clearCells();

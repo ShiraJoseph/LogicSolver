@@ -1,14 +1,15 @@
 <mat-grid-list
   [cols]="getColumnCount()"
   rowHeight="1:1"
-  gutterSize="1"
+  gutterSize="0"
   [style.max-width.px]="cols*42">
   <mat-grid-tile
     *ngFor="let tile of getTiles()"
     [colspan]="tile.cols"
     [rowspan]="tile.rows"
     [style.background]="tile.color"
-    [ngSwitch]="tile.type">
+    [ngSwitch]="tile.type"
+  [ngClass]="getBorder(tile)">
     <div *ngSwitchCase="'CELL_INACTIVE'"
       class="cell-inactive"
       (click)="switchOut(tile)">

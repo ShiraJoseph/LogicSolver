@@ -1,3 +1,7 @@
+:host {
+  box-sizing: content-box;
+}
+
 .header {
   display: flex;
   background-color: transparent;
@@ -18,21 +22,22 @@ input {
   height: 100%;
   background-color: transparent;
   font-family: Chalkboard;
-  font-size: 16px;
+  /*font-size: 16px;*/
+  font-size: medium;
   text-wrap: normal;
 }
 
-.input:focus, input:hover {
+input:focus, input:hover {
   border: 1px purple solid;
 }
 
 button {
   height: 100%;
-  width: 30px;
+  width: 30%;
 }
 
 .vertical button {
-  height: 30px;
+  height: 30%;
   width: 100%;
 }
 

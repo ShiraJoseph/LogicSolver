@@ -4,7 +4,7 @@ font-family: arial;
 }
 
 mat-grid-list {
-  max-width: 800px;
+  /*max-width: 800px;*/
 }
 
 .blank {
@@ -23,8 +23,9 @@ mat-grid-list {
   justify-content: space-between;
   height: -webkit-fill-available;
   width: -webkit-fill-available;
-  border: dimgray 1px double;
-  padding: 3px;
+  border: dimgray 1px solid;
+  /*padding: 3px;*/
+  /*padding: 3%;*/
 }
 
 .cell-inactive {
@@ -33,15 +34,17 @@ mat-grid-list {
   justify-content: center;
   height: -webkit-fill-available;
   width: -webkit-fill-available;
-  font-size: 18px;
-  border: dimgray 1px double;
+  /*font-size: 18px;*/
+  font-size: medium;
+  border: dimgray 1px solid;
 }
 
 .xo-buttons {
   flex-direction: row;
   display: flex;
   justify-content: space-between;
-  font-size: 16px;
+  /*font-size: 16px;*/
+  font-size: small;
 }
 
 .xo-button {
@@ -92,8 +95,26 @@ mat-grid-list {
 }
 
 app-header {
+  display: flex;
+  box-sizing: border-box;
   justify-content: space-between;
   align-items: stretch;
   height: 100%;
   width: 100%;
+}
+
+.top {
+  border-top: black 1px solid;
+}
+
+.bottom {
+  border-bottom: black 1px solid;
+}
+
+.left {
+  border-left: black 1px solid;
+}
+
+.right {
+  border-right: black 1px solid;
 }
