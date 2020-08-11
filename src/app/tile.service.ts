@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
-import { DataService } from './data.service';
+import {Injectable} from '@angular/core';
+import {DataService} from './data.service';
+import {from, of} from 'rxjs';
 
 export interface Tile {
   color?: string;
@@ -32,12 +33,17 @@ export class TileService {
   tiles: Tile[];
   leftFeatureTiles: Tile[];
 
+
   constructor(private dataService: DataService) {
+    // from(this.tiles).subscribe((changes) => {
+    //     //   console.log(changes);
+    //     // });
   }
 
-  getTiles () {
+  getTiles() {
     return this.tiles;
   }
+
   buildGrid() {
     this.buildHeaderTiles();
     this.buildRows();

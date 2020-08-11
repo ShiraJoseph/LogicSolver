@@ -18,6 +18,17 @@ export class Feature {
 
 }
 
+export class State {
+  constructor (cells: Cell[], options: Option[], features: Feature[]) {
+    this.cells = cells;
+    this.options = options;
+    this.features = features;
+  }
+  public cells: Cell[];
+  public options: Option[];
+  public features: Feature[];
+}
+
 export class Option {
   constructor () {
     this.id = Math.random();
@@ -25,11 +36,6 @@ export class Option {
   public id: number;
   public name = '';
   public featureId?: number;
-}
-
-export class Match {
-  public optionsIds: number [] = [];
-  public antiOptionsIds: number [] = [];
 }
 
 

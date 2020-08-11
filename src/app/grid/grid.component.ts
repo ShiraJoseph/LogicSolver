@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { DataService } from '../data.service';
-import { TileService, Tile, TileType } from '../tile.service';
+import {Component, OnInit} from '@angular/core';
+import {DataService} from '../data.service';
+import {TileService, Tile, TileType} from '../tile.service';
 
 @Component({
   selector: 'app-grid',
@@ -45,6 +45,7 @@ export class GridComponent implements OnInit {
   }
 
   updateTile(tile: Tile, text: string) {
+    // this.dataService.saveState();
     tile.text = text;
     tile.type = TileType.CELL_INACTIVE;
     this.dataService.setCell(tile.objectId, text);
@@ -64,22 +65,22 @@ export class GridComponent implements OnInit {
     const option = this.dataService.getOption(tile.objectId);
     const feature = this.dataService.getFeature(tile.objectId);
 
-    const all = feature || tile.type === TileType.ADD_OPTION || tile.type === TileType.ADD_FEATURE;
-    if (cell) {
+    const all = !!feature || tile.type === TileType.ADD_OPTION || tile.type === TileType.ADD_FEATURE;
+    if (!!cell) {
       topCellIndex = this.dataService.getFeatureOptions(this.dataService.getOption(cell.topOptionId).featureId)
         .findIndex(topOption => topOption.id === cell.topOptionId);
       leftCellIndex = this.dataService.getFeatureOptions(this.dataService.getOption(cell.leftOptionId).featureId)
         .findIndex(leftOption => leftOption.id === cell.leftOptionId);
     }
-    if (option) {
+    if (!!option) {
       optionIndex = this.dataService.getFeature(option.featureId).optionsIds.findIndex(id => id === option.id);
     }
 
     return {
-      left: all || (cell && topCellIndex === 0) || (option && (left || (top && optionIndex === 0))),
-      right: all || (cell && topCellIndex === last) || (option && (left || (top && optionIndex === last))),
-      top: all || (cell && leftCellIndex === 0) || (option && (top || (left && optionIndex === 0))),
-      bottom: all || (cell && leftCellIndex === last) || (option && (top || (left && optionIndex === last))),
+      left: !!all || (!!cell && topCellIndex === 0) || (!!option && (!!left || (!!top && optionIndex === 0))),
+      right: !!all || (!!cell && topCellIndex === last) || (!!option && (!!left || (!!top && optionIndex === last))),
+      top: !!all || (!!cell && leftCellIndex === 0) || (!!option && (!!top || (!!left && optionIndex === 0))),
+      bottom: !!all || (!!cell && leftCellIndex === last) || (!!option && (!!top || (!!left && optionIndex === last))),
     };
   }
 
@@ -87,5 +88,9 @@ export class GridComponent implements OnInit {
     console.log('clearing');
     this.dataService.clearCells();
     this.tileService.buildGrid();
+  }
+
+  undo() {
+    this.dataService.undo();
   }
 }

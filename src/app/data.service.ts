@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { Cell, Feature, Match, Option } from './model';
+import {Injectable} from '@angular/core';
+import {Cell, Feature, Option, State} from './model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +11,8 @@ export class DataService {
   options: Option[] = [];
   optionCount = 3;
   cellCount = 0;
+  states: State[] = [];
+  sp = 0;
 
   getAllowDeleteFeatures(): boolean {
     return this.features.length > 2;
@@ -58,6 +60,17 @@ export class DataService {
     this.options[10].name = 'boat';
     this.options[11].name = 'plane';
     this.updateCells();
+  }
+
+  saveState() {
+    this.states[this.sp] = new State(this.cells, this.options, this.features);
+    this.sp++;
+  }
+
+  loadState(i) {
+    this.features = this.states[i].features;
+    this.options = this.states[i].options;
+    this.cells = this.states[i].cells;
   }
 
   updateCells() {
@@ -109,8 +122,8 @@ export class DataService {
   }
 
   clearCells() {
-  this.cells.forEach(cell => cell.value = '');
-  this.updateCells();
+    this.cells.forEach(cell => cell.value = '');
+    this.updateCells();
   }
 
   getCellFromOptions(arr: Cell[], option1Id: number, option2Id: number): Cell {
@@ -155,6 +168,7 @@ export class DataService {
       feature.optionsIds.splice(indexToRemove, 1);
     });
     this.optionCount--;
+    this.states.push(new State(this.cells, this.options, this.features));
   }
 
   deleteFeature(id: number) {
@@ -163,10 +177,11 @@ export class DataService {
     this.cells = this.cells.filter(cell => !optionsToRemove.includes(cell.leftOptionId) && !optionsToRemove.includes(cell.topOptionId));
     this.options = this.options.filter(option => !optionsToRemove.includes(option.id));
     this.features = this.features.filter(feature => feature.id !== id);
+    this.states.push(new State(this.cells, this.options, this.features));
   }
 
   setCell(id: number, value ?: string, topOptionId ?: number, leftOptionId ?: number, withLogic = true) {
-    if (this.getCell(id)) {
+    if (!!this.getCell(id)) {
       if (value !== this.getCell(id).value) {
         this.cells.find(cell => cell.id === id).value = value;
         if (value === 'O') {
@@ -187,6 +202,7 @@ export class DataService {
       if (leftOptionId) {
         this.cells.find(cell => cell.id === id).leftOptionId = leftOptionId;
       }
+      this.states.push(new State(this.cells, this.options, this.features));
     }
   }
 
@@ -298,6 +314,9 @@ export class DataService {
                   this.setCell(fill.id, record.value, null, null, false);
                   // keep track so we don't repeat anything
                   changedCellIds.push(fill.id);
+                } else if (fill.value !== record.value) {
+                  console.log('cant do that, theres a conflict!');
+                  return;
                 }
               }
             });
@@ -355,6 +374,10 @@ export class DataService {
                   this.setCell(fill.id, record.value, null, null, false);
                   // keep track so we don't repeat anything
                   changedCellIds.push(fill.id);
+                } else if (fill.value !== record.value) {
+                  console.log('cant do that, theres a conflict!');
+                  this.undo();
+                  return;
                 }
               }
             });
@@ -366,16 +389,21 @@ export class DataService {
 
   fillDeductions() {
     this.cells.forEach(cell => {
-      if (!cell.value) {
+      // if (!cell.value) {
         const rowOptionCells = this.cells.filter(rowCell => rowCell.id !== cell.id && cell.topOptionId === rowCell.topOptionId &&
           this.getOption(cell.leftOptionId).featureId === this.getOption(rowCell.leftOptionId).featureId);
         const colOptionCells = this.cells.filter(colCell => colCell.id !== cell.id && cell.leftOptionId === colCell.leftOptionId &&
           this.getOption(cell.topOptionId).featureId === this.getOption(colCell.topOptionId).featureId);
         if (rowOptionCells.every(crossCell => crossCell.value === 'X') ||
           colOptionCells.every(crossCell => crossCell.value === 'X')) {
-          this.setCell(cell.id, 'O', null, null, false);
+          if (!cell.value) {
+            this.setCell(cell.id, 'O', null, null, false);
+          } else if (cell.value !== 'O') {
+            console.log('cant do that, theres a conflict!');
+            return;
+          }
         }
-      }
+      // }
     });
   }
 
@@ -388,5 +416,15 @@ export class DataService {
       return `${this.getOption(leftOptionId).name}, ${this.getOption(topOptionId).name}`;
     }
     return '[not found]';
+  }
+
+  undo(): void {
+    // this.states.pop();
+    const len = this.states.length;
+    this.clearCells();
+    this.cells = this.states[len - 2].cells;
+    this.options = this.states[len - 2].options;
+    this.features = this.states[len - 2].features;
+    // this.updateCells();
   }
 }
