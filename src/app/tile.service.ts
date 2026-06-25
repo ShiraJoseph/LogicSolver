@@ -9,6 +9,7 @@ export interface Tile {
   type?: TileType;
   objectId?: number;
   shouldShowMinus?: boolean;
+
 }
 
 export enum TileType {

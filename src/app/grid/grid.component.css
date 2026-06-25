@@ -4,7 +4,7 @@ font-family: arial;
 }
 
 mat-grid-list {
-  /*max-width: 800px;*/
+  max-width: 1000px;
 }
 
 .blank {
@@ -103,18 +103,31 @@ app-header {
   width: 100%;
 }
 
-.top {
-  border-top: black 1px solid;
+::ng-deep .mat-figure {
+  box-sizing: border-box;
+
+  input, button {
+    padding: 0;
+    box-sizing: border-box;
+    border: 1px solid dimgray;
+  }
+  button {
+    border: none;
+  }
 }
 
-.bottom {
-  border-bottom: black 1px solid;
+mat-grid-tile.top ::ng-deep .mat-figure {
+  border-top: black 4px solid;
 }
 
-.left {
-  border-left: black 1px solid;
+mat-grid-tile.bottom ::ng-deep .mat-figure {
+  border-bottom: black 4px solid;
 }
 
-.right {
-  border-right: black 1px solid;
+mat-grid-tile.left ::ng-deep .mat-figure {
+  border-left: black 4px solid;
+}
+
+mat-grid-tile.right ::ng-deep .mat-figure {
+  border-right: black 4px solid;
 }
