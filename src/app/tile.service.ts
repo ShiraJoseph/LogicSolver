@@ -36,9 +36,10 @@ export class TileService {
   constructor(private dataService: DataService) {
   }
 
-  getTiles () {
+  getTiles() {
     return this.tiles;
   }
+
   buildGrid() {
     this.buildHeaderTiles();
     this.buildRows();
@@ -49,6 +50,7 @@ export class TileService {
     const topFeatureTiles = [];
     this.leftFeatureTiles = [];
     this.tiles = [];
+
     this.dataService.features.forEach((feature, index) => {
       if (index > 0) {
         topFeatureTiles.push({
@@ -57,7 +59,6 @@ export class TileService {
           rows: 1,
           color: 'gray',
           type: TileType.TOP_FEATURE_HEADER,
-          object: feature,
           objectId: feature.id,
         });
         this.dataService.getFeatureOptions(feature.id).forEach(option => {
@@ -72,7 +73,7 @@ export class TileService {
         });
       }
     });
-    // push the first left feature
+
     this.leftFeatureTiles.push({
       text: this.dataService.features[0].name,
       cols: 1,
@@ -81,18 +82,18 @@ export class TileService {
       type: TileType.LEFT_FEATURE_HEADER,
       objectId: this.dataService.features[0].id,
     });
-    // push the remaining left features using the feature list in reverse order
-    for (let fCount = this.dataService.features.length - 1; fCount > 1; fCount--) {
+
+    for (let featureIndex = this.dataService.features.length - 1; featureIndex > 1; featureIndex--) {
       this.leftFeatureTiles.push({
-        text: this.dataService.features[fCount].name,
+        text: this.dataService.features[featureIndex].name,
         cols: 1,
         rows: this.dataService.optionCount,
         color: 'gray',
         type: TileType.LEFT_FEATURE_HEADER,
-        objectId: this.dataService.features[fCount].id,
+        objectId: this.dataService.features[featureIndex].id,
       });
     }
-    // insert all the headers and the add buttons to the grid
+
     this.tiles.push(
       {text: null, cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK},
       ...topFeatureTiles,
@@ -102,16 +103,21 @@ export class TileService {
     );
   }
 
+  /**
+   * Builds the staircase of cell rows. Each left feature gets one fewer
+   * feature's worth of cells than the one above it, so every row sheds one
+   * feature's cells and gains one filler blank to keep the grid square.
+   */
   buildRows() {
     let cellIndex = 0;
     let rowCellCount = (this.dataService.features.length - 1) * this.dataService.optionCount;
     const blanks = [];
+
     this.leftFeatureTiles.forEach(featureTile => {
       let addBlank = true;
-      // push a left feature
       this.tiles.push(featureTile);
+
       this.dataService.getFeatureOptions(featureTile.objectId).forEach(option => {
-        // push a left leftOptionId
         this.tiles.push({
           text: option.name,
           cols: 3,
@@ -120,8 +126,8 @@ export class TileService {
           type: TileType.LEFT_OPTION_HEADER,
           objectId: option.id,
         });
-        for (let cell = 0; cell < rowCellCount && cellIndex < this.dataService.cells.length; cell++) {
-          // push a cell
+
+        for (let i = 0; i < rowCellCount && cellIndex < this.dataService.cells.length; i++) {
           this.tiles.push({
             text: this.dataService.cells[cellIndex].value,
             cols: 1,
@@ -132,7 +138,7 @@ export class TileService {
           });
           cellIndex++;
         }
-        // push any blanks needed to the end of the row, to fill the bottom right corner
+
         if (addBlank) {
           this.tiles.push(
             ...blanks,
@@ -141,9 +147,8 @@ export class TileService {
           addBlank = false;
         }
       });
-      // take away one feature's worth of cells, so we don't have too many cells in the next row
+
       rowCellCount -= this.dataService.optionCount;
-      // add another blank so the next row will have the right number of blanks
       blanks.push({
         text: null,
         cols: this.dataService.optionCount,

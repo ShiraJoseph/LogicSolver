@@ -1,6 +1,5 @@
-
 :host {
-font-family: arial;
+  font-family: arial, sans-serif;
 }
 
 mat-grid-list {
@@ -8,7 +7,7 @@ mat-grid-list {
 }
 
 .blank {
- background-color: transparent;
+  background-color: transparent;
 }
 
 .other {
@@ -24,8 +23,6 @@ mat-grid-list {
   height: -webkit-fill-available;
   width: -webkit-fill-available;
   border: dimgray 1px solid;
-  /*padding: 3px;*/
-  /*padding: 3%;*/
 }
 
 .cell-inactive {
@@ -34,7 +31,6 @@ mat-grid-list {
   justify-content: center;
   height: -webkit-fill-available;
   width: -webkit-fill-available;
-  /*font-size: 18px;*/
   font-size: medium;
   border: dimgray 1px solid;
 }
@@ -43,7 +39,6 @@ mat-grid-list {
   flex-direction: row;
   display: flex;
   justify-content: space-between;
-  /*font-size: 16px;*/
   font-size: small;
 }
 
@@ -85,10 +80,6 @@ mat-grid-list {
   color: purple;
 }
 
-.cell:focus {
-  border: purple 1px solid;
-}
-
 .cell-inactive:hover {
   cursor: pointer;
   border: purple 1px solid;
@@ -109,8 +100,12 @@ app-header {
   input, button {
     padding: 0;
     box-sizing: border-box;
+  }
+
+  input {
     border: 1px solid dimgray;
   }
+
   button {
     border: none;
   }

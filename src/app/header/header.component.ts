@@ -28,6 +28,7 @@ export class HeaderComponent implements OnInit {
     } else {
       this.dataService.setOption(this.tile.objectId, event.target.value);
     }
+
     this.tileService.buildGrid();
     this.tile.shouldShowMinus = false;
   }
@@ -38,15 +39,15 @@ export class HeaderComponent implements OnInit {
     } else {
       this.dataService.deleteOption(this.tile.objectId);
     }
+
     this.tileService.buildGrid();
   }
 
   moveNext(event) {
-    let nextElem = event;
-    while (nextElem.tag !== ('app-header')) {
-      nextElem = event.target.nextSibling;
-      console.log(nextElem);
-    }
+    let nextElement = event;
 
+    while (nextElement.tag !== 'app-header') {
+      nextElement = event.target.nextSibling;
+    }
   }
 }

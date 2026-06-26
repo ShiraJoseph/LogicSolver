@@ -34,7 +34,7 @@ export class GridComponent implements OnInit {
     this.tileService.buildGrid();
   }
 
-  // deactivates all tiles except the currently selected one.
+  /** Deactivates all tiles except the currently selected one. */
   switchOut(newTile: Tile) {
     this.tileService.tiles.forEach((tile) => {
       if (tile.type === TileType.CELL_ACTIVE) {
@@ -63,13 +63,10 @@ export class GridComponent implements OnInit {
     const isTopButton = tile.type === TileType.ADD_FEATURE;
     const isBottomButton = tile.type === TileType.ADD_OPTION;
     const isCorner = tile.type === TileType.CORNER_BLANK;
-
-    const isLastOption = this.dataService.optionCount - 1;
-
+    const lastOptionIndex = this.dataService.optionCount - 1;
     const cell = this.dataService.getCell(tile.objectId);
     const option = this.dataService.getOption(tile.objectId);
     const feature = this.dataService.getFeature(tile.objectId);
-
 
     if (cell) {
       const topFeatureId = this.dataService.getOption(cell.topOptionId).featureId;
@@ -79,6 +76,7 @@ export class GridComponent implements OnInit {
       leftCellIndex = this.dataService.getFeatureOptions(leftFeatureId)
         .findIndex(leftOption => leftOption.id === cell.leftOptionId);
     }
+
     if (option) {
       optionIndex = this.dataService.getFeature(option.featureId).optionsIds.findIndex(id => id === option.id);
     }
@@ -86,15 +84,14 @@ export class GridComponent implements OnInit {
     return {
       left: isLeftFeature,
       right: isCorner || feature || isBottomButton || isTopButton ||
-        (cell && topCellIndex === isLastOption) || (isLeftOption || (isTopOption && optionIndex === isLastOption)),
+        (cell && topCellIndex === lastOptionIndex) || (isLeftOption || (isTopOption && optionIndex === lastOptionIndex)),
       top: isTopFeature || isTopButton,
       bottom: isCorner || feature || isBottomButton || isTopButton ||
-        (cell && leftCellIndex === isLastOption) || (isTopOption || (isLeftOption && optionIndex === isLastOption)),
+        (cell && leftCellIndex === lastOptionIndex) || (isTopOption || (isLeftOption && optionIndex === lastOptionIndex)),
     };
   }
 
   clearCells() {
-    console.log('clearing');
     this.dataService.clearCells();
     this.tileService.buildGrid();
   }
