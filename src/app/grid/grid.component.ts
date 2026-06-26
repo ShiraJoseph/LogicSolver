@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../data.service';
-import { TileService, Tile, TileType } from '../tile.service';
+import { Tile, TileService, TileType } from '../tile.service';
 
 @Component({
   selector: 'app-grid',
@@ -34,7 +34,7 @@ export class GridComponent implements OnInit {
     this.tileService.buildGrid();
   }
 
-  // deactivates all tiles except the currently selected one.
+  /** Deactivates all tiles except the currently selected one. */
   switchOut(newTile: Tile) {
     this.tileService.tiles.forEach((tile) => {
       if (tile.type === TileType.CELL_ACTIVE) {
@@ -56,35 +56,42 @@ export class GridComponent implements OnInit {
     let topCellIndex = -1;
     let leftCellIndex = -1;
     let optionIndex = -1;
-    const top = tile.type === TileType.TOP_OPTION_HEADER;
-    const left = tile.type === TileType.LEFT_OPTION_HEADER;
-    const last = this.dataService.optionCount - 1;
-
+    const isTopOption = tile.type === TileType.TOP_OPTION_HEADER;
+    const isLeftOption = tile.type === TileType.LEFT_OPTION_HEADER;
+    const isTopFeature = tile.type === TileType.TOP_FEATURE_HEADER;
+    const isLeftFeature = tile.type === TileType.LEFT_FEATURE_HEADER;
+    const isTopButton = tile.type === TileType.ADD_FEATURE;
+    const isBottomButton = tile.type === TileType.ADD_OPTION;
+    const isCorner = tile.type === TileType.CORNER_BLANK;
+    const lastOptionIndex = this.dataService.optionCount - 1;
     const cell = this.dataService.getCell(tile.objectId);
     const option = this.dataService.getOption(tile.objectId);
     const feature = this.dataService.getFeature(tile.objectId);
 
-    const all = feature || tile.type === TileType.ADD_OPTION || tile.type === TileType.ADD_FEATURE;
     if (cell) {
-      topCellIndex = this.dataService.getFeatureOptions(this.dataService.getOption(cell.topOptionId).featureId)
+      const topFeatureId = this.dataService.getOption(cell.topOptionId).featureId;
+      const leftFeatureId = this.dataService.getOption(cell.leftOptionId).featureId;
+      topCellIndex = this.dataService.getFeatureOptions(topFeatureId)
         .findIndex(topOption => topOption.id === cell.topOptionId);
-      leftCellIndex = this.dataService.getFeatureOptions(this.dataService.getOption(cell.leftOptionId).featureId)
+      leftCellIndex = this.dataService.getFeatureOptions(leftFeatureId)
         .findIndex(leftOption => leftOption.id === cell.leftOptionId);
     }
+
     if (option) {
       optionIndex = this.dataService.getFeature(option.featureId).optionsIds.findIndex(id => id === option.id);
     }
 
     return {
-      left: all || (cell && topCellIndex === 0) || (option && (left || (top && optionIndex === 0))),
-      right: all || (cell && topCellIndex === last) || (option && (left || (top && optionIndex === last))),
-      top: all || (cell && leftCellIndex === 0) || (option && (top || (left && optionIndex === 0))),
-      bottom: all || (cell && leftCellIndex === last) || (option && (top || (left && optionIndex === last))),
+      left: isLeftFeature,
+      right: isCorner || feature || isBottomButton || isTopButton ||
+        (cell && topCellIndex === lastOptionIndex) || (isLeftOption || (isTopOption && optionIndex === lastOptionIndex)),
+      top: isTopFeature || isTopButton,
+      bottom: isCorner || feature || isBottomButton || isTopButton ||
+        (cell && leftCellIndex === lastOptionIndex) || (isTopOption || (isLeftOption && optionIndex === lastOptionIndex)),
     };
   }
 
   clearCells() {
-    console.log('clearing');
     this.dataService.clearCells();
     this.tileService.buildGrid();
   }

@@ -5,7 +5,7 @@
   class="header"
   [ngClass]="{vertical: tile.type==='TOP_OPTION_HEADER' || tile.type==='LEFT_FEATURE_HEADER'}">
   <input
-    [id]="tile.type"
+    [class]="tile.type"
     (keyup.enter)="updateHeader($event)"
     (keyup.tab)="moveNext($event)"
     (blur)="updateHeader($event)"
