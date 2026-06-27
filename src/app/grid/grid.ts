@@ -1,16 +1,21 @@
 import { Component, OnInit } from '@angular/core';
-import { DataService } from '../data.service';
-import { Tile, TileService, TileType } from '../tile.service';
+import { DataService } from '../../services/data.service';
+import { Tile, TileService, TileType } from '../../services/tile.service';
+import { Header } from '../header/header';
+import { MatGridList, MatGridTile } from '@angular/material/grid-list';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-grid',
-  templateUrl: './grid.component.html',
-  styleUrls: ['./grid.component.css']
+  templateUrl: './grid.html',
+  styleUrl: './grid.css',
+  imports: [Header, MatGridList, MatGridTile, NgClass],
 })
-export class GridComponent implements OnInit {
-
-  constructor(private dataService: DataService, private tileService: TileService) {
-  }
+export class Grid implements OnInit {
+  constructor(
+    private dataService: DataService,
+    private tileService: TileService,
+  ) {}
 
   ngOnInit() {
     this.tileService.buildGrid();
@@ -53,9 +58,9 @@ export class GridComponent implements OnInit {
   }
 
   getBorder(tile: Tile) {
-    let topCellIndex = -1;
-    let leftCellIndex = -1;
-    let optionIndex = -1;
+    let topCellIndex: number | undefined = -1;
+    let leftCellIndex: number | undefined = -1;
+    let optionIndex: number | undefined = -1;
     const isTopOption = tile.type === TileType.TOP_OPTION_HEADER;
     const isLeftOption = tile.type === TileType.LEFT_OPTION_HEADER;
     const isTopFeature = tile.type === TileType.TOP_FEATURE_HEADER;
@@ -69,25 +74,41 @@ export class GridComponent implements OnInit {
     const feature = this.dataService.getFeature(tile.objectId);
 
     if (cell) {
-      const topFeatureId = this.dataService.getOption(cell.topOptionId).featureId;
-      const leftFeatureId = this.dataService.getOption(cell.leftOptionId).featureId;
-      topCellIndex = this.dataService.getFeatureOptions(topFeatureId)
-        .findIndex(topOption => topOption.id === cell.topOptionId);
-      leftCellIndex = this.dataService.getFeatureOptions(leftFeatureId)
-        .findIndex(leftOption => leftOption.id === cell.leftOptionId);
+      const topFeatureId = this.dataService.getOption(cell.topOptionId)?.featureId;
+      const leftFeatureId = this.dataService.getOption(cell.leftOptionId)?.featureId;
+      topCellIndex = this.dataService
+        .getFeatureOptions(topFeatureId as number)
+        ?.findIndex((topOption) => topOption.id === cell.topOptionId);
+      leftCellIndex = this.dataService
+        .getFeatureOptions(leftFeatureId as number)
+        ?.findIndex((leftOption) => leftOption.id === cell.leftOptionId);
     }
 
     if (option) {
-      optionIndex = this.dataService.getFeature(option.featureId).optionsIds.findIndex(id => id === option.id);
+      optionIndex = this.dataService
+        .getFeature(option.featureId)
+        ?.optionsIds?.findIndex((id) => id === option.id);
     }
 
     return {
       left: isLeftFeature,
-      right: isCorner || feature || isBottomButton || isTopButton ||
-        (cell && topCellIndex === lastOptionIndex) || (isLeftOption || (isTopOption && optionIndex === lastOptionIndex)),
+      right:
+        isCorner ||
+        feature ||
+        isBottomButton ||
+        isTopButton ||
+        (cell && topCellIndex === lastOptionIndex) ||
+        isLeftOption ||
+        (isTopOption && optionIndex === lastOptionIndex),
       top: isTopFeature || isTopButton,
-      bottom: isCorner || feature || isBottomButton || isTopButton ||
-        (cell && leftCellIndex === lastOptionIndex) || (isTopOption || (isLeftOption && optionIndex === lastOptionIndex)),
+      bottom:
+        isCorner ||
+        feature ||
+        isBottomButton ||
+        isTopButton ||
+        (cell && leftCellIndex === lastOptionIndex) ||
+        isTopOption ||
+        (isLeftOption && optionIndex === lastOptionIndex),
     };
   }
 

@@ -9,7 +9,6 @@ export interface Tile {
   type?: TileType;
   objectId?: number;
   shouldShowMinus?: boolean;
-
 }
 
 export enum TileType {
@@ -30,8 +29,8 @@ export enum TileType {
   providedIn: 'root'
 })
 export class TileService {
-  tiles: Tile[];
-  leftFeatureTiles: Tile[];
+  tiles: Tile[] = [];
+  leftFeatureTiles: Tile[] = [];
 
   constructor(private dataService: DataService) {
   }
@@ -46,8 +45,8 @@ export class TileService {
   }
 
   buildHeaderTiles() {
-    const topOptionTiles = [];
-    const topFeatureTiles = [];
+    const topOptionTiles:Array<Tile> = [];
+    const topFeatureTiles: Array<Tile> = [];
     this.leftFeatureTiles = [];
     this.tiles = [];
 
@@ -61,7 +60,7 @@ export class TileService {
           type: TileType.TOP_FEATURE_HEADER,
           objectId: feature.id,
         });
-        this.dataService.getFeatureOptions(feature.id).forEach(option => {
+        this.dataService.getFeatureOptions(feature.id)?.forEach(option => {
           topOptionTiles.push({
             text: option.name,
             cols: 1,
@@ -95,7 +94,7 @@ export class TileService {
     }
 
     this.tiles.push(
-      {text: null, cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK},
+      {text: '', cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK},
       ...topFeatureTiles,
       {text: '+', cols: 1, rows: 1, type: TileType.ADD_FEATURE},
       ...topOptionTiles,
@@ -111,13 +110,13 @@ export class TileService {
   buildRows() {
     let cellIndex = 0;
     let rowCellCount = (this.dataService.features.length - 1) * this.dataService.optionCount;
-    const blanks = [];
+    const blanks: Array<Tile> = [];
 
     this.leftFeatureTiles.forEach(featureTile => {
       let addBlank = true;
       this.tiles.push(featureTile);
 
-      this.dataService.getFeatureOptions(featureTile.objectId).forEach(option => {
+      this.dataService.getFeatureOptions(featureTile.objectId)?.forEach(option => {
         this.tiles.push({
           text: option.name,
           cols: 3,
@@ -142,7 +141,7 @@ export class TileService {
         if (addBlank) {
           this.tiles.push(
             ...blanks,
-            {text: null, cols: 1, rows: this.dataService.optionCount, type: TileType.RIGHT_BLANK}
+            {text: '', cols: 1, rows: this.dataService.optionCount, type: TileType.RIGHT_BLANK}
           );
           addBlank = false;
         }
@@ -150,7 +149,7 @@ export class TileService {
 
       rowCellCount -= this.dataService.optionCount;
       blanks.push({
-        text: null,
+        text: '',
         cols: this.dataService.optionCount,
         rows: this.dataService.optionCount,
         color: 'white',
