@@ -13,6 +13,7 @@ export class Feature {
   public id: number;
   public name = '';
   public optionsIds?: number[] = [];
+  public optionIdsSet: Set<number> = new Set();
 
   constructor() {
     this.id = Math.random();

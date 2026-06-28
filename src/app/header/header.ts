@@ -27,8 +27,8 @@ export class Header implements OnInit {
 
   getDisabledDelete() {
     return this.isFeatureHeader
-      ? !this.dataService.getAllowDeleteFeatures()
-      : !this.dataService.getAllowDeleteOptions();
+      ? !this.dataService.getIsDeleteFeatureAllowed()
+      : !this.dataService.getIsDeleteOptionAllowed();
   }
 
   updateHeader(event: any) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { Cell, Feature, Option } from './model';
 
 @Injectable({
@@ -11,24 +11,152 @@ export class DataService {
   options: Option[] = [];
   optionCount = 3;
   cellCount = 0;
+  featureMap = signal<Map<number, Feature>>(new Map());
+  optionMap = signal<Map<number, Option>>(new Map());
+  cellMap = signal<Map<number, Cell>>(new Map());
 
   constructor() {
-    this.buildDataTemplate();
+    this.buildMockDataTemplate();
   }
 
-  getAllowDeleteFeatures(): boolean {
-    return this.features.length > 2;
-  }
+  upsertFeature = (feature: Feature) => {
+    this.featureMap.update((current) => {
+      let next = new Map(current);
+      next.set(feature.id, feature);
 
-  getAllowDeleteOptions(): boolean {
-    return this.optionCount > 1;
-  }
-
-  buildDataTemplate() {
-    for (let i = 0; i < 4; i++) {
-      this.features.push(new Feature());
+      return next;
+    });
+  };
+  updateFeature = (id: number, updates: Partial<Feature>) => {
+    let feature: Feature = this.featureMap().get(id) as Feature;
+    if (feature) {
+      feature = { ...feature, ...updates };
+      this.upsertFeature(feature);
+      if (feature.id !== id) {
+        this.removeFeature(id);
+      }
     }
+  };
+  removeFeature = (id: number) => {
+    let feature = this.featureMap().get(id);
+    if (feature) {
+      this.featureMap.update((current) => {
+        let next = new Map(current);
+        next.delete(feature.id);
 
+        return next;
+      });
+    }
+  };
+
+  upsertOption = (option: Option) => {
+    this.optionMap.update((current) => {
+      let next = new Map(current);
+      next.set(option.id, option);
+
+      return next;
+    });
+  };
+  updateOption = (id: number, updates: Partial<Option>) => {
+    let option: Option = this.optionMap().get(id) as Option;
+    if (option) {
+      option = { ...option, ...updates };
+      this.upsertOption(option);
+      if (option.id !== id) {
+        this.removeOption(id);
+      }
+    }
+  };
+  removeOption = (id: number) => {
+    let option = this.optionMap().get(id);
+    if (option) {
+      this.optionMap.update((current) => {
+        let next = new Map(current);
+        next.delete(option.id);
+
+        return next;
+      });
+    }
+  };
+
+  upsertCell = (cell: Cell) => {
+    this.cellMap.update((current) => {
+      let next = new Map(current);
+      next.set(cell.id, cell);
+      return next;
+    });
+  };
+  updateCell = (id: number, updates: Partial<Cell>) => {
+    let cell: Cell = this.cellMap().get(id) as Cell;
+    if (cell) {
+      cell = { ...cell, ...updates };
+      this.upsertCell(cell);
+      if (cell.id !== id) {
+        this.removeCell(id);
+      }
+    }
+  };
+  removeCell = (id: number) => {
+    let cell = this.cellMap().get(id);
+    if (cell) {
+      this.cellMap.update((current) => {
+        let next = new Map(current);
+        next.delete(cell.id);
+
+        return next;
+      });
+    }
+  };
+
+  getFeatureCount = computed(() => this.featureMap().size);
+  getOptionCount = computed(() => this.optionMap().size || this.optionCount); // todo use a signal defaultOptionCount
+  getCellCount = computed(() => this.cellMap().size);
+
+  getIsDeleteFeatureAllowed(): boolean {
+    return this.features.length > 2;
+    // return this.getFeatureCount() > 2;
+  }
+
+  getIsDeleteOptionAllowed(): boolean {
+    return this.optionCount > 1;
+    // return this.getOptionCount() > 1;
+  }
+
+  buildMockDataTemplate() {
+    const mockFeatureNames = ['First Name', 'Last Name', 'Color', 'Vehicle'];
+    const mockOptionNames = [
+      'Bob',
+      'Missy',
+      'Jo',
+      'Smith',
+      'Johnson',
+      'Joseph',
+      'red',
+      'green',
+      'blue',
+      'car',
+      'boat',
+      'plane',
+    ];
+
+    for (let i = 0; i < 4; i++) {
+      let newFeature = new Feature();
+      this.features.push(newFeature);
+      this.upsertFeature({ ...newFeature, name: mockFeatureNames[i] }); //
+    }
+    this.featureMap().forEach((feature, featureIndex) => {
+      let newFeature = { ...feature };
+
+      for (let i = 0; i < this.getOptionCount(); i++) {
+        const option = new Option();
+        option.featureId = feature.id;
+        option.name = mockOptionNames[featureIndex * this.getOptionCount() + i];
+        this.upsertOption(option);
+        newFeature.optionIdsSet.add(option.id);
+      }
+
+      this.upsertFeature(newFeature);
+    });
     this.features.forEach((feature) => {
       feature.optionsIds = [];
 
@@ -334,7 +462,10 @@ export class DataService {
         );
         const masterColumn: { leftOptionId: number; value: string }[] = [];
         rowOfXs.forEach((rowXCell) =>
-          masterColumn.push({ leftOptionId: rowXCell.topOptionId as number, value: rowXCell.value }),
+          masterColumn.push({
+            leftOptionId: rowXCell.topOptionId as number,
+            value: rowXCell.value,
+          }),
         );
 
         if (rowOfOs.length > 0) {
