@@ -1,0 +1,78 @@
+<mat-grid-list
+  [cols]="getColumnCount()"
+  rowHeight="1:1"
+  gutterSize="0">
+  @for (tile of getTiles(); track tile.objectId) {
+    <mat-grid-tile
+      [colspan]="tile.cols"
+      [rowspan]="tile.rows"
+      [style.background]="tile.color"
+      [ngClass]="getBorder(tile)">
+      @switch (tile.type) {
+        @case ('CELL_INACTIVE') {
+          <div
+            class="cell-inactive"
+            (click)="switchOut(tile)">
+            {{ tile.text }}
+          </div>
+        }
+        @case ('CELL_ACTIVE') {
+          <div
+            class="cell-active">
+            <div class="xo-buttons">
+              <div
+                class="xo-button"
+                (click)="updateTile(tile, 'O')">O
+              </div>
+              <div
+                class="xo-button"
+                (click)="updateTile(tile, 'X')">X
+              </div>
+            </div>
+
+            <div class="clear-buttons">
+              <div
+                class="clear-button"
+                (click)="updateTile(tile, '')">clear
+              </div>
+              <div
+                class="clear-button"
+                (click)="updateTile(tile, tile.text)">x
+              </div>
+            </div>
+          </div>
+        }
+        @case ('LEFT_FEATURE_HEADER') {
+          <app-header [tile]="tile"></app-header>
+        }
+        @case ('LEFT_OPTION_HEADER') {
+          <app-header [tile]="tile"></app-header>
+        }
+        @case ('TOP_FEATURE_HEADER') {
+          <app-header [tile]="tile"></app-header>
+        }
+        @case ('TOP_OPTION_HEADER') {
+          <app-header [tile]="tile"></app-header>
+        }
+        @case ('ADD_FEATURE') {
+          <button
+            class="other"
+            (click)="addFeature()">{{ tile.text }}
+          </button>
+        }
+        @case ('ADD_OPTION') {
+          <button
+            class="other"
+            (click)="addOption()">{{ tile.text }}
+          </button>
+        }
+        @default {
+          <div
+            class="blank"></div>
+        }
+
+      }
+    </mat-grid-tile>
+  }
+</mat-grid-list>
+<button (click)="clearCells()">Clear Cells</button>

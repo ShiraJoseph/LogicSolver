@@ -10,13 +10,14 @@
     (keyup.tab)="moveNext($event)"
     (blur)="updateHeader($event)"
     [value]="tile.text">
-  <button
-    *ngIf="tile.shouldShowMinus"
-    (mouseover)="tile.shouldShowMinus=true"
-    (mouseleave)="tile.shouldShowMinus=false"
-    (blur)="tile.shouldShowMinus=false"
-    class="delete"
-    [disabled]="getDisabledDelete()"
-    (click)="deleteHeader()">-
-  </button>
+  @if (tile.shouldShowMinus) {
+    <button
+      (mouseover)="tile.shouldShowMinus=true"
+      (mouseleave)="tile.shouldShowMinus=false"
+      (blur)="tile.shouldShowMinus=false"
+      class="delete"
+      [disabled]="getDisabledDelete()"
+      (click)="deleteHeader()">-
+    </button>
+  }
 </div>
