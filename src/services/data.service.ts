@@ -1,5 +1,5 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { Cell, Feature, Option } from './model';
+import { Cell, Feature, Option } from './entities.model';
 
 @Injectable({
   providedIn: 'root',
@@ -402,19 +402,39 @@ export class DataService {
   getCell(id?: number): Cell | undefined {
     return id != undefined ? this.cells.find((cell) => cell.id === id) : undefined;
   }
+  getCellById(id: number): Cell | undefined {
+    return this.cellMap().get(id);
+  }
 
   getOption(id?: number): Option | undefined {
     return id != undefined ? this.options.find((option) => option.id === id) : undefined;
   }
+  getOptionById(id: number): Option | undefined {
+    return this.optionMap().get(id);
+  }
 
   getFeature(id?: number): Feature | undefined {
     return id != undefined ? this.features.find((feature) => feature.id === id) : undefined;
+  }
+  getFeatureById(id: number): Feature | undefined {
+    return this.featureMap().get(id);
   }
 
   getFeatureOptions(featureId?: number): Option[] | undefined {
     return featureId != undefined
       ? this.options.filter((option) => option.featureId === featureId)
       : undefined;
+  }
+  getFeatureOptionsById(id: number): Option[] | undefined {
+    let optionIds = [...(this.featureMap().get(id)?.optionIdsSet || new Set())];
+    return optionIds.reduce((prev, curr) => {
+      let option = this.optionMap().get(curr);
+      if (option) {
+        prev.push(option);
+      }
+
+      return prev;
+    }, [] as Array<Option>);
   }
 
   /**

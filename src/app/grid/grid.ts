@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../../services/data.service';
-import { Tile, TileService, TileType } from '../../services/tile.service';
+import { TileService } from '../../services/tile.service';
 import { Header } from '../header/header';
 import { MatGridList, MatGridTile } from '@angular/material/grid-list';
 import { NgClass } from '@angular/common';
+import { Tile, TileType } from '../../services/tile.model';
 
 @Component({
   selector: 'app-grid',
