@@ -1,8 +1,9 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, inject, input, Input, OnInit } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { TileService } from '../../services/tile.service';
 import { NgClass } from '@angular/common';
 import { Tile, TileType } from '../../services/tile.model';
+import { DataStore } from '../../services/data.store';
 
 @Component({
   selector: 'app-header',
@@ -12,7 +13,8 @@ import { Tile, TileType } from '../../services/tile.model';
 })
 export class Header implements OnInit {
   @Input() tile!: Tile;
-
+  tile2 = input.required<Tile>();
+  store = inject(DataStore);
   isFeatureHeader = true;
 
   constructor(
@@ -35,8 +37,11 @@ export class Header implements OnInit {
   updateHeader(event: any) {
     if (this.isFeatureHeader && this.tile.objectId != undefined) {
       this.dataService.setFeature(this.tile.objectId, event.target.value);
+      this.store.updateFeature(this.tile.objectId, { name: event.target.value });
+
     } else if (this.tile.objectId != undefined) {
       this.dataService.setOption(this.tile.objectId, event.target.value);
+      this.store.updateOption(this.tile.objectId, {name: event.target.value});
     }
 
     this.tileService.buildGrid();

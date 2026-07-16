@@ -1,3 +1,5 @@
+import { EntityId } from '@ngrx/signals/entities';
+
 export interface Tile {
   color?: string;
   cols: number;
@@ -5,6 +7,7 @@ export interface Tile {
   text: string;
   type?: TileType;
   objectId?: number;
+  objectId2?: EntityId;
   shouldShowMinus?: boolean;
 }
 

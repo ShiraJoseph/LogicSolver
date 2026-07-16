@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { TileService } from '../../services/tile.service';
 import { Header } from '../header/header';
 import { MatGridList, MatGridTile } from '@angular/material/grid-list';
 import { NgClass } from '@angular/common';
 import { Tile, TileType } from '../../services/tile.model';
+import { DataStore } from '../../services/data.store';
 
 @Component({
   selector: 'app-grid',
@@ -13,6 +14,8 @@ import { Tile, TileType } from '../../services/tile.model';
   imports: [Header, MatGridList, MatGridTile, NgClass],
 })
 export class Grid implements OnInit {
+  store = inject(DataStore);
+
   constructor(
     private dataService: DataService,
     private tileService: TileService,
@@ -58,6 +61,24 @@ export class Grid implements OnInit {
     this.tileService.buildGrid();
   }
 
+  getBorder2(tile: Tile){
+    if(!tile.objectId2) return;
+    let topCellIndex: number | undefined = -1;
+    let leftCellIndex: number | undefined = -1;
+    let optionIndex: number | undefined = -1;
+    const isTopOption = tile.type === TileType.TOP_OPTION_HEADER;
+    const isLeftOption = tile.type === TileType.LEFT_OPTION_HEADER;
+    const isTopFeature = tile.type === TileType.TOP_FEATURE_HEADER;
+    const isLeftFeature = tile.type === TileType.LEFT_FEATURE_HEADER;
+    const isTopButton = tile.type === TileType.ADD_FEATURE;
+    const isBottomButton = tile.type === TileType.ADD_OPTION;
+    const isCorner = tile.type === TileType.CORNER_BLANK;
+    const lastOptionIndex = this.dataService.optionCount - 1;
+    const cell = this.store.cellById(tile.objectId2);
+    const option = this.store.optionById(tile.objectId2);
+    const feature = this.store.featureById(tile.objectId2);
+// todo: continue
+  }
   getBorder(tile: Tile) {
     let topCellIndex: number | undefined = -1;
     let leftCellIndex: number | undefined = -1;
@@ -70,9 +91,9 @@ export class Grid implements OnInit {
     const isBottomButton = tile.type === TileType.ADD_OPTION;
     const isCorner = tile.type === TileType.CORNER_BLANK;
     const lastOptionIndex = this.dataService.optionCount - 1;
-    const cell = this.dataService.getCell(tile.objectId);
-    const option = this.dataService.getOption(tile.objectId);
-    const feature = this.dataService.getFeature(tile.objectId);
+    const cell = this.dataService.getCell(tile.objectId); // done
+    const option = this.dataService.getOption(tile.objectId); // done
+    const feature = this.dataService.getFeature(tile.objectId); // done
 
     if (cell) {
       const topFeatureId = this.dataService.getOption(cell.topOptionId)?.featureId;
