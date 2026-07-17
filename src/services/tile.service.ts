@@ -1,4 +1,4 @@
-import {computed, inject, Injectable} from '@angular/core';
+import {computed, inject, Injectable, linkedSignal} from '@angular/core';
 import {DataService} from './data.service';
 import {Tile, TileType} from './tile.model';
 import {DataStore} from './data.store';
@@ -28,7 +28,7 @@ export class TileService {
    * Tiles that span multiple rows are treated as existing only in their top row, in terms of tile order
    * @see tile.factory.ts for a diagram of how tiles are arranged.
    */
-  tiles2 = computed(() => {
+  tiles2 = linkedSignal(() => {
     const tiles: Array<Tile> = [];
     const topOptionTiles: Array<Tile> = [];
     const optionCount: number = this.store.optionCountPerFeature();
@@ -43,10 +43,12 @@ export class TileService {
 
   private fillTopFeatures(tiles: Tile[], optionCount: number, topOptionTiles: Tile[]) {
     tiles.push(CORNER_BLANK_TILE);
+    console.log('all options:', this.store.options())
 
     this.store.features().forEach((feature: Feature, index) => {
       if (index > 0) {
         tiles.push(TOP_FEATURE_TILE(feature, optionCount));
+        console.log('optionsByFeature:', this.store.optionsByFeature(feature));
         this.store.optionsByFeature(feature)?.forEach((option) => topOptionTiles.push(TOP_OPTION_TILE(option)));
       }
     });

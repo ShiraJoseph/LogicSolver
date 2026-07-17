@@ -1,13 +1,14 @@
 <mat-grid-list
-  [cols]="getColumnCount()"
+  [cols]="columnCount2()"
   rowHeight="1:1"
   gutterSize="0">
-  @for (tile of getTiles(); track tile.objectId) {
+  @for (tile of tileService.tiles2(); track `${$index}-${tile.type}`) {
     <mat-grid-tile
+      [id]="`${$index}-${tile.type}`"
       [colspan]="tile.cols"
       [rowspan]="tile.rows"
       [style.background]="tile.color"
-      [ngClass]="getBorder(tile)">
+      [ngClass]="getBorder2(tile)">
       @switch (tile.type) {
         @case ('CELL_INACTIVE') {
           <div
@@ -22,48 +23,48 @@
             <div class="xo-buttons">
               <div
                 class="xo-button"
-                (click)="updateTile(tile, 'O')">O
+                (click)="updateTile2(tile, CellText.O)">O
               </div>
               <div
                 class="xo-button"
-                (click)="updateTile(tile, 'X')">X
+                (click)="updateTile2(tile, CellText.X)">X
               </div>
             </div>
 
             <div class="clear-buttons">
               <div
                 class="clear-button"
-                (click)="updateTile(tile, '')">clear
+                (click)="updateTile2(tile, '')">clear
               </div>
               <div
                 class="clear-button"
-                (click)="updateTile(tile, tile.text)">x
+                (click)="updateTile2(tile, tile.text)">x
               </div>
             </div>
           </div>
         }
         @case ('LEFT_FEATURE_HEADER') {
-          <app-header [tile]="tile"></app-header>
+          <app-header [tile2]="tile"></app-header>
         }
         @case ('LEFT_OPTION_HEADER') {
-          <app-header [tile]="tile"></app-header>
+          <app-header [tile2]="tile"></app-header>
         }
         @case ('TOP_FEATURE_HEADER') {
-          <app-header [tile]="tile"></app-header>
+          <app-header [tile2]="tile"></app-header>
         }
         @case ('TOP_OPTION_HEADER') {
-          <app-header [tile]="tile"></app-header>
+          <app-header [tile2]="tile"></app-header>
         }
         @case ('ADD_FEATURE') {
           <button
             class="other"
-            (click)="addFeature()">{{ tile.text }}
+            (click)="addFeature2()">{{ tile.text }}
           </button>
         }
         @case ('ADD_OPTION') {
           <button
             class="other"
-            (click)="addOption()">{{ tile.text }}
+            (click)="addOption2()">{{ tile.text }}
           </button>
         }
         @default {

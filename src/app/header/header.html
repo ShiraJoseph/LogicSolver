@@ -1,23 +1,23 @@
 <div
-  (mouseover)="tile.shouldShowMinus=true"
-  (mouseleave)="tile.shouldShowMinus=false"
-  (blur)="tile.shouldShowMinus=false"
+  (mouseover)="showMinus()"
+  (mouseleave)="hideMinus()"
+  (blur)="hideMinus()"
   class="header"
-  [ngClass]="{vertical: tile.type==='TOP_OPTION_HEADER' || tile.type==='LEFT_FEATURE_HEADER'}">
+  [ngClass]="{vertical: tile2().type==='TOP_OPTION_HEADER' || tile2().type==='LEFT_FEATURE_HEADER'}">
   <input
-    [class]="tile.type"
-    (keyup.enter)="updateHeader($event)"
+    [class]="tile2().type"
+    (keyup.enter)="updateHeader2($event)"
     (keyup.tab)="moveNext($event)"
-    (blur)="updateHeader($event)"
-    [value]="tile.text">
-  @if (tile.shouldShowMinus) {
+    (blur)="updateHeader2($event)"
+    [value]="tile2().text">
+  @if (shouldShowMinus2()) {
     <button
-      (mouseover)="tile.shouldShowMinus=true"
-      (mouseleave)="tile.shouldShowMinus=false"
-      (blur)="tile.shouldShowMinus=false"
+      (mouseover)="showMinus()"
+      (mouseleave)="hideMinus()"
+      (blur)="hideMinus()"
       class="delete"
-      [disabled]="getDisabledDelete()"
-      (click)="deleteHeader()">-
+      [disabled]="isDeleteDisabled2()"
+      (click)="deleteHeader2()">-
     </button>
   }
 </div>

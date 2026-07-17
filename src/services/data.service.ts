@@ -1,6 +1,7 @@
 import {computed, inject, Injectable} from '@angular/core';
 import {Cell, CellId, Feature, FeatureId, Option, OptionId} from './entities.model';
 import {DataStore} from './data.store';
+import {CellText} from './tile.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,13 +22,11 @@ export class DataService {
   }
 
   getIsDeleteFeatureAllowed2 = computed(() => this.store.featureCount() > 2);
-
   getIsDeleteFeatureAllowed(): boolean {
     return this.features.length > 2;
   }
 
   getIsDeleteOptionAllowed2 = computed(() => this.store.optionCountPerFeature() > 1);
-
   getIsDeleteOptionAllowed(): boolean {
     return this.optionCount > 1;
   }
@@ -49,9 +48,10 @@ export class DataService {
       'plane'
     ];
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < mockFeatureNames.length; i++) {
       let newFeature = new Feature();
-      this.store.addFeature({...newFeature, name: mockFeatureNames[i]});
+      newFeature.name = mockFeatureNames[i];
+      this.store.addFeature(newFeature);
       for (let j = 0; j < this.store.optionCountPerFeature(); j++) {
         this.addOptionWithCellsToFeature2(newFeature, mockOptionNames[i * this.store.optionCountPerFeature() + j]);
       }
@@ -286,7 +286,8 @@ export class DataService {
           throw new Error('cannot find feature with id ' + existingOption.featureId2);
         }
 
-        // if the option is from a feature at index 0, we know it is on the left; otherwise the left option is whichever's feature index is higher
+        // if the option is from a feature at index 0, we know it is on the left;
+        // otherwise the left option is whichever's feature index is higher
         const leftOptionId = existingFeatureIndex === 0 ? existingOption.id2 :
           featureIndex === 0 || featureIndex > existingFeatureIndex ? option.id2 : existingOption.id2;
 
@@ -367,32 +368,25 @@ export class DataService {
     this.features = this.features.filter(feature => feature.id !== id);
   }
 
-  setCell2(cellId: CellId, value?: string, topOptionId?: OptionId, leftOptionId?: OptionId, withLogic = true) {
+  setCell2(cellId: CellId, value?: string, withLogic?: boolean) {
     if (!cellId) return;
     let cell = this.store.cellById(cellId);
     if (cell) {
       if (value !== cell.value && typeof value === 'string') {
         this.store.setCell({...cell, value});
-        if (value === 'O') {
+
+        if (value === CellText.O) {
           const crossCellIds = this.getCrossCellIds2(cellId);
           crossCellIds.forEach(crossCellId => {
-            this.setCell2(crossCellId, 'X');
+            this.setCell2(crossCellId, CellText.X, true);
           });
         }
 
         if (withLogic) {
-          this.propagateLogicalValuesToMatchingCells(true);
-          this.propagateLogicalValuesToMatchingCells(false);
+          this.propagateLogicalValuesToMatchingCells2(true);
+          this.propagateLogicalValuesToMatchingCells2(false);
           this.fillDeductions2();
         }
-      }
-      cell = this.store.cellById(cellId); // why was I getting this twice? Do any of the above functions delete cells??
-
-      if (cell && (topOptionId || leftOptionId)) {
-        let existingOptions = this.store.optionIdsByCell(cell);
-        let newOptions = [leftOptionId ?? existingOptions[0], topOptionId ?? existingOptions[1]];
-
-        this.store.updateCell(cellId, {optionIds: newOptions});
       }
     }
   }
@@ -404,11 +398,11 @@ export class DataService {
       if (value !== cell.value && typeof value === 'string') {
         cell.value = value;
 
-        if (value === 'O' && id != undefined) {
+        if (value === CellText.O && id != undefined) {
           // Shira, when would we have a cell with the id "undefined"?
           const crossCells = this.getCrossCellIds(id);
           crossCells.forEach(cellId => {
-            this.setCell(cellId, 'X');
+            this.setCell(cellId, CellText.X);
           });
         }
 
@@ -526,7 +520,7 @@ export class DataService {
     return crossCellIds;
   }
 
-  propagateLogicalValuesToMatchingCells(isHorizontal: boolean) {
+  propagateLogicalValuesToMatchingCells2(isHorizontal: boolean) {
     const lineAxis = isHorizontal ? 0 : 1;
     const crossAxis = isHorizontal ? 1 : 0;
     const changedCellIds: Set<CellId> = new Set();
@@ -537,10 +531,10 @@ export class DataService {
         const cellsInLineWithO: Cell[] = [];
         const master = new Map();
         this.store.cellsByOptionAtIndex(option.id2, lineAxis).forEach((cell) => {
-          if (cell.value === 'O') {
+          if (cell.value === CellText.O) {
             cellsInLineWithO.push(cell);
-          } else if (cell.value === 'X') {
-            master.set(cell.optionIds?.[crossAxis], 'X');
+          } else if (cell.value === CellText.X) {
+            master.set(cell.optionIds?.[crossAxis], CellText.X);
           }
         });
 
@@ -566,9 +560,9 @@ export class DataService {
         cellId => this.getCell(cellId)?.leftOptionId === leftOption.id)) {
         // Find the 'O's in the next row
         const rowOfOs: Cell[] = this.cells.filter(
-          cell => cell.leftOptionId === leftOption.id && cell.value === 'O');
+          cell => cell.leftOptionId === leftOption.id && cell.value === CellText.O);
         const rowOfXs: Cell[] = this.cells.filter(
-          cell => cell.leftOptionId === leftOption.id && cell.value === 'X');
+          cell => cell.leftOptionId === leftOption.id && cell.value === CellText.X);
         const masterColumn: { optionId: number; value: string }[] = [];
         rowOfXs.forEach(rowXCell =>
           masterColumn.push({
@@ -631,7 +625,7 @@ export class DataService {
   expandMasterCrossValuesAlongOs2(cellsInLineWithO: Cell[], master: Map<OptionId, string>, lineAxis: 0 | 1,
                                   crossAxis: 0 | 1) {
     for (let [optionId, value] of master.entries()) {
-      if (value === 'O') {
+      if (value === CellText.O) {
         const crossCells: Cell[] = this.store.cellsByOptionAtIndex(optionId as OptionId, crossAxis);
 
         if (crossCells.length > 0) {
@@ -655,7 +649,7 @@ export class DataService {
     crossAxis: 'leftOptionId' | 'topOptionId'
   ) {
     masterColumn.forEach(record => {
-      if (record.value === 'O') {
+      if (record.value === CellText.O) {
         const recordCrossCells = this.cells.filter(
           cell => cell[crossAxis] === record.optionId);
 
@@ -687,7 +681,7 @@ export class DataService {
       for (let [optionId, value] of master.entries()) {
         const cellToFill = this.store.cellByOptions(oCell.optionIds?.[crossAxis] as OptionId, optionId);
         if (cellToFill && !usedOptionIds.has(optionId as OptionId) && !cellToFill.value) {
-          this.setCell2(cellToFill.id2, value, undefined, undefined, false);
+          this.setCell2(cellToFill.id2, value);
           changedCellIds.add(cellToFill.id2);
           usedOptionIds.add(optionId);
         }
@@ -735,9 +729,9 @@ export class DataService {
         cellId => this.getCell(cellId)?.topOptionId === topOption.id)) {
         // Find the 'O's in the next row
         const columnOfOs: Cell[] = this.cells.filter(
-          cell => cell.topOptionId === topOption.id && cell.value === 'O');
+          cell => cell.topOptionId === topOption.id && cell.value === CellText.O);
         const columnOfXs: Cell[] = this.cells.filter(
-          cell => cell.topOptionId === topOption.id && cell.value === 'X');
+          cell => cell.topOptionId === topOption.id && cell.value === CellText.X);
         const masterRow: { optionId: number; value: string }[] = [];
         columnOfXs.forEach(columnXCell =>
           masterRow.push({
@@ -768,19 +762,19 @@ export class DataService {
           columnIsAllXs = this.store.cellsByOptionAtIndex(topOptionId, 1).every(cellByOption =>
             cell.id2 !== cellByOption.id2 &&
             this.store.featureIdsByCell(cellByOption)?.[0] === this.store.featureIdsByCell(cell)?.[0] &&
-            cellByOption.value === 'X'
+            cellByOption.value === CellText.X
           );
         }
         if (columnIsAllXs) {
-          this.setCell2(cell.id2, 'O', undefined, undefined, false);
+          this.setCell2(cell.id2, CellText.O);
         } else if (leftOptionId) { // only check the row if the column didn't already have all Xs
           rowIsAllXs = this.store.cellsByOptionAtIndex(leftOptionId, 0).every(cellByOption =>
             cell.id2 !== cellByOption.id2 &&
             this.store.featureIdsByCell(cellByOption)?.[1] === this.store.featureIdsByCell(cell)?.[1] &&
-            cellByOption.value === 'X'
+            cellByOption.value === CellText.X
           );
           if (rowIsAllXs) {
-            this.setCell2(cell.id2, 'O', undefined, undefined, false);
+            this.setCell2(cell.id2, CellText.O);
           }
         }
       }
@@ -811,10 +805,10 @@ export class DataService {
         );
 
         if (
-          rowOptionCells.every(crossCell => crossCell.value === 'X') ||
-          columnOptionCells.every(crossCell => crossCell.value === 'X')
+          rowOptionCells.every(crossCell => crossCell.value === CellText.X) ||
+          columnOptionCells.every(crossCell => crossCell.value === CellText.X)
         ) {
-          this.setCell(cell.id, 'O', undefined, undefined, false);
+          this.setCell(cell.id, CellText.O, undefined, undefined, false);
         }
       }
     });

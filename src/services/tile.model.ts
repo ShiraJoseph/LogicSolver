@@ -24,3 +24,8 @@ export enum TileType {
   RIGHT_BLANK = 'RIGHT_BLANK',
   FILLER_BLANK = 'FILLER_BLANK',
 }
+
+export enum CellText {
+  X = 'X',
+  O = 'O'
+}
