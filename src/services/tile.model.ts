@@ -1,7 +1,8 @@
 import { EntityId } from '@ngrx/signals/entities';
 
 export interface Tile {
-  color?: string;
+  backgroundColor?: string;
+  textColor?: string;
   cols: number;
   rows: number;
   text: string;

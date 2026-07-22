@@ -1,14 +1,18 @@
 :host {
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
 }
 
 .header {
+  box-sizing: border-box;
   display: flex;
   background-color: transparent;
   justify-content: space-between;
   align-items: stretch;
   width: 100%;
   height: 100%;
+  border: 1px solid dimgray;
 }
 
 .header:hover, .header:focus {
@@ -16,6 +20,7 @@
 }
 
 input {
+  border: none;
   text-align: center;
   width: 100%;
   height: 100%;
@@ -23,6 +28,7 @@ input {
   font-family: Chalkboard, sans-serif;
   font-size: medium;
   text-wrap: wrap;
+  box-sizing: border-box;
 }
 
 input:focus, input:hover {
@@ -32,6 +38,7 @@ input:focus, input:hover {
 button {
   height: 100%;
   width: 30%;
+  box-sizing: border-box;
 }
 
 .vertical button {

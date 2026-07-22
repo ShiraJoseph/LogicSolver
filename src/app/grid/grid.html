@@ -7,13 +7,13 @@
       [id]="`${$index}-${tile.type}`"
       [colspan]="tile.cols"
       [rowspan]="tile.rows"
-      [style.background]="tile.color"
+      [style.background]="tile.backgroundColor"
       [ngClass]="getBorder2(tile)">
       @switch (tile.type) {
         @case ('CELL_INACTIVE') {
           <div
             class="cell-inactive"
-            (click)="switchOut(tile)">
+            (click)="switchOut2(tile)">
             {{ tile.text }}
           </div>
         }

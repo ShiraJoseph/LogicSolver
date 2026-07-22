@@ -47,7 +47,7 @@ export class TileService {
 
     this.store.features().forEach((feature: Feature, index) => {
       if (index > 0) {
-        tiles.push(TOP_FEATURE_TILE(feature, optionCount));
+        tiles.push(TOP_FEATURE_TILE(feature, optionCount, index));
         console.log('optionsByFeature:', this.store.optionsByFeature(feature));
         this.store.optionsByFeature(feature)?.forEach((option) => topOptionTiles.push(TOP_OPTION_TILE(option)));
       }
@@ -69,7 +69,7 @@ export class TileService {
     for (let leftFeatureIndex = 0; leftFeatureIndex != 1; leftFeatureIndex--, numberOfCellsInRow -= optionCount) {
       const feature = this.store.features()[leftFeatureIndex];
 
-      tiles.push(LEFT_FEATURE_TILE(feature, optionCount));
+      tiles.push(LEFT_FEATURE_TILE(feature, optionCount, leftFeatureIndex));
       this.fillOptionRowsForFeature(feature, tiles, numberOfCellsInRow, topOptionTiles, blanks, optionCount);
       blanks.push(FILLER_BLANK_TILE(optionCount));
 
@@ -117,7 +117,7 @@ export class TileService {
           text: feature.name,
           cols: this.dataService.optionCount,
           rows: 1,
-          color: 'gray',
+          backgroundColor: 'gray',
           type: TileType.TOP_FEATURE_HEADER,
           objectId: feature.id,
         });
@@ -126,7 +126,7 @@ export class TileService {
             text: option.name,
             cols: 1,
             rows: 3,
-            color: 'lightgray',
+            backgroundColor: 'lightgray',
             type: TileType.TOP_OPTION_HEADER,
             objectId: option.id,
           });
@@ -138,7 +138,7 @@ export class TileService {
       text: this.dataService.features[0].name,
       cols: 1,
       rows: this.dataService.optionCount,
-      color: 'gray',
+      backgroundColor: 'gray',
       type: TileType.LEFT_FEATURE_HEADER,
       objectId: this.dataService.features[0].id,
     });
@@ -152,14 +152,14 @@ export class TileService {
         text: this.dataService.features[featureIndex].name,
         cols: 1,
         rows: this.dataService.optionCount,
-        color: 'gray',
+        backgroundColor: 'gray',
         type: TileType.LEFT_FEATURE_HEADER,
         objectId: this.dataService.features[featureIndex].id,
       });
     }
 
     this.tiles.push(
-      {text: '', cols: 4, rows: 4, color: 'white', type: TileType.CORNER_BLANK},
+      {text: '', cols: 4, rows: 4, backgroundColor: 'white', type: TileType.CORNER_BLANK},
       ...topFeatureTiles,
       {text: '+', cols: 1, rows: 1, type: TileType.ADD_FEATURE},
       ...topOptionTiles,
@@ -186,7 +186,7 @@ export class TileService {
           text: option.name,
           cols: 3,
           rows: 1,
-          color: 'lightgray',
+          backgroundColor: 'lightgray',
           type: TileType.LEFT_OPTION_HEADER,
           objectId: option.id,
         });
@@ -196,7 +196,7 @@ export class TileService {
             text: this.dataService.cells[cellIndex].value,
             cols: 1,
             rows: 1,
-            color: 'white',
+            backgroundColor: 'white',
             type: TileType.CELL_INACTIVE,
             objectId: this.dataService.cells[cellIndex].id,
           });
@@ -219,7 +219,7 @@ export class TileService {
         text: '',
         cols: this.dataService.optionCount,
         rows: this.dataService.optionCount,
-        color: 'white',
+        backgroundColor: 'white',
         type: TileType.FILLER_BLANK,
       });
     });

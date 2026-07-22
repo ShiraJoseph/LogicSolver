@@ -85,25 +85,12 @@ mat-grid-list {
   border: purple 1px solid;
 }
 
-app-header {
-  display: flex;
-  box-sizing: border-box;
-  justify-content: space-between;
-  align-items: stretch;
-  height: 100%;
-  width: 100%;
-}
 
 ::ng-deep .mat-grid-tile-content {
   box-sizing: border-box;
-
   input, button {
     padding: 0;
     box-sizing: border-box;
-  }
-
-  input {
-    border: 1px solid dimgray;
   }
 
   button {
