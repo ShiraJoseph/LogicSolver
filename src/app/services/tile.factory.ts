@@ -1,6 +1,5 @@
-import {Tile, TileType} from './tile.model';
-import {Cell, Feature, Option} from './entities.model';
-
+import {Tile, TileType} from '../types/tile.model';
+import {Cell, Feature, Option} from '../types/entities.model';
 
 /**
  * The following diagram indicates where each tile type would go in the grid if the grid had three features with two options each.
@@ -129,11 +128,11 @@ export const LEFT_OPTION_TILE = (leftOption: Option): Tile => ({
 });
 
 export const CELL_TILE = (currCell: Cell): Tile => ({
-  text: currCell?.value || '',
+  text: currCell?.value2 || '',
   cols: 1,
   rows: 1,
   backgroundColor: 'white',
-  type: TileType.CELL_INACTIVE,
+  type: TileType.CELL,
   objectId2: currCell?.id2,
 });
 
@@ -146,7 +145,6 @@ export const FILLER_BLANK_TILE = (optionCount: number): Tile => ({
 });
 
 export const RIGHT_BLANK_TILE = (optionCount: number): Tile => ({
-
   text: '',
   cols: 1,
   rows: optionCount,

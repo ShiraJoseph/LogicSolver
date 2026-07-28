@@ -3,6 +3,8 @@
 // Option to Cell is 1:many.  All options point to the same number of cells.
 // Cell to Option is 1:2.  Every cell belongs to exactly 2 (different) options and no cell shares the same two options
 
+import {CellText} from './tile.model';
+
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
 export type CellId = UUID;
 export type OptionId = UUID;
@@ -41,6 +43,7 @@ export class Cell {
   public leftOptionId?: number;
   public topOptionId?: number;
   public value = '';
+  value2?: CellText;
 
   constructor() {
     this.id = Math.random();

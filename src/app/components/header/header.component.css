@@ -49,3 +49,7 @@ button {
 .vertical {
   flex-direction: column;
 }
+
+.delete {
+  cursor: pointer;
+}

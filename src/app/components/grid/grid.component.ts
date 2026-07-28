@@ -1,21 +1,22 @@
 import {Component, computed, inject, linkedSignal, OnInit, signal} from '@angular/core';
 import { DataService } from '../../services/data.service';
 import { TileService } from '../../services/tile.service';
-import { Header } from '../header/header';
+import { HeaderComponent } from '../header/header.component';
 import { MatGridList, MatGridTile } from '@angular/material/grid-list';
 import { NgClass } from '@angular/common';
-import {CellText, Tile, TileType} from '../../services/tile.model';
+import {Tile, TileType} from '../../types/tile.model';
 import { DataStore } from '../../services/data.store';
-import {CellId, FeatureId, OptionId} from '../../services/entities.model';
+import {CellId, FeatureId, OptionId} from '../../types/entities.model';
 import {EntityId} from '@ngrx/signals/entities';
+import {ActiveCell} from './active-tile/active-cell.component';
 
 @Component({
   selector: 'app-grid',
-  templateUrl: './grid.html',
-  styleUrl: './grid.css',
-  imports: [Header, MatGridList, MatGridTile, NgClass],
+  templateUrl: './grid.component.html',
+  styleUrl: './grid.component.css',
+  imports: [HeaderComponent, MatGridList, MatGridTile, NgClass, ActiveCell],
 })
-export class Grid implements OnInit {
+export class GridComponent implements OnInit {
   store = inject(DataStore);
   tileService = inject(TileService);
   dataService = inject(DataService);
@@ -23,8 +24,7 @@ export class Grid implements OnInit {
 
   ngOnInit() {
     this.tileService.buildGrid();
-    // todo: to continue
-    // (just use tiles directly)
+    // v2: (just use tiles directly)
   }
 
   // use directly
@@ -55,7 +55,7 @@ export class Grid implements OnInit {
 
   // we might not need this after we use the new x-o-toggle ui
   switchOut2(newTile: Tile){
-    this.selectedTile2.set(newTile.objectId2);
+    this.store.setSelectedCellId(newTile.objectId2 as CellId);
   }
   /** Deactivates all tiles except the currently selected one. */
   switchOut(newTile: Tile) {
@@ -67,21 +67,6 @@ export class Grid implements OnInit {
     newTile.type = TileType.CELL_ACTIVE;
   }
 
-
-  updateTile2(tile: Tile, value: string) {
-    // we might not need this after we use the new x-o-toggle ui
-    if(this.selectedTile2() === tile.objectId2){
-      this.selectedTile2.set(undefined);
-    }
-
-    if(tile.type === TileType.CELL_INACTIVE || tile.type === TileType.CELL_ACTIVE) {
-      this.store.updateCell(tile.objectId2 as CellId, {value});
-    } else if(tile.type === TileType.TOP_OPTION_HEADER || tile.type === TileType.LEFT_OPTION_HEADER) {
-      this.store.updateOption(tile.objectId2 as OptionId, {name: value});
-    } else if (tile.type === TileType.TOP_FEATURE_HEADER || tile.type === TileType.LEFT_FEATURE_HEADER){
-      this.store.updateOption(tile.objectId2 as FeatureId, {name: value});
-    }
-  }
   updateTile(tile: Tile, text: string) {
     tile.text = text;
     tile.type = TileType.CELL_INACTIVE;
@@ -200,5 +185,4 @@ export class Grid implements OnInit {
     this.tileService.buildGrid();
   }
 
-  protected readonly CellText = CellText;
 }

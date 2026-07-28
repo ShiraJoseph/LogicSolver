@@ -1,8 +1,8 @@
 import {computed, inject, Injectable, linkedSignal} from '@angular/core';
 import {DataService} from './data.service';
-import {Tile, TileType} from './tile.model';
+import {Tile, TileType} from '../types/tile.model';
 import {DataStore} from './data.store';
-import {Cell, Feature, Option, OptionId} from './entities.model';
+import {Cell, Feature, Option, OptionId} from '../types/entities.model';
 import {
   CELL_TILE,
   CORNER_BLANK_TILE,
@@ -43,12 +43,10 @@ export class TileService {
 
   private fillTopFeatures(tiles: Tile[], optionCount: number, topOptionTiles: Tile[]) {
     tiles.push(CORNER_BLANK_TILE);
-    console.log('all options:', this.store.options())
 
     this.store.features().forEach((feature: Feature, index) => {
       if (index > 0) {
         tiles.push(TOP_FEATURE_TILE(feature, optionCount, index));
-        console.log('optionsByFeature:', this.store.optionsByFeature(feature));
         this.store.optionsByFeature(feature)?.forEach((option) => topOptionTiles.push(TOP_OPTION_TILE(option)));
       }
     });

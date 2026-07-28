@@ -10,38 +10,16 @@
       [style.background]="tile.backgroundColor"
       [ngClass]="getBorder2(tile)">
       @switch (tile.type) {
-        @case ('CELL_INACTIVE') {
-          <div
-            class="cell-inactive"
-            (click)="switchOut2(tile)">
-            {{ tile.text }}
-          </div>
-        }
-        @case ('CELL_ACTIVE') {
-          <div
-            class="cell-active">
-            <div class="xo-buttons">
-              <div
-                class="xo-button"
-                (click)="updateTile2(tile, CellText.O)">O
-              </div>
-              <div
-                class="xo-button"
-                (click)="updateTile2(tile, CellText.X)">X
-              </div>
+        @case ('CELL') {
+          @if (store.selectedCellId?.() === tile.objectId2) {
+            <app-active-cell [tile]="tile"/>
+          } @else {
+            <div
+              class="cell-inactive"
+              (click)="switchOut2(tile)">
+              {{ tile.text }}
             </div>
-
-            <div class="clear-buttons">
-              <div
-                class="clear-button"
-                (click)="updateTile2(tile, '')">clear
-              </div>
-              <div
-                class="clear-button"
-                (click)="updateTile2(tile, tile.text)">x
-              </div>
-            </div>
-          </div>
+          }
         }
         @case ('LEFT_FEATURE_HEADER') {
           <app-header [tile2]="tile"></app-header>
@@ -76,4 +54,4 @@
     </mat-grid-tile>
   }
 </mat-grid-list>
-<button (click)="clearCells()">Clear Cells</button>
+<button (click)="clearCells2()">Clear Cells</button>

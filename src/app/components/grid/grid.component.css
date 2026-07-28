@@ -1,0 +1,71 @@
+:host {
+  font-family: arial, sans-serif;
+}
+
+mat-grid-list {
+  max-width: 1000px;
+}
+
+.blank {
+  background-color: transparent;
+}
+
+.other {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+app-active-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  height: -webkit-fill-available;
+  width: -webkit-fill-available;
+  border: dimgray 1px solid;
+}
+
+.cell-inactive {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: -webkit-fill-available;
+  width: -webkit-fill-available;
+  font-size: medium;
+  border: dimgray 1px solid;
+}
+
+.cell-inactive:hover {
+  cursor: pointer;
+  border: purple 1px solid;
+}
+
+
+::ng-deep .mat-grid-tile-content {
+  box-sizing: border-box;
+  input, button {
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  button {
+    border: none;
+  }
+}
+
+mat-grid-tile.top ::ng-deep .mat-grid-tile-content {
+  border-top: black 4px solid;
+}
+
+mat-grid-tile.bottom ::ng-deep .mat-grid-tile-content {
+  border-bottom: black 4px solid;
+}
+
+mat-grid-tile.left ::ng-deep .mat-grid-tile-content{
+  border-left: black 4px solid;
+}
+
+mat-grid-tile.right ::ng-deep .mat-grid-tile-content{
+  border-right: black 4px solid;
+}

@@ -2,18 +2,18 @@ import {Component, computed, inject, input, model, OnInit, signal} from '@angula
 import {DataService} from '../../services/data.service';
 import {TileService} from '../../services/tile.service';
 import {NgClass} from '@angular/common';
-import {Tile, TileType} from '../../services/tile.model';
+import {Tile, TileType} from '../../types/tile.model';
 import {DataStore} from '../../services/data.store';
 import {should} from 'vitest';
-import {FeatureId, OptionId} from '../../services/entities.model';
+import {FeatureId, OptionId} from '../../types/entities.model';
 
 @Component({
   selector: 'app-header',
-  templateUrl: './header.html',
-  styleUrls: ['./header.css'],
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.css'],
   imports: [NgClass],
 })
-export class Header implements OnInit {
+export class HeaderComponent implements OnInit {
   tile = model<Tile>();
   tile2 = input.required<Tile>();
   store = inject(DataStore);
@@ -42,15 +42,16 @@ export class Header implements OnInit {
   }
 
   updateHeader2(event: any) {
-    if (this.tile2().objectId2 == undefined) return;
+    this.hideMinus();
+    const name = event?.target?.value;
+
+    if (this.tile2().objectId2 == undefined || name === this.tile2().text) return;
 
     if (this.isFeature2()) {
-      this.store.updateFeature(this.tile2().objectId2 as FeatureId, {name: event?.target?.value});
+      this.store.updateFeature(this.tile2().objectId2 as FeatureId, {name});
     } else {
-      this.store.updateOption(this.tile2().objectId2 as OptionId, {name: event.target.value});
+      this.store.updateOption(this.tile2().objectId2 as OptionId, {name});
     }
-
-    this.hideMinus();
   }
   updateHeader(event: any) {
     if (this.isFeatureHeader && this.tile()?.objectId != undefined) {
@@ -86,13 +87,5 @@ export class Header implements OnInit {
     }
 
     this.tileService.buildGrid();
-  }
-
-  moveNext(event: any) {
-    let nextElement = event;
-
-    while (nextElement.tag !== 'app-header') {
-      nextElement = event.target.nextSibling;
-    }
   }
 }

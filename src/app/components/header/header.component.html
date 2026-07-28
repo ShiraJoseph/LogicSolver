@@ -8,7 +8,6 @@
     [class]="tile2().type"
     [style.color]="tile2().textColor"
     (keyup.enter)="updateHeader2($event)"
-    (keyup.tab)="moveNext($event)"
     (blur)="updateHeader2($event)"
     [value]="tile2().text">
   @if (shouldShowMinus2()) {

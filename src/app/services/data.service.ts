@@ -1,7 +1,7 @@
 import {computed, inject, Injectable} from '@angular/core';
-import {Cell, CellId, Feature, FeatureId, Option, OptionId} from './entities.model';
+import {Cell, CellId, Feature, FeatureId, Option, OptionId} from '../types/entities.model';
 import {DataStore} from './data.store';
-import {CellText} from './tile.model';
+import {CellText} from '../types/tile.model';
 
 @Injectable({
   providedIn: 'root'
@@ -22,11 +22,13 @@ export class DataService {
   }
 
   getIsDeleteFeatureAllowed2 = computed(() => this.store.featureCount() > 2);
+
   getIsDeleteFeatureAllowed(): boolean {
     return this.features.length > 2;
   }
 
-  getIsDeleteOptionAllowed2 = computed(() => this.store.optionCountPerFeature() > 1);
+  getIsDeleteOptionAllowed2 = computed(() => this.store.optionCountPerFeature() > 2);
+
   getIsDeleteOptionAllowed(): boolean {
     return this.optionCount > 1;
   }
@@ -210,7 +212,7 @@ export class DataService {
   }
 
   clearCells2() {
-    this.store.updateAllCells({value: ''});
+    this.store.updateAllCells({value2: CellText.EMPTY});
   }
 
   clearCells() {
@@ -368,27 +370,44 @@ export class DataService {
     this.features = this.features.filter(feature => feature.id !== id);
   }
 
-  setCell2(cellId: CellId, value?: string, withLogic?: boolean) {
+  setCell2(cellId: CellId, value?: CellText, withLogic?: boolean) {
     if (!cellId) return;
     let cell = this.store.cellById(cellId);
     if (cell) {
-      if (value !== cell.value && typeof value === 'string') {
-        this.store.setCell({...cell, value});
-
-        if (value === CellText.O) {
-          const crossCellIds = this.getCrossCellIds2(cellId);
-          crossCellIds.forEach(crossCellId => {
-            this.setCell2(crossCellId, CellText.X, true);
-          });
-        }
-
-        if (withLogic) {
-          this.propagateLogicalValuesToMatchingCells2(true);
-          this.propagateLogicalValuesToMatchingCells2(false);
-          this.fillDeductions2();
-        }
+      if (value !== cell.value2 && typeof value === 'string') {
+        this.store.setCell({...cell, value2: value});
+        console.log('setting cell', cell);
+        this.xOutOtherOptionsIfCellIsO2(value, cellId);
+        this.deduceSideEffects2(cellId, withLogic);
       }
     }
+  }
+
+  private xOutOtherOptionsIfCellIsO2(value: CellText, cellId: CellId) {
+    if (value !== CellText.O) return;
+
+    const crossCellIds = this.getCrossCellIds2(cellId);
+
+    crossCellIds.forEach(crossCellId => {
+      this.setCell2(crossCellId, CellText.X, true);
+    });
+  }
+
+  private deduceSideEffects2(cellId: CellId, withLogic?: boolean) {
+    if (!withLogic) return;
+
+    const changedCellIds: Set<CellId> = new Set();
+
+    changedCellIds.add(cellId);
+
+    this.propagateLogicalValuesToMatchingCells2(0, changedCellIds);
+
+    this.propagateLogicalValuesToMatchingCells2(1, changedCellIds);
+
+    // changedCellIds.forEach(changedCellId => {
+      this.useProcessOfElimination2(cellId);
+    // });
+
   }
 
   setCell(id?: number, value?: string, topOptionId?: number,
@@ -520,10 +539,8 @@ export class DataService {
     return crossCellIds;
   }
 
-  propagateLogicalValuesToMatchingCells2(isHorizontal: boolean) {
-    const lineAxis = isHorizontal ? 0 : 1;
-    const crossAxis = isHorizontal ? 1 : 0;
-    const changedCellIds: Set<CellId> = new Set();
+  propagateLogicalValuesToMatchingCells2(lineAxis: 0 | 1, changedCellIds: Set<CellId>) {
+    const crossAxis = lineAxis ? 0 : 1;
     const usedOptionIds: Set<OptionId> = new Set();
 
     this.store.options().forEach(option => {
@@ -531,16 +548,16 @@ export class DataService {
         const cellsInLineWithO: Cell[] = [];
         const master = new Map();
         this.store.cellsByOptionAtIndex(option.id2, lineAxis).forEach((cell) => {
-          if (cell.value === CellText.O) {
+          if (cell.value2 === CellText.O) {
             cellsInLineWithO.push(cell);
-          } else if (cell.value === CellText.X) {
+          } else if (cell.value2 === CellText.X) {
             master.set(cell.optionIds?.[crossAxis], CellText.X);
           }
         });
 
         if (cellsInLineWithO.length > 0) {
-          this.collectCrossValuesForOs2(cellsInLineWithO, master, lineAxis, crossAxis);
-          this.expandMasterCrossValuesAlongOs2(cellsInLineWithO, master, lineAxis, crossAxis);
+          this.collectCrossValuesForOs2(cellsInLineWithO, master, lineAxis);
+          this.expandMasterCrossValuesAlongOs2(cellsInLineWithO, master, lineAxis);
           this.applyMasterCrossValuesToOs2(cellsInLineWithO, master, changedCellIds, crossAxis, usedOptionIds);
         }
       }
@@ -583,13 +600,14 @@ export class DataService {
     });
   }
 
-  collectCrossValuesForOs2(cellsInLineWithO: Cell[], master: Map<OptionId, string>, lineAxis: 0 | 1, crossAxis: 0 | 1) {
+  collectCrossValuesForOs2(cellsInLineWithO: Cell[], master: Map<OptionId, CellText>, lineAxis: 0 | 1) {
+    const crossAxis = lineAxis ? 0 : 1;
     cellsInLineWithO.forEach(cell => {
       const crossCells: Cell[] = this.store.cellsByOptionAtIndex(cell.optionIds?.[crossAxis] as OptionId, crossAxis);
       crossCells?.forEach(crossCell => {
         const lineOptionId = crossCell.optionIds?.[lineAxis];
-        if (crossCell.value && lineOptionId && !master.has(lineOptionId)) {
-          master.set(lineOptionId, crossCell.value);
+        if (crossCell.value2 && lineOptionId && !master.has(lineOptionId)) {
+          master.set(lineOptionId, crossCell.value2);
         }
       });
     });
@@ -622,8 +640,8 @@ export class DataService {
     });
   }
 
-  expandMasterCrossValuesAlongOs2(cellsInLineWithO: Cell[], master: Map<OptionId, string>, lineAxis: 0 | 1,
-                                  crossAxis: 0 | 1) {
+  expandMasterCrossValuesAlongOs2(cellsInLineWithO: Cell[], master: Map<OptionId, CellText>, lineAxis: 0 | 1) {
+    const crossAxis = lineAxis ? 0 : 1;
     for (let [optionId, value] of master.entries()) {
       if (value === CellText.O) {
         const crossCells: Cell[] = this.store.cellsByOptionAtIndex(optionId as OptionId, crossAxis);
@@ -632,8 +650,8 @@ export class DataService {
           cellsInLineWithO.push(crossCells[0]);
           crossCells?.forEach(crossCell => {
             const lineOptionId = crossCell.optionIds?.[lineAxis];
-            if (crossCell.value && lineOptionId && !master.has(lineOptionId)) {
-              master.set(lineOptionId, crossCell.value);
+            if (crossCell.value2 && lineOptionId && !master.has(lineOptionId)) {
+              master.set(lineOptionId, crossCell.value2);
             }
           });
         }
@@ -675,12 +693,12 @@ export class DataService {
     });
   }
 
-  applyMasterCrossValuesToOs2(cellsInLineWithO: Cell[], master: Map<OptionId, string>, changedCellIds: Set<CellId>,
+  applyMasterCrossValuesToOs2(cellsInLineWithO: Cell[], master: Map<OptionId, CellText>, changedCellIds: Set<CellId>,
                               crossAxis: 0 | 1, usedOptionIds: Set<OptionId>) {
     cellsInLineWithO.forEach(oCell => {
       for (let [optionId, value] of master.entries()) {
         const cellToFill = this.store.cellByOptions(oCell.optionIds?.[crossAxis] as OptionId, optionId);
-        if (cellToFill && !usedOptionIds.has(optionId as OptionId) && !cellToFill.value) {
+        if (cellToFill && !changedCellIds.has(cellToFill.id2 as CellId) && !cellToFill.value2) {
           this.setCell2(cellToFill.id2, value);
           changedCellIds.add(cellToFill.id2);
           usedOptionIds.add(optionId);
@@ -752,33 +770,52 @@ export class DataService {
     });
   }
 
-  fillDeductions2() {
-    this.store.cells().forEach(cell => {
-      const [leftOptionId, topOptionId] = cell.optionIds as Array<OptionId>;
-      let columnIsAllXs = false;
-      let rowIsAllXs = false;
-      if (!cell.value) {
-        if (topOptionId) {
-          columnIsAllXs = this.store.cellsByOptionAtIndex(topOptionId, 1).every(cellByOption =>
-            cell.id2 !== cellByOption.id2 &&
-            this.store.featureIdsByCell(cellByOption)?.[0] === this.store.featureIdsByCell(cell)?.[0] &&
-            cellByOption.value === CellText.X
-          );
-        }
-        if (columnIsAllXs) {
-          this.setCell2(cell.id2, CellText.O);
-        } else if (leftOptionId) { // only check the row if the column didn't already have all Xs
-          rowIsAllXs = this.store.cellsByOptionAtIndex(leftOptionId, 0).every(cellByOption =>
-            cell.id2 !== cellByOption.id2 &&
-            this.store.featureIdsByCell(cellByOption)?.[1] === this.store.featureIdsByCell(cell)?.[1] &&
-            cellByOption.value === CellText.X
-          );
-          if (rowIsAllXs) {
-            this.setCell2(cell.id2, CellText.O);
-          }
-        }
+  useProcessOfElimination2(cellId: CellId) {
+    const cell = this.store.cellById(cellId);
+    if (cell?.value2 !== CellText.X) return;
+
+    const [leftOptionId, topOptionId] = cell.optionIds as Array<OptionId>;
+
+    if (this.checkForAllXs2(topOptionId, cell, 1) || this.checkForAllXs2(leftOptionId, cell, 0)) return;
+
+
+  }
+
+  /**
+   * If you have 5 options and 4 of those options have been marked as Xs for that row/column while the 5th is blank,
+   * we deduce that the blank must be the answer and mark it with an O.
+   * @param optionId
+   * @param cell
+   * @param lineAxis
+   * @private
+   */
+  private checkForAllXs2(optionId: OptionId, cell: Cell, lineAxis: 0 | 1) {
+    if (!optionId) return false;
+
+    const crossAxis = lineAxis ? 0 : 1;
+    let emptyCellInLine: CellId | undefined = undefined;
+
+    for (const cellByOption of this.store.cellsByOptionAtIndex(optionId, lineAxis)) {
+      if (
+        this.store.featureIdsByCell(cellByOption)?.[crossAxis] !== this.store.featureIdsByCell(cell)?.[crossAxis] ||
+        cellByOption?.value2 === CellText.X
+      ) {
+        continue;
       }
-    });
+
+      if (cellByOption.value2 === CellText.O || !!emptyCellInLine) { // if there is already an O OR this is the second blank we found
+        return false;
+      }
+
+      emptyCellInLine = cellByOption.id2; // we found one blank - if all the others are Xs then we need to mark this cell as O
+    }
+
+    if (emptyCellInLine) {
+      this.setCell2(emptyCellInLine, CellText.O);
+      return true;
+    }
+
+    return false;
   }
 
   /**

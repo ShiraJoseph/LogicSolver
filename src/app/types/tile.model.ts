@@ -13,6 +13,7 @@ export interface Tile {
 }
 
 export enum TileType {
+  CELL = 'CELL',
   CELL_ACTIVE = 'CELL_ACTIVE',
   CELL_INACTIVE = 'CELL_INACTIVE',
   TOP_FEATURE_HEADER = 'TOP_FEATURE_HEADER',
@@ -28,5 +29,6 @@ export enum TileType {
 
 export enum CellText {
   X = 'X',
-  O = 'O'
+  O = 'O',
+  EMPTY = ''
 }
