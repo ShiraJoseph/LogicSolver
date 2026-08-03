@@ -11,43 +11,33 @@ export type OptionId = UUID;
 export type FeatureId = UUID;
 
 export class Feature {
-  public id: number;
   id2: FeatureId;
   public name = '';
-  public optionsIds?: number[] = []; // don't keep this for v2
 
   constructor() {
-    this.id = Math.random();
     this.id2 = crypto.randomUUID();
   }
 }
 
 export class Option {
-  public id: number;
   id2: OptionId;
   public name = '';
-  public featureId?: number;
   featureId2?: FeatureId;
 
   constructor() {
-    this.id = Math.random();
     this.id2 = crypto.randomUUID();
   }
 }
 
 export class Cell {
-  public id: number;
   id2: CellId;
   // always do left first, then top
   public optionIds?: Array<OptionId>;
-  public leftOptionId?: number;
-  public topOptionId?: number;
-  public value = '';
   value2?: CellText;
 
   constructor() {
-    this.id = Math.random();
     this.id2 = crypto.randomUUID();
+    this.value2 = CellText.EMPTY;
   }
 }
 

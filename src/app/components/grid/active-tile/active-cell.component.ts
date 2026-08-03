@@ -15,7 +15,6 @@ export class ActiveCell {
   dataService = inject(DataService);
   tile = input.required<Tile>();
 
-  /** The tile only carries display text, so the typed value comes from the cell itself. */
   cellValue(): CellText | undefined {
     return this.store.cellById(this.tile().objectId2 as CellId)?.value2;
   }

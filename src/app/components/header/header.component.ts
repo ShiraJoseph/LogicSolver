@@ -13,33 +13,22 @@ import {FeatureId, OptionId} from '../../types/entities.model';
   styleUrls: ['./header.component.css'],
   imports: [NgClass],
 })
-export class HeaderComponent implements OnInit {
-  tile = model<Tile>();
-  tile2 = input.required<Tile>();
+export class HeaderComponent {
   store = inject(DataStore);
   dataService = inject(DataService);
-  tileService = inject(TileService);
-  isFeatureHeader = true;
+
+  tile2 = input.required<Tile>();
+
   shouldShowMinus2 = signal(false);
-  isFeature2 = computed(
-    () => this.tile2().type === TileType.LEFT_FEATURE_HEADER || this.tile2().type === TileType.TOP_FEATURE_HEADER);
+
+  isFeature2 = computed(() =>
+    this.tile2().type === TileType.LEFT_FEATURE_HEADER || this.tile2().type === TileType.TOP_FEATURE_HEADER);
+  isDeleteDisabled2 = computed(() => this.isFeature2() ? this.store.featureCount() <= 2 :
+    this.store.optionCountPerFeature() <= 2);
+
   showMinus = () => this.shouldShowMinus2.set(true);
+
   hideMinus = () => this.shouldShowMinus2.set(false);
-
-  ngOnInit() {
-    this.isFeatureHeader =
-      this.tile()?.type === TileType.TOP_FEATURE_HEADER ||
-      this.tile()?.type === TileType.LEFT_FEATURE_HEADER;
-  }
-
-  isDeleteDisabled2 = computed(() => this.isFeature2() ? !this.dataService.getIsDeleteFeatureAllowed2() :
-    !this.dataService.getIsDeleteOptionAllowed2());
-
-  getDisabledDelete() {
-    return this.isFeatureHeader
-      ? !this.dataService.getIsDeleteFeatureAllowed()
-      : !this.dataService.getIsDeleteOptionAllowed();
-  }
 
   updateHeader2(event: any) {
     this.hideMinus();
@@ -53,22 +42,6 @@ export class HeaderComponent implements OnInit {
       this.store.updateOption(this.tile2().objectId2 as OptionId, {name});
     }
   }
-  updateHeader(event: any) {
-    if (this.isFeatureHeader && this.tile()?.objectId != undefined) {
-      this.dataService.setFeature(this.tile()?.objectId as number, event.target.value);
-
-    } else if (this.tile()?.objectId != undefined) {
-      this.dataService.setOption(this.tile()?.objectId as number, event.target.value);
-    }
-
-    this.tileService.buildGrid();
-    this.tile.update(tile => {
-      if (tile) {
-        tile.shouldShowMinus = false;
-      }
-      return tile;
-    });
-  }
 
   deleteHeader2(){
     if(this.tile2().objectId2 == undefined) return;
@@ -78,14 +51,5 @@ export class HeaderComponent implements OnInit {
     } else {
       this.dataService.deleteOption2(this.tile2().objectId2 as OptionId);
     }
-  }
-  deleteHeader() {
-    if (this.isFeatureHeader && this.tile()?.objectId != undefined) {
-      this.dataService.deleteFeature(this.tile()?.objectId as number);
-    } else if (this.tile()?.objectId != undefined) {
-      this.dataService.deleteOption(this.tile()?.objectId as number);
-    }
-
-    this.tileService.buildGrid();
   }
 }
