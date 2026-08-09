@@ -1,12 +1,16 @@
-<mat-grid-list
-  [cols]="columnCount2()"
-  rowHeight="1:1"
-  gutterSize="0">
+<div
+  class="grid"
+  [style.--column-count]="columnCount2()">
   @for (tile of tileService.tiles2(); track `${$index}-${tile.type}`) {
-    <mat-grid-tile
+    <div
+      class="tile"
       [id]="`${$index}-${tile.type}`"
-      [colspan]="tile.cols"
-      [rowspan]="tile.rows"
+      [style.--tile-columns]="tile.cols"
+      [style.--tile-rows]="tile.rows"
+      [style.--sticky-row]="stickyByType[tile.type!]?.row"
+      [style.--sticky-column]="stickyByType[tile.type!]?.column"
+      [style.--sticky-layer]="stickyByType[tile.type!]?.layer"
+      [class.sticky]="!!stickyByType[tile.type!]"
       [style.background]="tile.backgroundColor"
       [ngClass]="getBorder2(tile)">
       @switch (tile.type) {
@@ -51,7 +55,7 @@
         }
 
       }
-    </mat-grid-tile>
+    </div>
   }
-</mat-grid-list>
+</div>
 <button (click)="clearCells2()">Clear Cells</button>

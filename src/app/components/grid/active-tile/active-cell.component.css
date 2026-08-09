@@ -4,8 +4,9 @@
   flex-direction: column;
   align-items: stretch;
   justify-content: space-between;
-  height: -webkit-fill-available;
-  width: -webkit-fill-available;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
   border: dimgray 1px solid;
 }
 
@@ -67,17 +68,4 @@
 .cell-inactive:hover {
   cursor: pointer;
   border: purple 1px solid;
-}
-
-
-::ng-deep .mat-grid-tile-content {
-  box-sizing: border-box;
-  input, button {
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  button {
-    border: none;
-  }
 }

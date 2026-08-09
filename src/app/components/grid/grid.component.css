@@ -1,9 +1,44 @@
 :host {
   font-family: arial, sans-serif;
+  --cell-size: 60px;
 }
 
-mat-grid-list {
-  max-width: 1000px;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--column-count), var(--cell-size));
+  grid-auto-rows: var(--cell-size);
+  width: max-content;
+}
+
+.tile {
+  box-sizing: border-box;
+  overflow: hidden;
+  grid-column: span var(--tile-columns);
+  grid-row: span var(--tile-rows);
+}
+
+.tile.sticky {
+  position: sticky;
+  top: calc(var(--sticky-row) * var(--cell-size));
+  left: calc(var(--sticky-column) * var(--cell-size));
+  z-index: var(--sticky-layer);
+  background-color: white;
+}
+
+.tile.top {
+  border-top: black 4px solid;
+}
+
+.tile.bottom {
+  border-bottom: black 4px solid;
+}
+
+.tile.left {
+  border-left: black 4px solid;
+}
+
+.tile.right {
+  border-right: black 4px solid;
 }
 
 .blank {
@@ -21,8 +56,8 @@ app-active-cell {
   flex-direction: column;
   align-items: stretch;
   justify-content: space-between;
-  height: -webkit-fill-available;
-  width: -webkit-fill-available;
+  height: 100%;
+  width: 100%;
   border: dimgray 1px solid;
 }
 
@@ -30,8 +65,9 @@ app-active-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: -webkit-fill-available;
-  width: -webkit-fill-available;
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
   font-size: medium;
   border: dimgray 1px solid;
 }
@@ -41,31 +77,12 @@ app-active-cell {
   border: purple 1px solid;
 }
 
-
-::ng-deep .mat-grid-tile-content {
+.tile ::ng-deep input,
+.tile ::ng-deep button {
+  padding: 0;
   box-sizing: border-box;
-  input, button {
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  button {
-    border: none;
-  }
 }
 
-mat-grid-tile.top ::ng-deep .mat-grid-tile-content {
-  border-top: black 4px solid;
-}
-
-mat-grid-tile.bottom ::ng-deep .mat-grid-tile-content {
-  border-bottom: black 4px solid;
-}
-
-mat-grid-tile.left ::ng-deep .mat-grid-tile-content{
-  border-left: black 4px solid;
-}
-
-mat-grid-tile.right ::ng-deep .mat-grid-tile-content{
-  border-right: black 4px solid;
+.tile ::ng-deep button {
+  border: none;
 }
