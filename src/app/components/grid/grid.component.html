@@ -5,6 +5,7 @@
     <div
       class="tile"
       [id]="`${$index}-${tile.type}`"
+      [attr.data-tile-type]="tile.type"
       [style.--tile-columns]="tile.cols"
       [style.--tile-rows]="tile.rows"
       [style.--sticky-row]="stickyByType[tile.type!]?.row"

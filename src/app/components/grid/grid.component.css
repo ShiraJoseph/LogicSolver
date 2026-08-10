@@ -1,6 +1,10 @@
 :host {
   font-family: arial, sans-serif;
   --cell-size: 60px;
+  --band-shadow-offset: 3px;
+  --band-shadow-blur: 4px;
+  --band-shadow-spread: -1px;
+  --band-shadow-color: rgba(0, 0, 0, 0.3);
 }
 
 .grid {
@@ -23,6 +27,14 @@
   left: calc(var(--sticky-column) * var(--cell-size));
   z-index: var(--sticky-layer);
   background-color: white;
+}
+
+.tile[data-tile-type='LEFT_OPTION_HEADER'] {
+  box-shadow: var(--band-shadow-offset) 0 var(--band-shadow-blur) var(--band-shadow-spread) var(--band-shadow-color);
+}
+
+.tile[data-tile-type='TOP_OPTION_HEADER'] {
+  box-shadow: 0 var(--band-shadow-offset) var(--band-shadow-blur) var(--band-shadow-spread) var(--band-shadow-color);
 }
 
 .tile.top {
