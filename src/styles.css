@@ -1,1 +1,28 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --band-shadow-offset: 3px;
+  --band-shadow-blur: 4px;
+  --band-shadow-spread: -1px;
+  --band-shadow-color: rgba(0, 0, 0, 0.3);
+  --grey-border: dimgrey 1px solid;
+  --purple-border: purple 1px solid;
+  --thick-border: black 4px solid;
+
+  --right-shadow: var(--band-shadow-offset) 0 var(--band-shadow-blur) var(--band-shadow-spread) var(--band-shadow-color);
+  --bottom-shadow: 0 var(--band-shadow-offset) var(--band-shadow-blur) var(--band-shadow-spread) var(--band-shadow-color);
+  --right-and-bottom-shadow: var(--band-shadow-offset) var(--band-shadow-offset) var(--band-shadow-blur) var(--band-shadow-spread) var(--band-shadow-color);
+
+  --page-margin: 8px;
+
+  --cell-size: 60px;
+
+  height: 100%;
+
+  body {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+    padding: var(--page-margin);
+  }
+}

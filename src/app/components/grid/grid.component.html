@@ -1,17 +1,14 @@
 <div
   class="grid"
-  [style.--column-count]="columnCount2()">
+  [style.grid-auto-rows]="CELL_SIZE"
+  [style.grid-template-columns]="`repeat(${columnCount2()}, ${CELL_SIZE})`">
   @for (tile of tileService.tiles2(); track `${$index}-${tile.type}`) {
     <div
       class="tile"
       [id]="`${$index}-${tile.type}`"
       [attr.data-tile-type]="tile.type"
-      [style.--tile-columns]="tile.cols"
-      [style.--tile-rows]="tile.rows"
-      [style.--sticky-row]="stickyByType[tile.type!]?.row"
-      [style.--sticky-column]="stickyByType[tile.type!]?.column"
-      [style.--sticky-layer]="stickyByType[tile.type!]?.layer"
-      [class.sticky]="!!stickyByType[tile.type!]"
+      [style.grid-column]="`span ${tile.cols}`"
+      [style.grid-row]="`span ${tile.rows}`"
       [style.background]="tile.backgroundColor"
       [ngClass]="getBorder2(tile)">
       @switch (tile.type) {
@@ -59,4 +56,4 @@
     </div>
   }
 </div>
-<button (click)="clearCells2()">Clear Cells</button>
+<button (click)="clearCells2()" class="clear-button">Clear Cells</button>

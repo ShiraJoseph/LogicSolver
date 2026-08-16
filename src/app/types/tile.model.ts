@@ -32,3 +32,5 @@ export enum CellText {
   O = 'O',
   EMPTY = ''
 }
+
+export const CELL_SIZE = '60px';

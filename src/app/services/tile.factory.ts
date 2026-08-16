@@ -44,12 +44,12 @@ import {Cell, Feature, Option} from '../types/entities.model';
  */
 export const FEATURE_COLORS = [
   {background: '#7733FF', text: 'white'},
-  {background: '#FF3377', text: 'black'},
-  {background: '#3377FF', text: 'black'},
+  {background: '#FF3377', text: 'white'},
+  {background: '#3377FF', text: 'white'},
   {background: '#33FF77', text: 'black'},
   {background: '#FF7733', text: 'black'},
   {background: '#77FF33', text: 'black'},
-  {background: '#BB33FF', text: 'black'},
+  {background: '#BB33FF', text: 'white'},
   {background: '#FF33BB', text: 'black'},
   {background: '#33BBFF', text: 'black'},
   {background: '#33FFBB', text: 'black'},
@@ -89,6 +89,7 @@ export const NEW_FEATURE_BUTTON_TILE: Tile = {
   text: '+',
   cols: 1,
   rows: 1,
+  backgroundColor: 'white',
   type: TileType.ADD_FEATURE
 };
 
@@ -105,6 +106,7 @@ export const NEW_OPTION_BUTTON_TILE: Tile = {
   text: '+',
   cols: 1,
   rows: 3,
+  backgroundColor: 'white',
   type: TileType.ADD_OPTION
 };
 
