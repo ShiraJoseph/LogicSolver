@@ -15,6 +15,10 @@
 
   --cell-size: 60px;
 
+  --header-skew: -20deg;
+
+  --header-baseline: calc(var(--cell-size) * 4);
+
   height: 100%;
 
   body {

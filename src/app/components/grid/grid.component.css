@@ -23,17 +23,18 @@
     top: 0;
     left: 0;
     z-index: 2;
+    transform-origin: bottom;
+    transform: skewX(var(--header-skew));
+    /* white shadow to cover the triangle the skewing revealed on the left */
+    box-shadow: calc(var(--header-baseline) * tan(var(--header-skew))) 0 0 0 white;
   }
 
   &[data-tile-type='TOP_FEATURE_HEADER'],
   &[data-tile-type='ADD_FEATURE'] {
     position: sticky;
     top: 0;
-  }
-
-  &[data-tile-type='LEFT_FEATURE_HEADER'] {
-    position: sticky;
-    left: 0;
+    transform: skewX(var(--header-skew));
+    transform-origin: 0 var(--header-baseline);
   }
 
   &[data-tile-type='TOP_OPTION_HEADER'],
@@ -41,6 +42,13 @@
     position: sticky;
     top: var(--cell-size);
     box-shadow: var(--bottom-shadow);
+    transform: skewX(var(--header-skew));
+    transform-origin: bottom;
+  }
+
+  &[data-tile-type='LEFT_FEATURE_HEADER'] {
+    position: sticky;
+    left: 0;
   }
 
   &[data-tile-type='LEFT_OPTION_HEADER'] {
