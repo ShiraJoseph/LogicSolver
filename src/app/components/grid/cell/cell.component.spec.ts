@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ActiveCell } from './active-cell.component';
+import { CellComponent } from './cell.component';
 
-describe('ActiveTile', () => {
-  let component: ActiveCell;
-  let fixture: ComponentFixture<ActiveCell>;
+describe('CellComponent', () => {
+  let component: CellComponent;
+  let fixture: ComponentFixture<CellComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ActiveCell]
+      imports: [CellComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ActiveCell);
+    fixture = TestBed.createComponent(CellComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

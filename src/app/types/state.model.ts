@@ -1,11 +1,11 @@
-import {CellId} from "./entities.model";
+import {CellId} from './entities.model';
 
-export interface DataState {
+export interface GridState {
   optionCountPerFeature: number;
   selectedCellId?: CellId;
 }
 
-export const initialState: DataState = {
+export const initialState: GridState = {
   optionCountPerFeature: 0,
   selectedCellId: undefined,
 };

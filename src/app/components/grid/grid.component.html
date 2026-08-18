@@ -1,8 +1,9 @@
 <div
   class="grid"
   [style.grid-auto-rows]="CELL_SIZE"
-  [style.grid-template-columns]="`repeat(${columnCount2()}, ${CELL_SIZE})`">
-  @for (tile of tileService.tiles2(); track `${$index}-${tile.type}`) {
+  [style.grid-template-columns]="`repeat(${columnCount()}, ${CELL_SIZE})`">
+
+  @for (tile of tileService.tiles(); track `${$index}-${tile.type}`) {
     <div
       class="tile"
       [id]="`${$index}-${tile.type}`"
@@ -10,50 +11,35 @@
       [style.grid-column]="`span ${tile.cols}`"
       [style.grid-row]="`span ${tile.rows}`"
       [style.background]="tile.backgroundColor"
-      [ngClass]="getBorder2(tile)">
+      [ngClass]="getBorder(tile)">
+
       @switch (tile.type) {
         @case ('CELL') {
-          @if (store.selectedCellId?.() === tile.objectId2) {
-            <app-active-cell [tile]="tile"/>
-          } @else {
-            <div
-              class="cell-inactive"
-              (click)="switchOut2(tile)">
-              {{ tile.text }}
-            </div>
-          }
-        }
-        @case ('LEFT_FEATURE_HEADER') {
-          <app-header [tile2]="tile"></app-header>
-        }
-        @case ('LEFT_OPTION_HEADER') {
-          <app-header [tile2]="tile"></app-header>
-        }
-        @case ('TOP_FEATURE_HEADER') {
-          <app-header [tile2]="tile"></app-header>
-        }
-        @case ('TOP_OPTION_HEADER') {
-          <app-header [tile2]="tile"></app-header>
+          <app-cell [tile]="tile"/>
         }
         @case ('ADD_FEATURE') {
           <button
             class="other"
-            (click)="addFeature2()">{{ tile.text }}
+            (click)="addFeature()">{{ tile.text }}
           </button>
         }
         @case ('ADD_OPTION') {
           <button
             class="other"
-            (click)="addOption2()">{{ tile.text }}
+            (click)="addOption()">{{ tile.text }}
           </button>
         }
         @default {
-          <div
-            class="blank"></div>
+          @if (isHeader(tile)) {
+            <app-header [tile]="tile"/>
+          } @else {
+            <div
+              class="blank"></div>
+          }
         }
 
       }
     </div>
   }
 </div>
-<button (click)="clearCells2()" class="clear-button">Clear Cells</button>
+<button (click)="clearCells()" class="clear-button">Clear Cells</button>

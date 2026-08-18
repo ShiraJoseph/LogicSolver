@@ -80,6 +80,7 @@
   cursor: pointer;
 }
 
+/*
 .cell-inactive {
   display: flex;
   align-items: center;
@@ -95,6 +96,7 @@
   cursor: pointer;
   border: var(--purple-border);
 }
+*/
 
 .tile ::ng-deep input,
 .tile ::ng-deep button {

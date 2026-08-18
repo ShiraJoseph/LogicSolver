@@ -1,27 +1,21 @@
 import {patchState, signalStore, withComputed, withMethods, withState} from '@ngrx/signals';
 import {withEntities} from '@ngrx/signals/entities';
 import {withDevtools} from '@angular-architects/ngrx-toolkit';
-import {Cell, CellId, Feature, Option} from '../types/entities.model';
+import {CellId} from '../types/entities.model';
 import {withEntityAccessors, withEntityRelationship, withTransitiveRelationship} from 'signalkin';
-import {DataState, initialState} from '../types/data.state';
-import {setState, toEntityConfig} from './utils';
+import {GridState, initialState} from '../types/state.model';
+import {cellConfig, featureConfig, optionConfig} from './entityConfig';
 
-const featureConfig = toEntityConfig<Feature, 'feature'>('feature');
-const optionConfig = toEntityConfig<Option, 'option'>('option');
-const cellConfig = toEntityConfig<Cell, 'cell'>('cell');
-
-export const DataStore = signalStore(
-  {providedIn: 'root'},
-  withState<DataState>(initialState),
+export const GridStore = signalStore(
+  {providedIn: 'root', protectedState: false},
+  withState<GridState>(initialState),
   withEntities(featureConfig),
   withEntities(optionConfig),
   withEntities(cellConfig),
   withEntityAccessors(featureConfig, optionConfig, cellConfig),
-  withEntityRelationship({...featureConfig, count: 1, selectId: 'id2'},
-    {...optionConfig, count: 'many', selectId: 'id2', selectForeignId: 'featureId2'}),
-  withEntityRelationship({...optionConfig, count: 2, selectId: 'id2'},
-    {...cellConfig, count: 'many', selectId: 'id2', selectForeignId: 'optionIds'}),
-  withTransitiveRelationship({from: 'feature', to: 'cell', through: 'option', selectFromId: 'id2', selectToId: 'id2'}),
+  withEntityRelationship({...featureConfig, count: 1}, {...optionConfig, count: 'many'}),
+  withEntityRelationship({...optionConfig, count: 2}, {...cellConfig, count: 'many'}),
+  withTransitiveRelationship({from: 'feature', to: 'cell', through: 'option'}),
   withMethods((store) => ({
     setOptionCountPerFeature: (optionCountPerFeature: number) => {
       patchState(store, {optionCountPerFeature});

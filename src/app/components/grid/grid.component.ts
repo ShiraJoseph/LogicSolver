@@ -1,41 +1,38 @@
 import {Component, computed, inject} from '@angular/core';
-import {DataService} from '../../services/data.service';
+import {StoreService} from '../../store/store.service';
 import {TileService} from '../../services/tile.service';
-import {HeaderComponent} from '../header/header.component';
+import {HeaderComponent} from './header/header.component';
 import {NgClass} from '@angular/common';
-import {CELL_SIZE, Tile, TileType} from '../../types/tile.model';
-import {DataStore} from '../../services/data.store';
+import {HEADER_TILE_TYPES, Tile, TileType} from '../../types/tile.model';
+import {GridStore} from '../../store/store';
 import {CellId, FeatureId, OptionId} from '../../types/entities.model';
-import {ActiveCell} from './active-tile/active-cell.component';
+import {CellComponent} from './cell/cell.component';
+import {CELL_SIZE, NON_OPTION_COLUMN_COUNT} from '../../types/constants';
 
 @Component({
   selector: 'app-grid',
   templateUrl: './grid.component.html',
   styleUrl: './grid.component.css',
-  imports: [HeaderComponent, NgClass, ActiveCell],
+  imports: [HeaderComponent, NgClass, CellComponent],
 })
 export class GridComponent {
-  store = inject(DataStore);
-  tileService = inject(TileService);
-  dataService = inject(DataService);
+  store = inject(GridStore);
+  tileService: TileService = inject(TileService);
+  storeService: StoreService = inject(StoreService);
 
-  columnCount2 = computed(() => this.store.optionCountPerFeature() * (this.store.featureCount() - 1) + 5);
+  columnCount = computed(() => this.store.optionCountPerFeature() * (this.store.featureCount() - 1) + NON_OPTION_COLUMN_COUNT);
 
-  addFeature2() {
-    this.dataService.addNewFeature2();
+  isHeader = (tile: Tile) => HEADER_TILE_TYPES.has(tile.type!);
+
+  addFeature() {
+    this.storeService.addNewFeature();
   }
 
-  addOption2() {
-    this.dataService.addNewOptionToAllFeatures2();
+  addOption() {
+    this.storeService.addNewOptionToAllFeatures();
   }
 
-  // we might not need this after we use the new x-o-toggle ui
-  /** Deactivates all tiles except the currently selected one. */
-  switchOut2(newTile: Tile) {
-    this.store.setSelectedCellId(newTile.objectId2 as CellId);
-  }
-
-  getBorder2(tile: Tile) {
+  getBorder(tile: Tile) {
     let topCellIndex: number | undefined = -1;
     let leftCellIndex: number | undefined = -1;
     let optionIndex: number | undefined = -1;
@@ -47,9 +44,9 @@ export class GridComponent {
     const isBottomButton = tile.type === TileType.ADD_OPTION;
     const isCorner = tile.type === TileType.CORNER_BLANK;
     const lastOptionIndex = this.store.optionCountPerFeature() - 1;
-    const cell = this.store.cellById(tile.objectId2 as CellId);
-    const option = this.store.optionById(tile.objectId2 as OptionId);
-    const feature = this.store.featureById(tile.objectId2 as FeatureId);
+    const cell = this.store.cellById(tile.entityId as CellId);
+    const option = this.store.optionById(tile.entityId as OptionId);
+    const feature = this.store.featureById(tile.entityId as FeatureId);
 
     if (cell) {
       const [leftOptionId, topOptionId] = cell.optionIds || [];
@@ -83,8 +80,8 @@ export class GridComponent {
     };
   }
 
-  clearCells2() {
-    this.dataService.clearCells2();
+  clearCells() {
+    this.storeService.clearCells();
   }
 
   protected readonly CELL_SIZE = CELL_SIZE;

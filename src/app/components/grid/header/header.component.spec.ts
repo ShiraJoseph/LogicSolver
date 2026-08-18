@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { HeaderComponent } from './header.component';
 
-import {TileType} from "../../types/tile.model";
+import {TileType} from "../../../types/tile.model";
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;

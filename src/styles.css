@@ -1,23 +1,21 @@
 :root {
-  --band-shadow-offset: 3px;
-  --band-shadow-blur: 4px;
-  --band-shadow-spread: -1px;
-  --band-shadow-color: rgba(0, 0, 0, 0.3);
+  --cell-size: 60px;
+  --page-margin: 8px;
+
   --grey-border: dimgrey 1px solid;
   --purple-border: purple 1px solid;
   --thick-border: black 4px solid;
 
+  --header-skew: -20deg;
+  --header-baseline: calc(var(--cell-size) * 4);
+
+  --band-shadow-offset: 3px;
+  --band-shadow-blur: 4px;
+  --band-shadow-spread: -1px;
+  --band-shadow-color: rgba(0, 0, 0, 0.3);
   --right-shadow: var(--band-shadow-offset) 0 var(--band-shadow-blur) var(--band-shadow-spread) var(--band-shadow-color);
   --bottom-shadow: 0 var(--band-shadow-offset) var(--band-shadow-blur) var(--band-shadow-spread) var(--band-shadow-color);
   --right-and-bottom-shadow: var(--band-shadow-offset) var(--band-shadow-offset) var(--band-shadow-blur) var(--band-shadow-spread) var(--band-shadow-color);
-
-  --page-margin: 8px;
-
-  --cell-size: 60px;
-
-  --header-skew: -20deg;
-
-  --header-baseline: calc(var(--cell-size) * 4);
 
   height: 100%;
 

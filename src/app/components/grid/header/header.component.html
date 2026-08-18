@@ -1,0 +1,22 @@
+<div
+  (mouseover)="showMinus()"
+  (mouseleave)="hideMinus()"
+  class="header"
+  [class.vertical]="isVertical()">
+  <input
+    [class]="tile().type"
+    [style.color]="tile().textColor"
+    (keyup.enter)="updateHeader($event)"
+    (blur)="updateHeader($event)"
+    [value]="tile().text">
+  @if (shouldShowMinus()) {
+    <button
+      (mouseover)="showMinus()"
+      (mouseleave)="hideMinus()"
+      (blur)="hideMinus()"
+      class="delete"
+      [disabled]="isDeleteDisabled()"
+      (click)="deleteHeader()">-
+    </button>
+  }
+</div>
