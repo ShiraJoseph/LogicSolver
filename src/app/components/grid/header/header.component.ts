@@ -1,22 +1,24 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
-import {StoreService} from '../../../store/store.service';
+import {Component, computed, input, signal} from '@angular/core';
 import {Tile, TileType} from '../../../types/tile.model';
-import {GridStore} from '../../../store/store';
 import {FeatureId, OptionId} from '../../../types/entities.model';
+import {BaseComponent} from '../../base/base.component';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
 })
-export class HeaderComponent {
-  store = inject(GridStore);
-  storeService = inject(StoreService);
+export class HeaderComponent extends BaseComponent {
 
   tile = input.required<Tile>();
 
   shouldShowMinus = signal(false);
 
+  featurePosition = computed(() => this.store.featurePositions().get(this.tile().entityId as FeatureId));
+  backgroundColor = computed(() => this.isFeature() ?
+    this.colorService.getFeatureColor(this.featurePosition()) :
+    this.colorService.getOptionColor(this.tile()));
+  textColor = computed(() => this.isFeature() ? this.colorService.getFeatureTextColor(this.featurePosition()) : undefined);
   isFeature = computed(() => [TileType.LEFT_FEATURE_HEADER, TileType.TOP_FEATURE_HEADER].includes(this.tile().type!));
   isVertical = computed(() => [TileType.TOP_OPTION_HEADER, TileType.LEFT_FEATURE_HEADER].includes(this.tile().type!));
   isDeleteDisabled = computed(() => this.isFeature() ? this.store.featureCount() <= 2 :

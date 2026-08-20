@@ -5,6 +5,7 @@ import {CellId} from '../types/entities.model';
 import {withEntityAccessors, withEntityRelationship, withTransitiveRelationship} from 'signalkin';
 import {GridState, initialState} from '../types/state.model';
 import {cellConfig, featureConfig, optionConfig} from './entityConfig';
+import {NON_CELL_COLUMN_COUNT} from '../constants/grid.const';
 
 export const GridStore = signalStore(
   {providedIn: 'root', protectedState: false},
@@ -26,8 +27,15 @@ export const GridStore = signalStore(
   })),
   withComputed(store => ({
     featurePositions: () => {
-      return new Map(store.featureIds().map((id, index) => [id, index]));
-    }
+      const positionMap = new Map();
+      store.featureIds().forEach((id, index) => {
+        if(id && index != undefined){
+          positionMap.set(id, index);
+        }
+      })
+      return positionMap;
+    },
+    columnCount: () => store.optionCountPerFeature() * (store.featureCount() - 1) + NON_CELL_COLUMN_COUNT
   })),
   withDevtools('logicSolver')
 );

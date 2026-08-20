@@ -1,9 +1,9 @@
 import {CellText, Tile, TileType} from '../types/tile.model';
-import {Cell, Feature, Option} from '../types/entities.model';
-import {FEATURE_COLORS} from '../types/constants';
+import {BOTTOM_BORDER, LEFT_BORDER, RIGHT_BORDER, TOP_BORDER} from './grid.const';
 
 /**
- * A set of tile factories for each tile type.
+ * The starting shape of every tile type. A tile that stands for an entity is spread and
+ * given its own text, entityId, and span where it is pushed onto the grid.
  *
  * The following diagram indicates where each tile type would go in the grid if the grid had three features with two options each.
  *
@@ -38,96 +38,82 @@ import {FEATURE_COLORS} from '../types/constants';
  *    LEFT_FEATURE_TILE, LEFT_OPTION_TILE, CELL_TILE, CELL_TILE, CELL_TILE CELL_TILE, FILLER_BLANK_TILE, RIGHT_BLANK_TILE,
  *    LEFT_OPTION_TILE, CELL_TILE, CELL_TILE, CELL_TILE CELL_TILE,
  * ]
+ *
  */
 
-export const createCornerBlankTile = (): Tile => ({
+export const CORNER_BLANK_TILE: Tile = {
+  borders: `${RIGHT_BORDER} ${BOTTOM_BORDER}`,
   text: CellText.EMPTY,
   cols: 4,
   rows: 4,
-  backgroundColor: 'white',
   type: TileType.CORNER_BLANK
-});
+};
 
-export const createTopFeatureTile = (feature: Feature, optionCount: number, position: number): Tile => ({
-  text: feature.name,
-  cols: optionCount,
-  rows: 1,
-  backgroundColor: featureColor(position),
-  textColor: featureTextColor(position),
-  type: TileType.TOP_FEATURE_HEADER,
-  entityId: feature.id,
-});
-
-export const createAddFeatureButtonTile = (): Tile => ({
+export const NEW_FEATURE_BUTTON_TILE: Tile = {
+  borders: `${TOP_BORDER} ${RIGHT_BORDER} ${BOTTOM_BORDER}`,
   text: '+',
   cols: 1,
   rows: 1,
-  backgroundColor: 'white',
   type: TileType.ADD_FEATURE
-});
+};
 
-export const createTopOptionTile = (option: Option): Tile => ({
-  text: option.name,
-  cols: 1,
-  rows: 3,
-  backgroundColor: 'lightgray',
-  type: TileType.TOP_OPTION_HEADER,
-  entityId: option.id,
-});
-
-export const createAddOptionButtonTile = (): Tile => ({
+export const NEW_OPTION_BUTTON_TILE: Tile = {
+  borders: `${RIGHT_BORDER} ${BOTTOM_BORDER}`,
   text: '+',
   cols: 1,
   rows: 3,
-  backgroundColor: 'white',
   type: TileType.ADD_OPTION
-});
+};
 
-export const createLeftFeatureTile = (feature: Feature, optionCount: number, position: number): Tile => ({
-  text: feature.name,
+export const TOP_FEATURE_TILE: Tile = {
+  borders: `${TOP_BORDER} ${RIGHT_BORDER} ${BOTTOM_BORDER}`,
+  text: CellText.EMPTY,
   cols: 1,
-  rows: optionCount,
-  backgroundColor: featureColor(position),
-  textColor: featureTextColor(position),
-  type: TileType.LEFT_FEATURE_HEADER,
-  entityId: feature.id,
-});
+  rows: 1,
+  type: TileType.TOP_FEATURE_HEADER
+};
 
-export const createLeftOptionTile = (leftOption: Option): Tile => ({
-  text: leftOption.name,
+export const TOP_OPTION_TILE: Tile = {
+  borders: BOTTOM_BORDER,
+  text: CellText.EMPTY,
+  cols: 1,
+  rows: 3,
+  type: TileType.TOP_OPTION_HEADER
+};
+
+export const LEFT_FEATURE_TILE: Tile = {
+  borders: `${LEFT_BORDER} ${RIGHT_BORDER} ${BOTTOM_BORDER}`,
+  text: CellText.EMPTY,
+  cols: 1,
+  rows: 1,
+  type: TileType.LEFT_FEATURE_HEADER
+};
+
+export const LEFT_OPTION_TILE: Tile = {
+  borders: RIGHT_BORDER,
+  text: CellText.EMPTY,
   cols: 3,
   rows: 1,
-  backgroundColor: 'lightgray',
-  type: TileType.LEFT_OPTION_HEADER,
-  entityId: leftOption.id,
-});
+  type: TileType.LEFT_OPTION_HEADER
+};
 
-export const createCellTile = (currCell: Cell): Tile => ({
-  text: currCell?.userValue || CellText.EMPTY,
+export const CELL_TILE: Tile = {
+  text: CellText.EMPTY,
   cols: 1,
   rows: 1,
-  backgroundColor: 'white',
-  type: TileType.CELL,
-  entityId: currCell?.id,
-});
+  type: TileType.CELL
+};
 
-export const createFillerBlankTile = (optionCount: number): Tile => ({
-  text: CellText.EMPTY,
-  cols: optionCount,
-  rows: optionCount,
-  backgroundColor: 'white',
-  type: TileType.FILLER_BLANK,
-});
-
-export const createRightBlankTile = (optionCount: number): Tile => ({
+export const FILLER_BLANK_TILE: Tile = {
   text: CellText.EMPTY,
   cols: 1,
-  rows: optionCount,
-  type: TileType.RIGHT_BLANK,
-});
+  rows: 1,
+  type: TileType.FILLER_BLANK
+};
 
-// Color helpers
-
-const featureColor = (position: number): string => FEATURE_COLORS[position % FEATURE_COLORS.length].background;
-
-const featureTextColor = (position: number): string => FEATURE_COLORS[position % FEATURE_COLORS.length].text;
+export const RIGHT_BLANK_TILE: Tile = {
+  text: CellText.EMPTY,
+  cols: 1,
+  rows: 1,
+  type: TileType.RIGHT_BLANK
+};

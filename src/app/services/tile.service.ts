@@ -1,8 +1,9 @@
 import {computed, inject, Service} from '@angular/core';
-import {Tile} from '../types/tile.model';
+import {CellText, Tile} from '../types/tile.model';
 import {GridStore} from '../store/store';
 import {Cell, Feature, OptionId} from '../types/entities.model';
-import {createAddFeatureButtonTile, createAddOptionButtonTile, createCellTile, createCornerBlankTile, createFillerBlankTile, createLeftFeatureTile, createLeftOptionTile, createRightBlankTile, createTopFeatureTile, createTopOptionTile} from './tile.factory';
+import {CELL_TILE, CORNER_BLANK_TILE, FILLER_BLANK_TILE, LEFT_FEATURE_TILE, LEFT_OPTION_TILE, NEW_FEATURE_BUTTON_TILE, NEW_OPTION_BUTTON_TILE, RIGHT_BLANK_TILE, TOP_FEATURE_TILE, TOP_OPTION_TILE} from '../constants/tile.const';
+import {BOTTOM_BORDER, RIGHT_BORDER} from '../constants/grid.const';
 
 @Service()
 export class TileService {
@@ -11,7 +12,7 @@ export class TileService {
   /**
    * Pushes the array of tile data for the grid, one row at a time.
    * Tiles that span multiple rows are treated as existing only in their top row, in terms of tile order.
-   * @see tile.factory.ts for a diagram of how tiles are arranged.
+   * @see tile.const.ts for a diagram of how tiles are arranged.
    */
   tiles = computed(() => {
     const tiles: Array<Tile> = [];
@@ -27,21 +28,26 @@ export class TileService {
   });
 
   private fillTopFeatures(tiles: Tile[], optionCount: number, topOptionTiles: Tile[]) {
-    tiles.push(createCornerBlankTile());
+    tiles.push(CORNER_BLANK_TILE);
 
     this.store.features().forEach((feature: Feature, index) => {
       if (index > 0) {
-        tiles.push(createTopFeatureTile(feature, optionCount, index));
-        this.store.optionsByFeature(feature)?.forEach((option) => topOptionTiles.push(createTopOptionTile(option)));
+        tiles.push({...TOP_FEATURE_TILE, text: feature.name, entityId: feature.id, cols: optionCount});
+        this.store.optionsByFeature(feature)?.forEach((option, indexInFeature) => topOptionTiles.push({
+          ...TOP_OPTION_TILE,
+          text: option.name,
+          entityId: option.id,
+          borders: this.joinBorders(TOP_OPTION_TILE.borders, indexInFeature === optionCount - 1 && RIGHT_BORDER)
+        }));
       }
     });
   }
 
   private fillTopOptions(tiles: Tile[], topOptionTiles: Tile[]) {
     tiles.push(
-      createAddFeatureButtonTile(),
+      NEW_FEATURE_BUTTON_TILE,
       ...topOptionTiles,
-      createAddOptionButtonTile()
+      NEW_OPTION_BUTTON_TILE
     );
   }
 
@@ -52,9 +58,9 @@ export class TileService {
     for (let leftFeatureIndex = 0; leftFeatureIndex != 1; leftFeatureIndex--, numberOfCellsInRow -= optionCount) {
       const feature = this.store.features()[leftFeatureIndex];
 
-      tiles.push(createLeftFeatureTile(feature, optionCount, leftFeatureIndex));
+      tiles.push({...LEFT_FEATURE_TILE, text: feature.name, entityId: feature.id, rows: optionCount});
       this.fillOptionRowsForFeature(feature, tiles, numberOfCellsInRow, topOptionTiles, blanks, optionCount);
-      blanks.push(createFillerBlankTile(optionCount));
+      blanks.push({...FILLER_BLANK_TILE, cols: optionCount, rows: optionCount});
 
       if (leftFeatureIndex === 0) {
         leftFeatureIndex = featuresLength;
@@ -63,17 +69,33 @@ export class TileService {
   }
 
   private fillOptionRowsForFeature(feature: Feature, tiles: Tile[], rowCellCount: number, topOptionTiles: Tile[], blanks: Tile[], optionCount: number) {
+    const lastOptionIndex = optionCount - 1;
+
     this.store.optionsByFeature(feature)?.forEach((leftOption, rowInFeature) => {
-      tiles.push(createLeftOptionTile(leftOption));
+      const isLastRowInBlock = rowInFeature === lastOptionIndex;
+
+      tiles.push({
+        ...LEFT_OPTION_TILE,
+        text: leftOption.name,
+        entityId: leftOption.id,
+        borders: this.joinBorders(LEFT_OPTION_TILE.borders, isLastRowInBlock && BOTTOM_BORDER)
+      });
 
       for (let i = 0; i < rowCellCount; i++) {
         const currCell = this.store.cellByOptions(leftOption.id, topOptionTiles[i]?.entityId as OptionId) as Cell;
-        tiles.push(createCellTile(currCell));
+        tiles.push({
+          ...CELL_TILE,
+          text: currCell?.userValue || CellText.EMPTY,
+          entityId: currCell?.id,
+          borders: this.joinBorders(i % optionCount === lastOptionIndex && RIGHT_BORDER, isLastRowInBlock && BOTTOM_BORDER)
+        });
       }
 
       if (rowInFeature === 0) {
-        tiles.push(...blanks, createRightBlankTile(optionCount));
+        tiles.push(...blanks, {...RIGHT_BLANK_TILE, rows: optionCount});
       }
     });
   }
+
+  private joinBorders = (...borders: Array<string | false | undefined>): string => borders.filter(Boolean).join(' ');
 }

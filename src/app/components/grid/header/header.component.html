@@ -2,10 +2,11 @@
   (mouseover)="showMinus()"
   (mouseleave)="hideMinus()"
   class="header"
+  [style.background-color]="backgroundColor()"
   [class.vertical]="isVertical()">
   <input
     [class]="tile().type"
-    [style.color]="tile().textColor"
+    [style.color]="textColor()"
     (keyup.enter)="updateHeader($event)"
     (blur)="updateHeader($event)"
     [value]="tile().text">

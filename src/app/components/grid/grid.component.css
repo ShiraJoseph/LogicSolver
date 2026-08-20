@@ -17,6 +17,7 @@
 .tile {
   box-sizing: border-box;
   overflow: hidden;
+  background-color: white;
 
   &[data-tile-type='CORNER_BLANK'] {
     position: sticky;

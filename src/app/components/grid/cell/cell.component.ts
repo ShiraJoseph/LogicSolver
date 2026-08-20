@@ -1,26 +1,24 @@
 import {Component, computed, inject, input} from '@angular/core';
 import {CellText, Tile} from '../../../types/tile.model';
 import {CellId} from '../../../types/entities.model';
-import {GridStore} from '../../../store/store';
 import {LogicService} from '../../../services/logic.service';
+import {BaseComponent} from '../../base/base.component';
 
 @Component({
   selector: 'app-cell',
   templateUrl: './cell.component.html',
   styleUrl: './cell.component.css',
 })
-export class CellComponent {
-  store = inject(GridStore);
+export class CellComponent extends BaseComponent {
   logicService = inject(LogicService);
-
   tile = input.required<Tile>();
 
+  hoverColor = computed(() => this.colorService.getCellColor(this.tile()));
   isSelected = computed(() => this.store.selectedCellId?.() === this.tile().entityId);
   cellValue = computed(() => {
     const [leftOptionId, topOptionId] = this.store.cellById(this.tile().entityId as CellId)!.optionIds!;
     const possibleTopOptions = this.logicService.candidates().get(leftOptionId)!
       .get(this.store.optionById(topOptionId)!.featureId!)!;
-
 
     return !possibleTopOptions.has(topOptionId) ?
       CellText.X : possibleTopOptions.size === 1 ?
@@ -38,4 +36,8 @@ export class CellComponent {
   }
 
   protected readonly CellText = CellText;
+
+  protected onHover() {
+    this.colorService.hoveredCellId.set(this.tile().entityId as CellId);
+  }
 }

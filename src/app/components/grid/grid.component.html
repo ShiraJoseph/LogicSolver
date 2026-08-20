@@ -10,8 +10,7 @@
       [attr.data-tile-type]="tile.type"
       [style.grid-column]="`span ${tile.cols}`"
       [style.grid-row]="`span ${tile.rows}`"
-      [style.background]="tile.backgroundColor"
-      [ngClass]="getBorder(tile)">
+      [class]="tile.borders">
 
       @switch (tile.type) {
         @case ('CELL') {
@@ -20,13 +19,13 @@
         @case ('ADD_FEATURE') {
           <button
             class="other"
-            (click)="addFeature()">{{ tile.text }}
+            (click)="storeService.addNewFeature()">{{ tile.text }}
           </button>
         }
         @case ('ADD_OPTION') {
           <button
             class="other"
-            (click)="addOption()">{{ tile.text }}
+            (click)="this.storeService.addNewOptionToAllFeatures()">{{ tile.text }}
           </button>
         }
         @default {
@@ -42,4 +41,4 @@
     </div>
   }
 </div>
-<button (click)="clearCells()" class="clear-button">Clear Cells</button>
+<button (click)="storeService.clearCells()" class="clear-button">Clear Cells</button>
