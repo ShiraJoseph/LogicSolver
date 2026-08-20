@@ -1,13 +1,13 @@
 import {Component} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {BaseComponent} from './base.component';
+import {BaseDirective} from './base.directive';
 
 @Component({selector: 'app-test-base', template: ''})
-class TestBaseComponent extends BaseComponent {
+class TestBaseComponent extends BaseDirective {
 }
 
-describe('BaseComponent', () => {
+describe('BaseDirective', () => {
   let component: TestBaseComponent;
   let fixture: ComponentFixture<TestBaseComponent>;
 

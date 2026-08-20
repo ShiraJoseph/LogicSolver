@@ -1,14 +1,14 @@
 import {Component, computed, input, signal} from '@angular/core';
 import {Tile, TileType} from '../../../types/tile.model';
 import {FeatureId, OptionId} from '../../../types/entities.model';
-import {BaseComponent} from '../../base/base.component';
+import {BaseDirective} from '../../../directives/base.directive';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
 })
-export class HeaderComponent extends BaseComponent {
+export class HeaderComponent extends BaseDirective {
 
   tile = input.required<Tile>();
 

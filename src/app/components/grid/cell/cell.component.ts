@@ -2,14 +2,14 @@ import {Component, computed, inject, input} from '@angular/core';
 import {CellText, Tile} from '../../../types/tile.model';
 import {CellId} from '../../../types/entities.model';
 import {LogicService} from '../../../services/logic.service';
-import {BaseComponent} from '../../base/base.component';
+import {BaseDirective} from '../../../directives/base.directive';
 
 @Component({
   selector: 'app-cell',
   templateUrl: './cell.component.html',
   styleUrl: './cell.component.css',
 })
-export class CellComponent extends BaseComponent {
+export class CellComponent extends BaseDirective {
   logicService = inject(LogicService);
   tile = input.required<Tile>();
 
