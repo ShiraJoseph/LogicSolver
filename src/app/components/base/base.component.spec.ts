@@ -1,18 +1,23 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {Component} from '@angular/core';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { BaseComponent } from './base.component';
+import {BaseComponent} from './base.component';
+
+@Component({selector: 'app-test-base', template: ''})
+class TestBaseComponent extends BaseComponent {
+}
 
 describe('BaseComponent', () => {
-  let component: BaseComponent;
-  let fixture: ComponentFixture<BaseComponent>;
+  let component: TestBaseComponent;
+  let fixture: ComponentFixture<TestBaseComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BaseComponent]
+      imports: [TestBaseComponent]
     })
-    .compileComponents();
+      .compileComponents();
 
-    fixture = TestBed.createComponent(BaseComponent);
+    fixture = TestBed.createComponent(TestBaseComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

@@ -15,7 +15,7 @@ describe('HeaderComponent', () => {
 
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('tile2', { text: '', cols: 1, rows: 1, type: TileType.TOP_FEATURE_HEADER });
+    fixture.componentRef.setInput('tile', { text: '', cols: 1, rows: 1, type: TileType.TOP_FEATURE_HEADER });
     fixture.detectChanges();
   });
 
