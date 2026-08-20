@@ -1,0 +1,63 @@
+:host {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+
+.header {
+  box-sizing: border-box;
+  display: flex;
+  background-color: transparent;
+  justify-content: space-between;
+  align-items: stretch;
+  width: 100%;
+  height: 100%;
+  border: 1px solid dimgray;
+
+  &:hover,
+  &:focus-within {
+    border: 1px purple solid;
+  }
+
+  &.vertical {
+    flex-direction: column;
+
+    button {
+      height: 30%;
+      width: 100%;
+    }
+  }
+}
+
+input {
+  border: none;
+  outline: none;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  font-family: Chalkboard, sans-serif;
+  font-size: medium;
+  text-wrap: wrap;
+  box-sizing: border-box;
+
+  &.TOP_FEATURE_HEADER {
+    transform: skewX(calc(-1 * var(--header-skew)));
+  }
+
+
+  &.TOP_OPTION_HEADER {
+    writing-mode: vertical-rl;
+    transform: skewX(calc(-1 * var(--header-skew))) rotate(calc(180deg - var(--header-skew)));
+  }
+}
+
+button {
+  height: 100%;
+  width: 30%;
+  box-sizing: border-box;
+}
+
+.delete {
+  cursor: pointer;
+}

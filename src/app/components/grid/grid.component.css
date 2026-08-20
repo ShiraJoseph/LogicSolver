@@ -1,0 +1,92 @@
+:host {
+  display: contents;
+  font-family: arial, sans-serif;
+}
+
+.grid {
+  display: grid;
+  overflow: auto;
+  min-height: 0;
+}
+
+.clear-button {
+  align-self: start;
+  margin-top: var(--page-margin);
+}
+
+.tile {
+  box-sizing: border-box;
+  overflow: hidden;
+  background-color: white;
+
+  &[data-tile-type='CORNER_BLANK'] {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    transform-origin: bottom;
+    transform: skewX(var(--header-skew));
+    /* white shadow to cover the triangle the skewing revealed on the left */
+    box-shadow: calc(var(--header-baseline) * tan(var(--header-skew))) 0 0 0 white;
+  }
+
+  &[data-tile-type='TOP_FEATURE_HEADER'],
+  &[data-tile-type='ADD_FEATURE'] {
+    position: sticky;
+    top: 0;
+    transform: skewX(var(--header-skew));
+    transform-origin: 0 var(--header-baseline);
+  }
+
+  &[data-tile-type='TOP_OPTION_HEADER'],
+  &[data-tile-type='ADD_OPTION'] {
+    position: sticky;
+    top: var(--cell-size);
+    box-shadow: var(--bottom-shadow);
+    transform: skewX(var(--header-skew));
+    transform-origin: bottom;
+  }
+
+  &[data-tile-type='LEFT_FEATURE_HEADER'] {
+    position: sticky;
+    left: 0;
+  }
+
+  &[data-tile-type='LEFT_OPTION_HEADER'] {
+    position: sticky;
+    left: var(--cell-size);
+    box-shadow: var(--right-shadow);
+  }
+
+  &.top-border {
+    border-top: var(--thick-border);
+  }
+
+  &.bottom-border {
+    border-bottom: var(--thick-border);
+  }
+
+  &.left-border {
+    border-left: var(--thick-border);
+  }
+
+  &.right-border {
+    border-right: var(--thick-border);
+  }
+}
+
+.other {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.tile ::ng-deep input,
+.tile ::ng-deep button {
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.tile ::ng-deep button {
+  border: none;
+}

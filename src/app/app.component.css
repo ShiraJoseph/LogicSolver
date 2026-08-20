@@ -1,0 +1,6 @@
+/* wrappers that group markup only, so the grid and the button are laid out by the body */
+:host,
+.main,
+.content {
+  display: contents;
+}

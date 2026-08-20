@@ -1,0 +1,44 @@
+<div
+  class="grid"
+  [style.grid-auto-rows]="CELL_SIZE"
+  [style.grid-template-columns]="`repeat(${columnCount()}, ${CELL_SIZE})`">
+
+  @for (tile of tileService.tiles(); track `${$index}-${tile.type}`) {
+    <div
+      class="tile"
+      [id]="`${$index}-${tile.type}`"
+      [attr.data-tile-type]="tile.type"
+      [style.grid-column]="`span ${tile.cols}`"
+      [style.grid-row]="`span ${tile.rows}`"
+      [class]="tile.borders">
+
+      @switch (tile.type) {
+        @case ('CELL') {
+          <app-cell [tile]="tile"/>
+        }
+        @case ('ADD_FEATURE') {
+          <button
+            class="other"
+            (click)="storeService.addNewFeature()">{{ tile.text }}
+          </button>
+        }
+        @case ('ADD_OPTION') {
+          <button
+            class="other"
+            (click)="this.storeService.addNewOptionToAllFeatures()">{{ tile.text }}
+          </button>
+        }
+        @default {
+          @if (isHeader(tile)) {
+            <app-header [tile]="tile"/>
+          } @else {
+            <div
+              class="blank"></div>
+          }
+        }
+
+      }
+    </div>
+  }
+</div>
+<button (click)="storeService.clearCells()" class="clear-button">Clear Cells</button>
