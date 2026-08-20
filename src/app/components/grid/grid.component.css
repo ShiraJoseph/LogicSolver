@@ -81,24 +81,6 @@
   cursor: pointer;
 }
 
-/*
-.cell-inactive {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  height: 100%;
-  width: 100%;
-  font-size: medium;
-  border: var(--grey-border);
-}
-
-.cell-inactive:hover {
-  cursor: pointer;
-  border: var(--purple-border);
-}
-*/
-
 .tile ::ng-deep input,
 .tile ::ng-deep button {
   padding: 0;

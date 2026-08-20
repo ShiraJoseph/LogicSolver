@@ -14,7 +14,6 @@
   height: 100%;
   border: 1px solid dimgray;
 
-  /* the container carries the tile's skew, so the highlight traces the cell */
   &:hover,
   &:focus-within {
     border: 1px purple solid;
