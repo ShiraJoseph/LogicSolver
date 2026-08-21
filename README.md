@@ -1,6 +1,6 @@
 # LogicSolver
 
-A grid for solving logic puzzles. You enter the clues you know, and it works out everything that follows from them.
+A grid for solving logic puzzles. The user enters clues and the app deduces the rest.
 
 ---
 
@@ -42,9 +42,7 @@ Vehicle:  Bike, Canoe, Tractor, ...
 Name:     Alice, Bob, Carol, ...
 ```
 
-Every option belongs to exactly one feature, and every option matches exactly one option in each of the other features. A **cell** sits where two options from different features cross, and holds the X or O you clicked there.
-
-An X means those two options are not a match. An O means they are.
+Every option belongs to exactly one feature, and every option matches exactly one option in each of the other features. A **cell** sits where two options from different features cross and can hold an X or an O. An X means those two options are not a match. An O means they are.
 
 ---
 
@@ -57,7 +55,7 @@ An X means those two options are not a match. An O means they are.
 | Type in a header | Renames the feature or option on enter or blur                             |
 | `-` on a header | Deletes that feature, or the option in that number slot from every feature |
 | `+` at the end of a row or column | Adds a feature or an option to every feature                               |
-| Clear Cells | Empties the cells in the board, keeping features and options               |
+| Clear Cells | Empties the cells in the grid, keeping features and options               |
 
 ---
 
@@ -84,7 +82,7 @@ A cell reads as an O when one candidate is left, an X when the pairing is gone f
 | `services/tile.service.ts` | Builds the flat tile array the grid renders, row by row |
 | `services/color.service.ts` | Every color the grid draws |
 | `components/grid/` | The grid and its cell and header components |
-| `constants/tile.const.ts` | The starting shape of each tile type, with a diagram of how they sit on the board |
+| `constants/tile.const.ts` | The starting shape of each tile type, with a diagram of how they sit on the grid |
 | `directives/base.directive.ts` | The services the grid components share |
 | `types/` | Entities, tiles, solver types and store state |
 
