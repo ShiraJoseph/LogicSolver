@@ -1,9 +1,9 @@
 import {inject, Service} from '@angular/core';
 import {Cell, Feature, FeatureId, Option, OptionId} from '../types/entities.model';
 import {GridStore} from './store';
+import {GridSeed} from '../types/grid.model';
 import {CellText} from '../types/tile.model';
-import {MOCK_FEATURE_NAMES} from '../mocks/feature.mock';
-import {MOCK_OPTION_NAMES} from '../mocks/option.mock';
+import {GRID_SEED} from './grid.token';
 
 
 /**
@@ -14,8 +14,7 @@ export class StoreService {
   store = inject(GridStore);
 
   constructor() {
-    this.store.setOptionCountPerFeature(Math.floor(MOCK_OPTION_NAMES.length / MOCK_FEATURE_NAMES.length));
-    this.buildMockDataTemplate();
+    this.populateGridStore(inject(GRID_SEED));
   }
 
   addNewFeature(name?: string) {
@@ -107,15 +106,23 @@ export class StoreService {
     this.store.addOption(option);
   }
 
-  private buildMockDataTemplate() {
-    for (let i = 0; i < MOCK_FEATURE_NAMES.length; i++) {
+  /**
+   * Fills an empty store with the seeded features and their options.
+   */
+  private populateGridStore({featureNames, optionNames}: GridSeed) {
+    if (!featureNames.length) return;
+
+    const optionCount = Math.floor(optionNames.length / featureNames.length);
+    this.store.setOptionCountPerFeature(optionCount);
+
+    featureNames.forEach((featureName, featureIndex) => {
       const newFeature = new Feature();
-      newFeature.name = MOCK_FEATURE_NAMES[i];
+      newFeature.name = featureName;
       this.store.addFeature(newFeature);
 
-      for (let j = 0; j < this.store.optionCountPerFeature(); j++) {
-        this.addOptionWithCellsToFeature(newFeature, MOCK_OPTION_NAMES[i * this.store.optionCountPerFeature() + j]);
+      for (let i = 0; i < optionCount; i++) {
+        this.addOptionWithCellsToFeature(newFeature, optionNames[featureIndex * optionCount + i]);
       }
-    }
+    });
   }
 }

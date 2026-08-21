@@ -99,3 +99,15 @@ export const MOCK_OPTION_NAMES = [
   'crown',
   'graduation hat'
 ] as const;
+
+export const MOCK_SMALL_OPTION_NAMES = [
+  'Cat',
+  'Dog',
+  'Fish',
+  'Bike',
+  'Canoe',
+  'Tractor',
+  'Alice',
+  'Bob',
+  'Carol'
+] as const;
