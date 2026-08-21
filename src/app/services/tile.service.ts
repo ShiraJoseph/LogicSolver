@@ -52,20 +52,24 @@ export class TileService {
   }
 
   private fillGridRows(featuresLength: number, optionCount: number, tiles: Tile[], topOptionTiles: Tile[]) {
-    let numberOfCellsInRow = (featuresLength - 1) * optionCount;
     const blanks: Array<Tile> = [];
 
-    for (let leftFeatureIndex = 0; leftFeatureIndex != 1; leftFeatureIndex--, numberOfCellsInRow -= optionCount) {
+    this.leftFeatureIndexes(featuresLength).forEach((leftFeatureIndex, blockIndex) => {
       const feature = this.store.features()[leftFeatureIndex];
 
-      tiles.push({...LEFT_FEATURE_TILE, text: feature.name, entityId: feature.id, rows: optionCount});
-      this.fillOptionRowsForFeature(feature, tiles, numberOfCellsInRow, topOptionTiles, blanks, optionCount);
+      tiles.push({...LEFT_FEATURE_TILE, text: feature?.name, entityId: feature?.id, rows: optionCount});
+      this.fillOptionRowsForFeature(feature, tiles, (featuresLength - 1 - blockIndex) * optionCount, topOptionTiles, blanks, optionCount);
       blanks.push({...FILLER_BLANK_TILE, cols: optionCount, rows: optionCount});
+    });
+  }
 
-      if (leftFeatureIndex === 0) {
-        leftFeatureIndex = featuresLength;
-      }
-    }
+  /**
+   * The features that get a row block on the left, in order: the first feature, then the rest from the last back to the second.
+   */
+  private leftFeatureIndexes(featuresLength: number): Array<number> {
+    const afterTheFirst = Array.from({length: Math.max(featuresLength - 2, 0)}, (_, index) => featuresLength - 1 - index);
+
+    return featuresLength ? [0, ...afterTheFirst] : [];
   }
 
   private fillOptionRowsForFeature(feature: Feature, tiles: Tile[], rowCellCount: number, topOptionTiles: Tile[], blanks: Tile[], optionCount: number) {
