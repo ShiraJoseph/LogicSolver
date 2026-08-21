@@ -35,6 +35,10 @@ export class CellComponent extends BaseDirective {
     this.store.setSelectedCellId(this.tile().entityId as CellId);
   }
 
+  deselectCell() {
+    this.store.setSelectedCellId(undefined);
+  }
+
   protected readonly CellText = CellText;
 
   protected onHover() {
