@@ -32,7 +32,7 @@ npm run docs:build # compodoc into documentation/, without the server
 
 `--legacy-peer-deps` is required while `@angular-architects/ngrx-toolkit` declares Angular 21 peers.
 
-Every PR into `master` runs the tests and the production build. Merging to `master` publishes the compodoc output to GitHub Pages.
+Every PR into `master` runs the tests and the production build, and has its patch version bumped for it. A branch that already carries a minor or major bump is left alone. Merging to `master` publishes the compodoc output to GitHub Pages.
 
 ---
 
