@@ -7,8 +7,6 @@ import {ColorService} from '../services/color.service';
 @Directive()
 export abstract class BaseDirective {
   store = inject(GridStore);
-
   storeService = inject(StoreService);
-
   colorService = inject(ColorService);
 }

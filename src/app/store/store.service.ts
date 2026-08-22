@@ -32,6 +32,9 @@ export class StoreService {
     }
   }
 
+  /**
+   * Increases the option count for each feature by one.
+   */
   addNewOptionToAllFeatures() {
     this.store.setOptionCountPerFeature(this.store.optionCountPerFeature() + 1);
 
