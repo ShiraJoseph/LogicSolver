@@ -6,6 +6,7 @@ import {CellComponent} from './cell/cell.component';
 import {CELL_SIZE, NON_CELL_COLUMN_COUNT} from '../../constants/grid.const';
 import {BaseDirective} from '../../directives/base.directive';
 
+/** Lays the tiles out on one CSS grid, sized to the current feature and option counts. */
 @Component({
   selector: 'app-grid',
   templateUrl: './grid.component.html',
@@ -15,9 +16,8 @@ import {BaseDirective} from '../../directives/base.directive';
 export class GridComponent extends BaseDirective {
   tileService: TileService = inject(TileService);
 
+  /** A column per option of every feature after the first, plus the header and button columns. */
   columnCount = computed(() => this.store.optionCountPerFeature() * (this.store.featureCount() - 1) + NON_CELL_COLUMN_COUNT);
-
-  isHeader = (tile: Tile) => HEADER_TILE_TYPES.has(tile.type!);
 
   protected readonly CELL_SIZE = CELL_SIZE;
 }

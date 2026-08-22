@@ -16,6 +16,12 @@
         @case ('CELL') {
           <app-cell [tile]="tile"/>
         }
+        @case ('TOP_FEATURE_HEADER')
+        @case ('TOP_OPTION_HEADER')
+        @case ('LEFT_FEATURE_HEADER')
+        @case ('LEFT_OPTION_HEADER') {
+          <app-header [tile]="tile"/>
+        }
         @case ('ADD_FEATURE') {
           <button
             class="other"
@@ -29,14 +35,9 @@
           </button>
         }
         @default {
-          @if (isHeader(tile)) {
-            <app-header [tile]="tile"/>
-          } @else {
-            <div
-              class="blank"></div>
-          }
+          <div
+            class="blank"></div>
         }
-
       }
     </div>
   }

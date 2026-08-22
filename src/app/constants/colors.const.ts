@@ -1,5 +1,5 @@
-export const WHITE = 'white';
-export const BLACK = 'black';
+export const WHITE = '#FFFFFF';
+export const BLACK = '#000000';
 
 /**
  * Feature header backgrounds paired with their label text color, applied in

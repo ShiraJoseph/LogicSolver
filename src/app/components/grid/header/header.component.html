@@ -5,6 +5,7 @@
   [style.background-color]="backgroundColor()"
   [class.vertical]="isVertical()">
   <input
+    name="header-input"
     [class]="tile().type"
     [style.color]="textColor()"
     (keyup.enter)="updateHeader($event)"

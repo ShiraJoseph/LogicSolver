@@ -1,0 +1,70 @@
+name: Auto Version Bump
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+concurrency:
+  group: auto-version-bump-${{ github.head_ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  bump:
+    # Skip commits from this workflow (prevents infinite loop)
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Bump version (master + 1 patch, unless branch is already ahead at major/minor)
+        run: |
+          git fetch origin master --depth=1
+          MASTER_VERSION=$(git show origin/master:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin','utf8')).version")
+          BRANCH_VERSION=$(node -p "require('./package.json').version")
+          export BRANCH_VERSION MASTER_VERSION
+          AHEAD=$(node -e '
+            const [major, minor] = process.env.BRANCH_VERSION.split(".").map(Number);
+            const [masterMajor, masterMinor] = process.env.MASTER_VERSION.split(".").map(Number);
+            console.log(major > masterMajor || (major === masterMajor && minor > masterMinor));
+          ')
+          if [ "$AHEAD" = "true" ]; then
+            echo "Branch version ${BRANCH_VERSION} is ahead of master ${MASTER_VERSION} at major/minor — skipping auto-bump."
+            exit 0
+          fi
+          NEXT_VERSION=$(node -e '
+            const [major, minor, patch] = process.env.MASTER_VERSION.split(".").map(Number);
+            console.log(major + "." + minor + "." + (patch + 1));
+          ')
+          npm version "$NEXT_VERSION" --no-git-tag-version --allow-same-version
+
+      - name: Read new version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        env:
+          NEW_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git diff --cached --quiet && echo "No version changes to commit" && exit 0
+          git commit -m "[tech] Auto-bump to ${NEW_VERSION} [skip ci]"
+          git push

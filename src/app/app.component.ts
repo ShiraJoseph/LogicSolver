@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
-import { GridComponent } from './components/grid/grid.component';
+import {Component, signal} from '@angular/core';
+import {GridComponent} from './components/grid/grid.component';
 
+/** The application shell, which hosts the grid. */
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',

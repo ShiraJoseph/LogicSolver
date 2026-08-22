@@ -1,23 +1,23 @@
 import {inject, Service} from '@angular/core';
 import {Cell, Feature, FeatureId, Option, OptionId} from '../types/entities.model';
 import {GridStore} from './store';
+import {GridSeed} from '../types/grid.model';
 import {CellText} from '../types/tile.model';
-import {MOCK_FEATURE_NAMES} from '../mocks/feature.mock';
-import {MOCK_OPTION_NAMES} from '../mocks/option.mock';
+import {GRID_SEED} from './grid.token';
 
-
-/**
- * Helper functions for updating store entities
- */
+/** Helper functions for updating store entities */
 @Service()
 export class StoreService {
   store = inject(GridStore);
 
   constructor() {
-    this.store.setOptionCountPerFeature(Math.floor(MOCK_OPTION_NAMES.length / MOCK_FEATURE_NAMES.length));
-    this.buildMockDataTemplate();
+    this.populateGridStore(inject(GRID_SEED));
   }
 
+  /**
+   * Adds a feature with a full set of options, each paired with every option of the existing features.
+   * @param name
+   */
   addNewFeature(name?: string) {
     const feature = new Feature();
 
@@ -32,6 +32,9 @@ export class StoreService {
     }
   }
 
+  /**
+   * Increases the option count for each feature by one.
+   */
   addNewOptionToAllFeatures() {
     this.store.setOptionCountPerFeature(this.store.optionCountPerFeature() + 1);
 
@@ -40,6 +43,10 @@ export class StoreService {
     });
   }
 
+  /**
+   * Removes the option in the same slot from every feature, so they keep matching counts.
+   * @param optionId
+   */
   deleteOption(optionId: OptionId) {
     const indexToRemove = this.store.indexOfFeatureOption(optionId);
 
@@ -53,6 +60,10 @@ export class StoreService {
     this.store.setOptionCountPerFeature(this.store.optionCountPerFeature() - 1);
   }
 
+  /**
+   * Removes the feature along with its options and their cells.
+   * @param featureId
+   */
   deleteFeature(featureId: FeatureId) {
     this.store.removeCells(this.store.cellsByFeature(featureId));
     this.store.removeOptions(this.store.optionsByFeature(featureId));
@@ -66,7 +77,12 @@ export class StoreService {
     this.store.updateAllCells({userValue: CellText.EMPTY});
   }
 
-
+  /**
+   * Adds an option and a cell for each option of the other features, ordered so the higher feature sits on the left.
+   * @param feature
+   * @param name
+   * @private
+   */
   private addOptionWithCellsToFeature(feature: Feature, name?: string) {
     const option = new Option();
     option.featureId = feature.id;
@@ -107,15 +123,24 @@ export class StoreService {
     this.store.addOption(option);
   }
 
-  private buildMockDataTemplate() {
-    for (let i = 0; i < MOCK_FEATURE_NAMES.length; i++) {
+  /**
+   * Fills an empty store with the seeded features and their options.
+   * @private
+   */
+  private populateGridStore({featureNames, optionNames}: GridSeed) {
+    if (!featureNames.length) return;
+
+    const optionCount = Math.floor(optionNames.length / featureNames.length);
+    this.store.setOptionCountPerFeature(optionCount);
+
+    featureNames.forEach((featureName, featureIndex) => {
       const newFeature = new Feature();
-      newFeature.name = MOCK_FEATURE_NAMES[i];
+      newFeature.name = featureName;
       this.store.addFeature(newFeature);
 
-      for (let j = 0; j < this.store.optionCountPerFeature(); j++) {
-        this.addOptionWithCellsToFeature(newFeature, MOCK_OPTION_NAMES[i * this.store.optionCountPerFeature() + j]);
+      for (let i = 0; i < optionCount; i++) {
+        this.addOptionWithCellsToFeature(newFeature, optionNames[featureIndex * optionCount + i]);
       }
-    }
+    });
   }
 }
