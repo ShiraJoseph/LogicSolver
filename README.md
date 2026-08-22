@@ -24,12 +24,15 @@ npm start
 The app serves at `http://localhost:4200/` and reloads on save.
 
 ```
-npm test          # vitest, via ng test
-npm run build     # production bundle into dist/
-npm run docs      # compodoc, generated into documentation/ and served
+npm test           # vitest, via ng test
+npm run build      # production bundle into dist/
+npm run docs       # compodoc, generated into documentation/ and served
+npm run docs:build # compodoc into documentation/, without the server
 ```
 
 `--legacy-peer-deps` is required while `@angular-architects/ngrx-toolkit` declares Angular 21 peers.
+
+Every PR into `master` runs the tests and the production build. Merging to `master` publishes the compodoc output to GitHub Pages.
 
 ---
 

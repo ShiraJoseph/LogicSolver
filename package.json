@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --coverage",
-    "docs": "compodoc -p tsconfig.app.json --serve --open"
+    "docs": "npm run docs:build -- --serve --open",
+    "docs:build": "compodoc -p tsconfig.app.json"
   },
   "private": true,
   "packageManager": "npm@11.13.0",
