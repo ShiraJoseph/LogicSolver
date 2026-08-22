@@ -1,5 +1,5 @@
 import {patchState, signalStore, withComputed, withMethods, withState} from '@ngrx/signals';
-import {withEntities} from '@ngrx/signals/entities';
+import {removeAllEntities, setAllEntities, withEntities} from '@ngrx/signals/entities';
 import {withDevtools} from '@angular-architects/ngrx-toolkit';
 import {CellId} from '../types/entities.model';
 import {withEntityAccessors, withEntityRelationship, withTransitiveRelationship} from 'signalkin';
@@ -24,6 +24,44 @@ export const GridStore = signalStore(
     },
     setSelectedCellId: (selectedCellId: CellId | undefined) => {
       patchState(store, {selectedCellId});
+    },
+    takeSnapshot: () => {
+      const {features, options, cells, optionCountPerFeature} = store;
+      patchState(store, {redoStack: [], undoStack: [...store.undoStack(), {features: features(), options: options(), cells: cells(), optionCountPerFeature: optionCountPerFeature()}]});
+    },
+    undo: () => {
+      const undoState = store.undoStack()[store.undoStack().length - 1];
+      if (undoState) {
+        patchState(store,
+          {
+            redoStack: [...store.redoStack(), undoState],
+            undoStack: store.undoStack().slice(0, -1)
+          },
+          removeAllEntities(cellConfig),
+          removeAllEntities(optionConfig),
+          setAllEntities(undoState.features, featureConfig),
+          {optionCountPerFeature: undoState.optionCountPerFeature},
+          setAllEntities(undoState.options, optionConfig),
+          setAllEntities(undoState.cells, cellConfig)
+        );
+      }
+    },
+    redo: () => {
+      const redoState = store.redoStack()[store.redoStack().length - 1];
+      if (redoState) {
+        patchState(store,
+          {
+            undoStack: [...store.undoStack(), redoState],
+            redoStack: store.redoStack().slice(0, -1)
+          },
+          removeAllEntities(cellConfig),
+          removeAllEntities(optionConfig),
+          setAllEntities(redoState.features, featureConfig),
+          {optionCountPerFeature: redoState.optionCountPerFeature},
+          setAllEntities(redoState.options, optionConfig),
+          setAllEntities(redoState.cells, cellConfig)
+        );
+      }
     }
   })),
   withComputed(store => ({
@@ -31,14 +69,16 @@ export const GridStore = signalStore(
     featurePositions: () => {
       const positionMap = new Map();
       store.featureIds().forEach((id, index) => {
-        if(id && index != undefined){
+        if (id && index != undefined) {
           positionMap.set(id, index);
         }
-      })
+      });
       return positionMap;
     },
     /** A column per option of every feature after the first, plus the header and button columns. */
-    columnCount: () => store.optionCountPerFeature() * (store.featureCount() - 1) + NON_CELL_COLUMN_COUNT
+    columnCount: () => store.optionCountPerFeature() * (store.featureCount() - 1) + NON_CELL_COLUMN_COUNT,
+    canUndo: () => store.undoStack().length > 0,
+    canRedo: () => store.redoStack().length > 0,
   })),
   withDevtools('logicSolver')
 );

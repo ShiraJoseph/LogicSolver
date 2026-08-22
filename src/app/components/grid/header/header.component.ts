@@ -54,6 +54,8 @@ export class HeaderComponent extends BaseDirective {
 
     if (this.tile().entityId == undefined || name === this.tile().text) return;
 
+    this.store.takeSnapshot();
+
     if (this.isFeature()) {
       this.store.updateFeature(this.tile().entityId as FeatureId, {name});
     } else {
@@ -68,6 +70,7 @@ export class HeaderComponent extends BaseDirective {
   deleteHeader() {
     if (this.tile().entityId == undefined) return;
 
+    this.store.takeSnapshot();
     if (this.isFeature()) {
       this.storeService.deleteFeature(this.tile().entityId as FeatureId);
     } else {

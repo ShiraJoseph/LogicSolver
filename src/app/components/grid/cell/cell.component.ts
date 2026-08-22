@@ -39,6 +39,7 @@ export class CellComponent extends BaseDirective {
    * @param value
    */
   updateCell(tile: Tile, value: CellText) {
+    this.store.takeSnapshot();
     this.store.updateCell(tile.entityId as CellId, {userValue: value});
     this.store.setSelectedCellId(undefined);
   }

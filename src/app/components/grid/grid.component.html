@@ -25,13 +25,13 @@
         @case ('ADD_FEATURE') {
           <button
             class="other"
-            (click)="storeService.addNewFeature()">{{ tile.text }}
+            (click)="onClickAddFeature()">{{ tile.text }}
           </button>
         }
         @case ('ADD_OPTION') {
           <button
             class="other"
-            (click)="this.storeService.addNewOptionToAllFeatures()">{{ tile.text }}
+            (click)="onClickAddOption()">{{ tile.text }}
           </button>
         }
         @default {
@@ -42,4 +42,12 @@
     </div>
   }
 </div>
-<button (click)="storeService.clearCells()" class="clear-button">Clear Cells</button>
+<div class="clear-button">
+  <button (click)="onClickClearCells()">Clear Cells</button>
+  @if (store.canUndo()) {
+    <button (click)="undo()">Undo</button>
+  }
+  @if (store.canRedo()) {
+    <button (click)="redo()">Redo</button>
+  }
+</div>
