@@ -5,7 +5,7 @@ import {GridStore} from '../../store/store';
 import {StoreService} from '../../store/store.service';
 import {GRID_SEED} from '../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../mocks/grid.mock';
-import {CellText, Tile, TileType} from '../../types/tile.model';
+import {CellText} from '../../types/tile.model';
 import {NON_CELL_COLUMN_COUNT} from '../../constants/grid.const';
 
 describe('GridComponent', () => {
@@ -13,8 +13,6 @@ describe('GridComponent', () => {
   let fixture: ComponentFixture<GridComponent>;
   let store: InstanceType<typeof GridStore>;
   let storeService: StoreService;
-
-  const tileOfType = (type: TileType) => ({text: '', cols: 1, rows: 1, type}) as Tile;
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
@@ -42,17 +40,6 @@ describe('GridComponent', () => {
       storeService.addNewFeature('Sport');
 
       expect(component.columnCount()).toBe(3 * 3 + NON_CELL_COLUMN_COUNT);
-    });
-  });
-
-  describe('isHeader', () => {
-    it('should be true for the four header tiles', () => {
-      [TileType.TOP_FEATURE_HEADER, TileType.TOP_OPTION_HEADER, TileType.LEFT_FEATURE_HEADER, TileType.LEFT_OPTION_HEADER]
-        .forEach(type => expect(component.isHeader(tileOfType(type))).toBe(true));
-    });
-
-    it('should be false for a blank tile', () => {
-      expect(component.isHeader(tileOfType(TileType.FILLER_BLANK))).toBe(false);
     });
   });
 

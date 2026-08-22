@@ -5,10 +5,7 @@ import {GridSeed} from '../types/grid.model';
 import {CellText} from '../types/tile.model';
 import {GRID_SEED} from './grid.token';
 
-
-/**
- * Helper functions for updating store entities
- */
+/** Helper functions for updating store entities */
 @Service()
 export class StoreService {
   store = inject(GridStore);
@@ -17,6 +14,10 @@ export class StoreService {
     this.populateGridStore(inject(GRID_SEED));
   }
 
+  /**
+   * Adds a feature with a full set of options, each paired with every option of the existing features.
+   * @param name
+   */
   addNewFeature(name?: string) {
     const feature = new Feature();
 
@@ -39,6 +40,10 @@ export class StoreService {
     });
   }
 
+  /**
+   * Removes the option in the same slot from every feature, so they keep matching counts.
+   * @param optionId
+   */
   deleteOption(optionId: OptionId) {
     const indexToRemove = this.store.indexOfFeatureOption(optionId);
 
@@ -52,6 +57,10 @@ export class StoreService {
     this.store.setOptionCountPerFeature(this.store.optionCountPerFeature() - 1);
   }
 
+  /**
+   * Removes the feature along with its options and their cells.
+   * @param featureId
+   */
   deleteFeature(featureId: FeatureId) {
     this.store.removeCells(this.store.cellsByFeature(featureId));
     this.store.removeOptions(this.store.optionsByFeature(featureId));
@@ -65,7 +74,12 @@ export class StoreService {
     this.store.updateAllCells({userValue: CellText.EMPTY});
   }
 
-
+  /**
+   * Adds an option and a cell for each option of the other features, ordered so the higher feature sits on the left.
+   * @param feature
+   * @param name
+   * @private
+   */
   private addOptionWithCellsToFeature(feature: Feature, name?: string) {
     const option = new Option();
     option.featureId = feature.id;
@@ -108,6 +122,7 @@ export class StoreService {
 
   /**
    * Fills an empty store with the seeded features and their options.
+   * @private
    */
   private populateGridStore({featureNames, optionNames}: GridSeed) {
     if (!featureNames.length) return;

@@ -4,6 +4,7 @@ import {CellText} from '../types/tile.model';
 import {CandidateOptionSetsByFeatureIds, Candidates, ChangedSets} from '../types/logic.model';
 import {GridStore} from '../store/store';
 
+/** Deduces which option pairings are still possible from the Xs and Os the user entered. */
 @Service()
 export class LogicService {
   store = inject(GridStore);
@@ -18,6 +19,7 @@ export class LogicService {
   /**
    * Uses a process of elimination to update every option's candidate map based on user entered Xs and Os.
    * Reruns on the updated sets until no more deductions can be made with the available information.
+   * @private
    */
   private deduceCandidates(): Candidates {
     const candidates = this.rebuildCandidates();

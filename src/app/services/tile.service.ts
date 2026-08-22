@@ -5,6 +5,7 @@ import {Cell, Feature, OptionId} from '../types/entities.model';
 import {CELL_TILE, CORNER_BLANK_TILE, FILLER_BLANK_TILE, LEFT_FEATURE_TILE, LEFT_OPTION_TILE, NEW_FEATURE_BUTTON_TILE, NEW_OPTION_BUTTON_TILE, RIGHT_BLANK_TILE, TOP_FEATURE_TILE, TOP_OPTION_TILE} from '../constants/tile.const';
 import {BOTTOM_BORDER, RIGHT_BORDER} from '../constants/grid.const';
 
+/** Builds the ordered list of tiles the grid renders from the features, options, and cells in the store. */
 @Service()
 export class TileService {
   store = inject(GridStore);
@@ -12,7 +13,46 @@ export class TileService {
   /**
    * Pushes the array of tile data for the grid, one row at a time.
    * Tiles that span multiple rows are treated as existing only in their top row, in terms of tile order.
-   * @see tile.const.ts for a diagram of how tiles are arranged.
+   *
+   * @example
+   * ```markdown
+   * The following diagram indicates where each tile type would go in the grid if the grid had
+   * three features with two options each.
+   *
+   * Legend:
+   *   NF  = NEW_FEATURE_BUTTON_TILE
+   *   NO  = NEW_OPTION_BUTTON_TILE
+   *   RB  = RIGHT_BLANK_TILE
+   *   ┄   = no border visible in the UI but the tile ends there
+   *   0-9 = address in the grid (not visible in the UI)
+   *
+   *        0         1     2     3        4          5            6           7         8
+   *    ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╔═══════════════════════╦═══════════════════════╦═══════╗
+   * 0 ┆                             ║   TOP_FEATURE_TILE    ║   TOP_FEATURE_TILE    ║  NF   ║
+   *   ┆                             ╠═══════════╦═══════════╬═══════════╦═══════════╬═══════╣
+   * 1 ┆      CORNER_BLANK_TILE      ║   TOP_    ║   TOP_    ║   TOP_    ║   TOP_    ║       ║
+   * 2 ┆                             ║  OPTION_  ║  OPTION_  ║  OPTION_  ║  OPTION_  ║  NO   ║
+   * 3 ┆                             ║   TILE    ║   TILE    ║   TILE    ║   TILE    ║       ║
+   *   ╔══════════╦══════════════════╬═══════════╬═══════════╬═══════════╬═══════════╬═══════╝
+   * 4 ║  LEFT_   ║ LEFT_OPTION_TILE ║ CELL_TILE ║ CELL_TILE ║ CELL_TILE ║ CELL_TILE ║       ┆
+   *   ║ FEATURE_ ╠══════════════════╬═══════════╬═══════════╬═══════════╬═══════════╣  RB   ┆
+   * 5 ║   TILE   ║ LEFT_OPTION_TILE ║ CELL_TILE ║ CELL_TILE ║ CELL_TILE ║ CELL_TILE ║       ┆
+   *   ╠══════════╬══════════════════╬═══════════╬═══════════╬═══════════╩═══════════╝┄┄┄┄┄┄┄
+   * 6 ║  LEFT_   ║ LEFT_OPTION_TILE ║ CELL_TILE ║ CELL_TILE ║                       ┆       ┆
+   *   ║ FEATURE_ ╠══════════════════╬═══════════╬═══════════╣   FILLER_BLANK_TILE   ┆  RB   ┆
+   * 7 ║   TILE   ║ LEFT_OPTION_TILE ║ CELL_TILE ║ CELL_TILE ║                       ┆       ┆
+   *   ╚══════════╩══════════════════╩═══════════╩═══════════╝┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ┄┄┄┄┄┄┄
+   *
+   * Continuing the same example, the order that these tiles would be pushed into the tiles array would be:
+   * [
+   *    CORNER_BLANK_TILE, TOP_FEATURE_TILE, TOP_FEATURE_TILE, NEW_FEATURE_BUTTON_TILE,
+   *    TOP_OPTION_TILE, TOP_OPTION_TILE, TOP_OPTION_TILE, TOP_OPTION_TILE, NEW_OPTION_BUTTON_TILE,
+   *    LEFT_FEATURE_TILE, LEFT_OPTION_TILE, CELL_TILE, CELL_TILE, CELL_TILE CELL_TILE, RIGHT_BLANK_TILE,
+   *    LEFT_OPTION_TILE, CELL_TILE, CELL_TILE, CELL_TILE CELL_TILE,
+   *    LEFT_FEATURE_TILE, LEFT_OPTION_TILE, CELL_TILE, CELL_TILE, CELL_TILE CELL_TILE, FILLER_BLANK_TILE, RIGHT_BLANK_TILE,
+   *    LEFT_OPTION_TILE, CELL_TILE, CELL_TILE, CELL_TILE CELL_TILE,
+   * ]
+   * ```
    */
   tiles = computed(() => {
     const tiles: Array<Tile> = [];
@@ -20,16 +60,24 @@ export class TileService {
     const optionCount: number = this.store.optionCountPerFeature();
     const featuresLength = this.store.featureCount();
 
-    this.fillTopFeatures(tiles, optionCount, topOptionTiles);
-    this.fillTopOptions(tiles, topOptionTiles);
-    this.fillGridRows(featuresLength, optionCount, tiles, topOptionTiles);
+    tiles.push(CORNER_BLANK_TILE);
+    this.pushTopFeatures(tiles, optionCount, topOptionTiles);
+    tiles.push(NEW_FEATURE_BUTTON_TILE);
+    tiles.push(...topOptionTiles);
+    tiles.push(NEW_OPTION_BUTTON_TILE);
+    this.pushGridRows(featuresLength, optionCount, tiles, topOptionTiles);
 
     return tiles;
   });
 
-  private fillTopFeatures(tiles: Tile[], optionCount: number, topOptionTiles: Tile[]) {
-    tiles.push(CORNER_BLANK_TILE);
-
+  /**
+   * Pushes the corner, then a header per feature after the first, collecting their option headers for the row below.
+   * @param tiles
+   * @param optionCount
+   * @param topOptionTiles
+   * @private
+   */
+  private pushTopFeatures(tiles: Tile[], optionCount: number, topOptionTiles: Tile[]) {
     this.store.features().forEach((feature: Feature, index) => {
       if (index > 0) {
         tiles.push({...TOP_FEATURE_TILE, text: feature.name, entityId: feature.id, cols: optionCount});
@@ -43,18 +91,33 @@ export class TileService {
     });
   }
 
-  private fillTopOptions(tiles: Tile[], topOptionTiles: Tile[]) {
-    tiles.push(
-      NEW_FEATURE_BUTTON_TILE,
-      ...topOptionTiles,
-      NEW_OPTION_BUTTON_TILE
-    );
-  }
-
-  private fillGridRows(featuresLength: number, optionCount: number, tiles: Tile[], topOptionTiles: Tile[]) {
+  /**
+   * Pushes rows of tiles per left feature, stopping when a feature crosses itself.
+   *
+   * @example
+   * ```markdown
+   * No cells are needed from where feature C on the left crosses feature C at the top,
+   * and no cells needed to the right of that since they are repeated elsewhere:
+   *
+   *   || B  | C  | D  |
+   *   ----------------
+   * A || AB | AC | AD |
+   * D || DB | DC | x  |
+   * C || CB | x  | xx |
+   *
+   * x No such thing as a feature matching itself
+   * xx We already have DC so we don't need CD
+   * ```
+   * @param featuresLength
+   * @param optionCount
+   * @param tiles
+   * @param topOptionTiles
+   * @private
+   */
+  private pushGridRows(featuresLength: number, optionCount: number, tiles: Tile[], topOptionTiles: Tile[]) {
     const blanks: Array<Tile> = [];
 
-    this.leftFeatureIndexes(featuresLength).forEach((leftFeatureIndex, blockIndex) => {
+    this.leftFeatureIndices(featuresLength).forEach((leftFeatureIndex, blockIndex) => {
       const feature = this.store.features()[leftFeatureIndex];
 
       tiles.push({...LEFT_FEATURE_TILE, text: feature?.name, entityId: feature?.id, rows: optionCount});
@@ -64,14 +127,26 @@ export class TileService {
   }
 
   /**
-   * The features that get a row block on the left, in order: the first feature, then the rest from the last back to the second.
+   * The order of features going down the left side of the grid: first 0, then the rest in reverse order down to 1.
+   * @param featuresLength
+   * @private
    */
-  private leftFeatureIndexes(featuresLength: number): Array<number> {
+  private leftFeatureIndices(featuresLength: number): Array<number> {
     const afterTheFirst = Array.from({length: Math.max(featuresLength - 2, 0)}, (_, index) => featuresLength - 1 - index);
 
     return featuresLength ? [0, ...afterTheFirst] : [];
   }
 
+  /**
+   * Pushes one row per option of the given left feature: the option header, the cells, and on the blanks on the right side to hold the grid shape.
+   * @param feature
+   * @param tiles
+   * @param rowCellCount
+   * @param topOptionTiles
+   * @param blanks
+   * @param optionCount
+   * @private
+   */
   private fillOptionRowsForFeature(feature: Feature, tiles: Tile[], rowCellCount: number, topOptionTiles: Tile[], blanks: Tile[], optionCount: number) {
     const lastOptionIndex = optionCount - 1;
 
@@ -101,5 +176,10 @@ export class TileService {
     });
   }
 
+  /**
+   * Joins the border classes for a tile into a single string
+   * @param borders
+   * @private
+   */
   private joinBorders = (...borders: Array<string | false | undefined>): string => borders.filter(Boolean).join(' ');
 }

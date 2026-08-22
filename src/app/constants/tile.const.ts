@@ -1,46 +1,7 @@
 import {CellText, Tile, TileType} from '../types/tile.model';
 import {BOTTOM_BORDER, LEFT_BORDER, RIGHT_BORDER, TOP_BORDER} from './grid.const';
 
-/**
- * The starting shape of every tile type. A tile that stands for an entity is spread and
- * given its own text, entityId, and span where it is pushed onto the grid.
- *
- * The following diagram indicates where each tile type would go in the grid if the grid had three features with two options each.
- *
- * Legend:
- *   NF = NEW_FEATURE_BUTTON_TILE
- *   NO = NEW_OPTION_BUTTON_TILE
- *   RB = RIGHT_BLANK_TILE
- *   ┄ = no border in the UI but the tile ends there
- *
- *  ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╔═══════════════════════╦═══════════════════════╦═══════╗
- * ┆                             ║   TOP_FEATURE_TILE    ║   TOP_FEATURE_TILE    ║  NF   ║
- * ┆                             ╠═══════════╦═══════════╬═══════════╦═══════════╬═══════╣
- * ┆      CORNER_BLANK_TILE      ║   TOP_    ║   TOP_    ║   TOP_    ║   TOP_    ║       ║
- * ┆                             ║  OPTION_  ║  OPTION_  ║  OPTION_  ║  OPTION_  ║  NO   ║
- * ┆                             ║   TILE    ║   TILE    ║   TILE    ║   TILE    ║       ║
- * ╔══════════╦══════════════════╬═══════════╬═══════════╬═══════════╬═══════════╬═══════╝
- * ║  LEFT_   ║ LEFT_OPTION_TILE ║ CELL_TILE ║ CELL_TILE ║ CELL_TILE ║ CELL_TILE ║       ┆
- * ║ FEATURE_ ╠══════════════════╬═══════════╬═══════════╬═══════════╬═══════════╣  RB   ┆
- * ║   TILE   ║ LEFT_OPTION_TILE ║ CELL_TILE ║ CELL_TILE ║ CELL_TILE ║ CELL_TILE ║       ┆
- * ╠══════════╬══════════════════╬═══════════╬═══════════╬═══════════╩═══════════╝┄┄┄┄┄┄┄
- * ║  LEFT_   ║ LEFT_OPTION_TILE ║ CELL_TILE ║ CELL_TILE ║                       ┆       ┆
- * ║ FEATURE_ ╠══════════════════╬═══════════╬═══════════╣   FILLER_BLANK_TILE   ┆  RB   ┆
- * ║   TILE   ║ LEFT_OPTION_TILE ║ CELL_TILE ║ CELL_TILE ║                       ┆       ┆
- * ╚══════════╩══════════════════╩═══════════╩═══════════╝┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ┄┄┄┄┄┄┄
- *
- * Continuing the same example, the order that these tiles would be pushed into the tiles array would be:
- * [
- *    CORNER_BLANK_TILE, TOP_FEATURE_TILE, TOP_FEATURE_TILE, NEW_FEATURE_BUTTON_TILE,
- *    TOP_OPTION_TILE, TOP_OPTION_TILE, TOP_OPTION_TILE, TOP_OPTION_TILE, NEW_OPTION_BUTTON_TILE,
- *    LEFT_FEATURE_TILE, LEFT_OPTION_TILE, CELL_TILE, CELL_TILE, CELL_TILE CELL_TILE, RIGHT_BLANK_TILE,
- *    LEFT_OPTION_TILE, CELL_TILE, CELL_TILE, CELL_TILE CELL_TILE,
- *    LEFT_FEATURE_TILE, LEFT_OPTION_TILE, CELL_TILE, CELL_TILE, CELL_TILE CELL_TILE, FILLER_BLANK_TILE, RIGHT_BLANK_TILE,
- *    LEFT_OPTION_TILE, CELL_TILE, CELL_TILE, CELL_TILE CELL_TILE,
- * ]
- *
- */
-
+/** First tile in the grid */
 export const CORNER_BLANK_TILE: Tile = {
   borders: `${RIGHT_BORDER} ${BOTTOM_BORDER}`,
   text: CellText.EMPTY,
@@ -49,6 +10,7 @@ export const CORNER_BLANK_TILE: Tile = {
   type: TileType.CORNER_BLANK
 };
 
+/** Last tile in the first row of the grid, next to the top features */
 export const NEW_FEATURE_BUTTON_TILE: Tile = {
   borders: `${TOP_BORDER} ${RIGHT_BORDER} ${BOTTOM_BORDER}`,
   text: '+',
@@ -57,6 +19,7 @@ export const NEW_FEATURE_BUTTON_TILE: Tile = {
   type: TileType.ADD_FEATURE
 };
 
+/** Last tile in the second row of the grid, next to the top options */
 export const NEW_OPTION_BUTTON_TILE: Tile = {
   borders: `${RIGHT_BORDER} ${BOTTOM_BORDER}`,
   text: '+',
@@ -65,6 +28,7 @@ export const NEW_OPTION_BUTTON_TILE: Tile = {
   type: TileType.ADD_OPTION
 };
 
+/** Horizontal tiles at the top of the grid */
 export const TOP_FEATURE_TILE: Tile = {
   borders: `${TOP_BORDER} ${RIGHT_BORDER} ${BOTTOM_BORDER}`,
   text: CellText.EMPTY,
@@ -73,6 +37,7 @@ export const TOP_FEATURE_TILE: Tile = {
   type: TileType.TOP_FEATURE_HEADER
 };
 
+/** Vertical tiles in the second row of the grid */
 export const TOP_OPTION_TILE: Tile = {
   borders: BOTTOM_BORDER,
   text: CellText.EMPTY,
@@ -81,6 +46,7 @@ export const TOP_OPTION_TILE: Tile = {
   type: TileType.TOP_OPTION_HEADER
 };
 
+/** Vertical tiles going down the first column in the grid */
 export const LEFT_FEATURE_TILE: Tile = {
   borders: `${LEFT_BORDER} ${RIGHT_BORDER} ${BOTTOM_BORDER}`,
   text: CellText.EMPTY,
@@ -89,6 +55,7 @@ export const LEFT_FEATURE_TILE: Tile = {
   type: TileType.LEFT_FEATURE_HEADER
 };
 
+/** Horizontal tiles in the second column of the grid */
 export const LEFT_OPTION_TILE: Tile = {
   borders: RIGHT_BORDER,
   text: CellText.EMPTY,
@@ -97,6 +64,7 @@ export const LEFT_OPTION_TILE: Tile = {
   type: TileType.LEFT_OPTION_HEADER
 };
 
+/** All the tiles that can have an X or an O in them */
 export const CELL_TILE: Tile = {
   text: CellText.EMPTY,
   cols: 1,
@@ -104,6 +72,7 @@ export const CELL_TILE: Tile = {
   type: TileType.CELL
 };
 
+/** Blank space for Feature A at Feature B where we already filled out cells for Feature B at Feature A or for where a feature crosses itself */
 export const FILLER_BLANK_TILE: Tile = {
   text: CellText.EMPTY,
   cols: 1,
@@ -111,6 +80,7 @@ export const FILLER_BLANK_TILE: Tile = {
   type: TileType.FILLER_BLANK
 };
 
+/** Column of blank tiles going down the rightmost side of the grid to fill out the space below the add feature/option buttons */
 export const RIGHT_BLANK_TILE: Tile = {
   text: CellText.EMPTY,
   cols: 1,

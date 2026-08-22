@@ -26,6 +26,7 @@ The app serves at `http://localhost:4200/` and reloads on save.
 ```
 npm test          # vitest, via ng test
 npm run build     # production bundle into dist/
+npm run docs      # compodoc, generated into documentation/ and served
 ```
 
 `--legacy-peer-deps` is required while `@angular-architects/ngrx-toolkit` declares Angular 21 peers.

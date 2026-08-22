@@ -7,6 +7,7 @@ import {GridState, initialState} from '../types/state.model';
 import {cellConfig, featureConfig, optionConfig} from './entityConfig';
 import {NON_CELL_COLUMN_COUNT} from '../constants/grid.const';
 
+/** Holds the features, options and cells of the grid, and the relationships between them. */
 export const GridStore = signalStore(
   {providedIn: 'root', protectedState: false},
   withState<GridState>(initialState),
@@ -26,6 +27,7 @@ export const GridStore = signalStore(
     }
   })),
   withComputed(store => ({
+    /** Each feature id mapped to the order its feature appears in. */
     featurePositions: () => {
       const positionMap = new Map();
       store.featureIds().forEach((id, index) => {
@@ -35,6 +37,7 @@ export const GridStore = signalStore(
       })
       return positionMap;
     },
+    /** A column per option of every feature after the first, plus the header and button columns. */
     columnCount: () => store.optionCountPerFeature() * (store.featureCount() - 1) + NON_CELL_COLUMN_COUNT
   })),
   withDevtools('logicSolver')

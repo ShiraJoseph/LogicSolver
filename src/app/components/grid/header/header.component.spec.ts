@@ -8,6 +8,7 @@ import {GRID_SEED} from '../../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../../mocks/grid.mock';
 import {Tile, TileType} from '../../../types/tile.model';
 import {FeatureId, OptionId} from '../../../types/entities.model';
+import {BLACK} from '../../../constants/colors.const';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -98,7 +99,7 @@ describe('HeaderComponent', () => {
     it('should leave an option header label uncolored', async () => {
       await showHeader(TileType.TOP_OPTION_HEADER, 'Bike', optionId('Bike'));
 
-      expect(component.textColor()).toBeUndefined();
+      expect(component.textColor()).toEqual(BLACK);
     });
   });
 

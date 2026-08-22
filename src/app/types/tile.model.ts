@@ -1,11 +1,14 @@
 import {EntityId} from '@ngrx/signals/entities';
 
+/** One square of the grid, ready to render. */
 export interface Tile {
+  /** The border classes this tile draws, space separated. */
   borders?: string;
   cols: number;
   rows: number;
   text: string;
   type?: TileType;
+  /** The feature, option or cell this tile stands for, if it stands for one. */
   entityId?: EntityId;
 }
 
