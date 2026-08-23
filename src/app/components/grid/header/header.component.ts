@@ -4,6 +4,7 @@ import {FeatureId, OptionId} from '../../../types/entities.model';
 import {BaseDirective} from '../../../directives/base.directive';
 import {MIN_FEATURE_COUNT, MIN_OPTION_COUNT} from '../../../constants/grid.const';
 import {BLACK} from '../../../constants/colors.const';
+import {MoveArgs, MoveFnEnum} from '../../../types/move.model';
 
 /** A feature or option label on the top or left axis, with its rename and delete controls. */
 @Component({
@@ -18,18 +19,18 @@ export class HeaderComponent extends BaseDirective {
   shouldShowMinus = signal(false);
 
   /** The index of the current feature in the feature list */
-  featurePosition = computed(() => this.store.featurePositions().get(this.tile().entityId as FeatureId));
+  featureIndex = computed(() => this.store.featurePositions().get(this.tile().entityId as FeatureId));
 
   /** Whether the current header is a feature header or, if false, an option header */
   isFeature = computed(() => [TileType.LEFT_FEATURE_HEADER, TileType.TOP_FEATURE_HEADER].includes(this.tile().type!));
 
   /** Fill color based on feature index */
   backgroundColor = computed(() => this.isFeature() ?
-    this.colorService.getFeatureColor(this.featurePosition()) :
+    this.colorService.getFeatureColor(this.featureIndex()) :
     this.colorService.getOptionColor(this.tile()));
 
   /** The label color for the header */
-  textColor = computed(() => this.isFeature() ? this.colorService.getFeatureTextColor(this.featurePosition()) : BLACK);
+  textColor = computed(() => this.isFeature() ? this.colorService.getFeatureTextColor(this.featureIndex()) : BLACK);
 
   /** True for the headers whose label runs down the tile rather than across it. */
   isVertical = computed(() => [TileType.TOP_OPTION_HEADER, TileType.LEFT_FEATURE_HEADER].includes(this.tile().type!));
@@ -39,8 +40,10 @@ export class HeaderComponent extends BaseDirective {
     this.store.featureCount() <= MIN_FEATURE_COUNT :
     this.store.optionCountPerFeature() <= MIN_OPTION_COUNT);
 
+  /** Shows the delete button on this header. */
   showMinus = () => this.shouldShowMinus.set(true);
 
+  /** Hides the delete button on this header. */
   hideMinus = () => this.shouldShowMinus.set(false);
 
   /**
@@ -50,16 +53,19 @@ export class HeaderComponent extends BaseDirective {
   updateHeader(event: Event) {
     this.hideMinus();
 
-    const name = (event.target as HTMLInputElement).value;
+    const newValue = (event.target as HTMLInputElement).value;
+    const oldValue = this.tile().text;
 
-    if (this.tile().entityId == undefined || name === this.tile().text) return;
-
-    this.store.takeSnapshot();
+    if (this.tile().entityId == undefined || newValue === oldValue) return;
 
     if (this.isFeature()) {
-      this.store.updateFeature(this.tile().entityId as FeatureId, {name});
+      const featureId = this.tile().entityId as FeatureId;
+      this.store.updateFeature(featureId, {name: newValue});
+      this.store.recordMove({moveFn: MoveFnEnum.UPDATE, moveArgs: {featureId, oldValue, newValue}});
     } else {
-      this.store.updateOption(this.tile().entityId as OptionId, {name});
+      const optionId = this.tile().entityId as OptionId;
+      this.store.updateOption(optionId, {name: newValue});
+      this.store.recordMove({moveFn: MoveFnEnum.UPDATE, moveArgs: {optionId, oldValue, newValue}});
     }
   }
 
@@ -70,11 +76,14 @@ export class HeaderComponent extends BaseDirective {
   deleteHeader() {
     if (this.tile().entityId == undefined) return;
 
-    this.store.takeSnapshot();
+    let moveArgs: MoveArgs<MoveFnEnum.DELETE>;
+
     if (this.isFeature()) {
-      this.storeService.deleteFeature(this.tile().entityId as FeatureId);
+      moveArgs = this.storeService.deleteFeature(this.tile().entityId as FeatureId) as MoveArgs<MoveFnEnum.DELETE>;
     } else {
-      this.storeService.deleteOption(this.tile().entityId as OptionId);
+      moveArgs = this.storeService.deleteOption(this.tile().entityId as OptionId) as MoveArgs<MoveFnEnum.DELETE>;
     }
+
+    this.store.recordMove({moveFn: MoveFnEnum.DELETE, moveArgs});
   }
 }

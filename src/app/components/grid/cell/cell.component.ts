@@ -1,8 +1,9 @@
 import {Component, computed, inject, input} from '@angular/core';
 import {CellText, Tile} from '../../../types/tile.model';
-import {CellId} from '../../../types/entities.model';
+import {Cell, CellId} from '../../../types/entities.model';
 import {LogicService} from '../../../services/logic.service';
 import {BaseDirective} from '../../../directives/base.directive';
+import {MoveFnEnum} from '../../../types/move.model';
 
 /** One square where two options cross, showing its deduced X or O and the buttons for entering one. */
 @Component({
@@ -39,7 +40,7 @@ export class CellComponent extends BaseDirective {
    * @param value
    */
   updateCell(tile: Tile, value: CellText) {
-    this.store.takeSnapshot();
+    this.store.recordMove({moveFn: MoveFnEnum.UPDATE, moveArgs: {cellId: tile.entityId as CellId, oldValue: tile.text as CellText, newValue: value}});
     this.store.updateCell(tile.entityId as CellId, {userValue: value});
     this.store.setSelectedCellId(undefined);
   }

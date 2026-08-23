@@ -9,7 +9,7 @@
   min-height: 0;
 }
 
-.clear-button {
+.grid-buttons {
   align-self: start;
   margin-top: var(--page-margin);
 }

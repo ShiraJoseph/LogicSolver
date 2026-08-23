@@ -2,13 +2,14 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {CellComponent} from './cell.component';
 import {GridStore} from '../../../store/store';
-import {StoreService} from '../../../store/store.service';
+import {StoreService} from '../../../services/store.service';
 import {ColorService} from '../../../services/color.service';
 import {GRID_SEED} from '../../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../../mocks/grid.mock';
 import {CELL_TILE} from '../../../constants/tile.const';
 import {CellText} from '../../../types/tile.model';
 import {CellId} from '../../../types/entities.model';
+import {MoveFnEnum} from '../../../types/move.model';
 
 describe('CellComponent', () => {
   let component: CellComponent;
@@ -223,6 +224,23 @@ describe('CellComponent', () => {
 
     it('should color the cell from the color service', () => {
       expect(component.hoverColor()).toBe(colorService.getCellColor(component.tile()));
+    });
+  });
+  describe('recording moves', () => {
+    it('should record the value on each side of the write', () => {
+      component.updateCell(component.tile(), CellText.X);
+
+      expect(store.undoStack()).toEqual([{
+        moveFn: MoveFnEnum.UPDATE,
+        moveArgs: {cellId: store.cells()[0].id, oldValue: CellText.EMPTY, newValue: CellText.X}
+      }]);
+    });
+
+    it('should record every write on its own', () => {
+      component.updateCell(component.tile(), CellText.X);
+      component.updateCell(component.tile(), CellText.EMPTY);
+
+      expect(store.undoStack().length).toBe(2);
     });
   });
 });

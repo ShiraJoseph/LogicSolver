@@ -1,9 +1,9 @@
 import {inject, Service} from '@angular/core';
 import {Cell, Feature, FeatureId, Option, OptionId} from '../types/entities.model';
-import {GridStore} from './store';
+import {GridStore} from '../store/store';
 import {GridSeed} from '../types/grid.model';
 import {CellText} from '../types/tile.model';
-import {GRID_SEED} from './grid.token';
+import {GRID_SEED} from '../store/grid.token';
 
 /** Helper functions for updating store entities */
 @Service()
@@ -20,6 +20,8 @@ export class StoreService {
    */
   addNewFeature(name?: string) {
     const feature = new Feature();
+    const allNewCells: Array<Cell> = [];
+    const allNewOptions: Array<Option> = [];
 
     if (name) {
       feature.name = name;
@@ -28,19 +30,31 @@ export class StoreService {
     this.store.addFeature(feature);
 
     for (let i = 0; i < this.store.optionCountPerFeature(); i++) {
-      this.addOptionWithCellsToFeature(feature);
+      const {options, cells} = this.addOptionWithCellsToFeature(feature);
+      allNewOptions.push(...options);
+      allNewCells.push(...cells);
     }
+
+    return {features: [feature], options: allNewOptions, cells: allNewCells};
   }
 
   /**
    * Increases the option count for each feature by one.
    */
   addNewOptionToAllFeatures() {
-    this.store.setOptionCountPerFeature(this.store.optionCountPerFeature() + 1);
+    const newOptions: Array<Option> = [];
+    const allNewCells: Array<Cell> = [];
+    const optionCountPerFeature = this.store.optionCountPerFeature() + 1;
+
+    this.store.setOptionCountPerFeature(optionCountPerFeature);
 
     this.store.features().forEach((feature: Feature) => {
-      this.addOptionWithCellsToFeature(feature);
+      const {options, cells} = this.addOptionWithCellsToFeature(feature);
+      newOptions.push(...options);
+      allNewCells.push(...cells);
     });
+
+    return {options: newOptions, cells: allNewCells, optionCountPerFeature};
   }
 
   /**
@@ -48,16 +62,23 @@ export class StoreService {
    * @param optionId
    */
   deleteOption(optionId: OptionId) {
-    const indexToRemove = this.store.indexOfFeatureOption(optionId);
+    const oldOptions: Array<Option> = [];
+    const oldCells: Array<Cell> = [];
+    const optionIndex = this.store.indexOfFeatureOption(optionId);
 
     this.store.features().forEach((feature: Feature) => {
-      const matchingOption = this.store.optionIdsByFeature(feature)[indexToRemove];
-
-      this.store.removeCells(this.store.cellsByOption(matchingOption));
-      this.store.removeOption(matchingOption);
+      const optionToDelete = this.store.optionsByFeature(feature)[optionIndex];
+      const cellsToDelete = this.store.cellsByOption(optionToDelete);
+      oldOptions.push(optionToDelete);
+      oldCells.push(...cellsToDelete);
+      this.store.removeCells(cellsToDelete);
+      this.store.removeOption(optionToDelete);
     });
 
-    this.store.setOptionCountPerFeature(this.store.optionCountPerFeature() - 1);
+    const optionCountPerFeature = this.store.optionCountPerFeature();
+    this.store.setOptionCountPerFeature(optionCountPerFeature - 1);
+
+    return {options: oldOptions, cells: oldCells, optionCountPerFeature, optionIndex};
   }
 
   /**
@@ -65,20 +86,31 @@ export class StoreService {
    * @param featureId
    */
   deleteFeature(featureId: FeatureId) {
-    this.store.removeCells(this.store.cellsByFeature(featureId));
-    this.store.removeOptions(this.store.optionsByFeature(featureId));
+    const oldFeature = this.store.featureById(featureId);
+    if(!oldFeature) return;
+    const oldOptions = this.store.optionsByFeature(featureId);
+    const oldCells = this.store.cellsByFeature(featureId);
+    const featureIndex = this.store.featureIds().indexOf(oldFeature?.id as FeatureId);
+    this.store.removeCells(oldCells);
+    this.store.removeOptions(oldOptions);
     this.store.removeFeature(featureId);
+
+    return {features: [oldFeature], options: oldOptions, cells: oldCells, featureIndex};
   }
 
   /**
    * Clears all cells in the grid. (Leaves features and options as they are)
    */
   clearCells() {
-    this.store.updateAllCells({userValue: CellText.EMPTY});
+    const oldCells = this.store.cells().filter(cell => !!cell.userValue);
+
+    this.store.updateCells(oldCells, {userValue: CellText.EMPTY});
+
+    return {cells: oldCells};
   }
 
   /**
-   * Adds an option and a cell for each option of the other features, ordered so the higher feature sits on the left.
+   * Adds an option and a cell for each option in the other features, ordered so the higher feature sits on the left.
    * @param feature
    * @param name
    * @private
@@ -121,6 +153,8 @@ export class StoreService {
 
     this.store.addCells(newCells);
     this.store.addOption(option);
+
+    return {options: [option], cells: newCells};
   }
 
   /**

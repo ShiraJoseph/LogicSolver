@@ -42,12 +42,8 @@
     </div>
   }
 </div>
-<div class="clear-button">
-  <button (click)="onClickClearCells()">Clear Cells</button>
-  @if (store.canUndo()) {
-    <button (click)="undo()">Undo</button>
-  }
-  @if (store.canRedo()) {
-    <button (click)="redo()">Redo</button>
-  }
+<div class="grid-buttons">
+  <button class="clear-button" (click)="onClickClearCells()">Clear Cells</button>
+  <button [disabled]="!store.canUndo()" (click)="undo()">Undo</button>
+  <button [disabled]="!store.canRedo()" (click)="redo()">Redo</button>
 </div>

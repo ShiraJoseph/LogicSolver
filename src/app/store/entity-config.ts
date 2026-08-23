@@ -10,6 +10,6 @@ export const toEntityConfig = <T extends {id: UUID}, C extends string>(collectio
     selectId: (entity: T) => entity.id as UUID,
   });
 
-export const featureConfig = toEntityConfig<Feature, 'feature'>('feature');
-export const optionConfig = toEntityConfig<Option, 'option'>('option');
-export const cellConfig = toEntityConfig<Cell, 'cell'>('cell');
+export const FEATURE_CONFIG = toEntityConfig<Feature, 'feature'>('feature');
+export const OPTION_CONFIG = toEntityConfig<Option, 'option'>('option');
+export const CELL_CONFIG = toEntityConfig<Cell, 'cell'>('cell');

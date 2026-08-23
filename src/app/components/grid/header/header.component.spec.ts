@@ -2,13 +2,14 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {HeaderComponent} from './header.component';
 import {GridStore} from '../../../store/store';
-import {StoreService} from '../../../store/store.service';
+import {StoreService} from '../../../services/store.service';
 import {ColorService} from '../../../services/color.service';
 import {GRID_SEED} from '../../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../../mocks/grid.mock';
 import {Tile, TileType} from '../../../types/tile.model';
 import {FeatureId, OptionId} from '../../../types/entities.model';
 import {BLACK} from '../../../constants/colors.const';
+import {MoveArgs, MoveFnEnum} from '../../../types/move.model';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -261,6 +262,61 @@ describe('HeaderComponent', () => {
       component.deleteHeader();
 
       expect(store.featureCount()).toBe(3);
+    });
+  });
+  describe('recording moves', () => {
+    const rename = (name: string) => component.updateHeader({target: {value: name}} as unknown as Event);
+
+    it('should record a feature rename with the name on each side of it', () => {
+      const id = featureId('Vehicle');
+
+      rename('Transport');
+
+      expect(store.undoStack()).toEqual([{
+        moveFn: MoveFnEnum.UPDATE,
+        moveArgs: {featureId: id, oldValue: 'Vehicle', newValue: 'Transport'}
+      }]);
+    });
+
+    it('should record an option rename with the name on each side of it', async () => {
+      const id = optionId('Bike');
+      await showHeader(TileType.TOP_OPTION_HEADER, 'Bike', id);
+
+      rename('Scooter');
+
+      expect(store.undoStack()).toEqual([{
+        moveFn: MoveFnEnum.UPDATE,
+        moveArgs: {optionId: id, oldValue: 'Bike', newValue: 'Scooter'}
+      }]);
+    });
+
+    it('should record nothing when the name has not changed', () => {
+      rename('Vehicle');
+
+      expect(store.undoStack()).toEqual([]);
+    });
+
+    it('should record a deleted feature with the slot it sat in', () => {
+      component.deleteHeader();
+
+      const [move] = store.undoStack();
+      const moveArgs = move.moveArgs as MoveArgs<MoveFnEnum.DELETE>;
+      expect(move.moveFn).toBe(MoveFnEnum.DELETE);
+      expect(moveArgs.features!.map(feature => feature.name)).toEqual(['Vehicle']);
+      expect(moveArgs.featureIndex).toBe(1);
+    });
+
+    it('should record a deleted option with the slot it sat in and the count it left', async () => {
+      await showHeader(TileType.TOP_OPTION_HEADER, 'Canoe', optionId('Canoe'));
+
+      component.deleteHeader();
+
+      const [move] = store.undoStack();
+      const moveArgs = move.moveArgs as MoveArgs<MoveFnEnum.DELETE>;
+      expect(move.moveFn).toBe(MoveFnEnum.DELETE);
+      expect(moveArgs.options!.length).toBe(3);
+      expect(moveArgs.optionIndex).toBe(1);
+      expect(moveArgs.optionCountPerFeature).toBe(3);
     });
   });
 });
