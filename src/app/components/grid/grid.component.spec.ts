@@ -14,6 +14,11 @@ describe('GridComponent', () => {
   let store: InstanceType<typeof GridStore>;
   let storeService: StoreService;
 
+  const pressKey = async (key: string, modifiers: Partial<KeyboardEventInit> = {}, target?: HTMLElement) => {
+    (target ?? document).dispatchEvent(new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true, ...modifiers}));
+    await fixture.whenStable();
+  };
+
   const gridButton = (label: string): HTMLButtonElement =>
     [...fixture.nativeElement.querySelectorAll('.grid-buttons button')]
       .find((button: HTMLElement) => button.textContent!.trim() === label)!;
@@ -168,6 +173,74 @@ describe('GridComponent', () => {
       await fixture.whenStable();
 
       expect(store.cells()[0].userValue).toBe(CellText.EMPTY);
+    });
+  });
+  describe('the undo and redo shortcuts', () => {
+    beforeEach(async () => {
+      store.updateCell(store.cells()[0].id, {userValue: CellText.X});
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+    });
+
+    it('should walk the grid back on ctrl z', async () => {
+      await pressKey('z', {ctrlKey: true});
+
+      expect(store.cells()[0].userValue).toBe(CellText.X);
+    });
+
+    it('should walk the grid back on cmd z', async () => {
+      await pressKey('z', {metaKey: true});
+
+      expect(store.cells()[0].userValue).toBe(CellText.X);
+    });
+
+    it('should make the move again on ctrl shift z', async () => {
+      await pressKey('z', {ctrlKey: true});
+
+      await pressKey('z', {ctrlKey: true, shiftKey: true});
+
+      expect(store.cells()[0].userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should make the move again on ctrl y', async () => {
+      await pressKey('z', {ctrlKey: true});
+
+      await pressKey('y', {ctrlKey: true});
+
+      expect(store.cells()[0].userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should take an uppercase key the same way', async () => {
+      await pressKey('Z', {ctrlKey: true});
+
+      expect(store.cells()[0].userValue).toBe(CellText.X);
+    });
+
+    it('should ignore z on its own', async () => {
+      await pressKey('z');
+
+      expect(store.cells()[0].userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should ignore a key it has no shortcut for', async () => {
+      await pressKey('a', {ctrlKey: true});
+
+      expect(store.canUndo()).toBe(true);
+    });
+
+    it('should leave the shortcut to the browser while a header is being typed in', async () => {
+      await pressKey('z', {ctrlKey: true}, fixture.nativeElement.querySelector('input'));
+
+      expect(store.cells()[0].userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should stop the browser handling a shortcut it took', async () => {
+      const event = new KeyboardEvent('keydown', {key: 'z', ctrlKey: true, bubbles: true, cancelable: true});
+
+      document.dispatchEvent(event);
+      await fixture.whenStable();
+
+      expect(event.defaultPrevented).toBe(true);
     });
   });
 });
