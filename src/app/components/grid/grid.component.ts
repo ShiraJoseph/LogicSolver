@@ -1,18 +1,20 @@
 import {Component, computed, inject} from '@angular/core';
 import {TileService} from '../../services/tile.service';
-import {HeaderComponent} from './header/header.component';
+import {FeatureComponent} from './feature/feature.component';
+import {OptionComponent} from './option/option.component';
 import {CellComponent} from './cell/cell.component';
 import {CELL_SIZE, NON_CELL_COLUMN_COUNT} from '../../constants/grid.const';
 import {BaseDirective} from '../../directives/base.directive';
 import {MoveFnEnum} from '../../types/move.model';
 import {UndoRedoService} from '../../services/undo-redo.service';
+import {TranslatePipe} from '@ngx-translate/core';
 
 /** Lays the tiles out on one CSS grid, sized to the current feature and option counts. */
 @Component({
   selector: 'app-grid',
   templateUrl: './grid.component.html',
   styleUrl: './grid.component.css',
-  imports: [HeaderComponent, CellComponent],
+  imports: [FeatureComponent, OptionComponent, CellComponent, TranslatePipe],
   host: {'(document:keydown)': 'onKeydown($event)'},
 })
 export class GridComponent extends BaseDirective {
@@ -36,7 +38,7 @@ export class GridComponent extends BaseDirective {
     this.store.recordMove({moveFn: MoveFnEnum.ADD, moveArgs});
   }
 
-  /** Walks the grid back one move. */
+  /** Undoes the last user move. */
   protected undo(){
     this.undoRedoService.undo();
   }

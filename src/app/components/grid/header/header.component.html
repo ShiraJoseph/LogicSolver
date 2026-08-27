@@ -6,10 +6,11 @@
   [class.vertical]="isVertical()">
   <input
     name="header-input"
+    [attr.aria-label]="nameLabel()"
     [class]="tile().type"
     [style.color]="textColor()"
-    (keyup.enter)="updateHeader($event)"
-    (blur)="updateHeader($event)"
+    (keyup.enter)="onChangeName($event)"
+    (blur)="onChangeName($event)"
     [value]="tile().text">
   @if (shouldShowMinus()) {
     <button
@@ -17,8 +18,9 @@
       (mouseleave)="hideMinus()"
       (blur)="hideMinus()"
       class="delete"
+      [attr.aria-label]="deleteLabel()"
       [disabled]="isDeleteDisabled()"
-      (click)="deleteHeader()">-
+      (click)="onClickDelete()">-
     </button>
   }
 </div>

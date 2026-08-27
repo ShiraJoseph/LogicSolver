@@ -1,7 +1,7 @@
 import {patchState, signalStore, withComputed, withMethods, withState} from '@ngrx/signals';
 import {withEntities} from '@ngrx/signals/entities';
 import {withDevtools} from '@angular-architects/ngrx-toolkit';
-import {CellId} from '../types/entities.model';
+import {CellId, FeatureId} from '../types/entities.model';
 import {withEntityAccessors, withEntityRelationship, withTransitiveRelationship} from 'signalkin';
 import {GridState, initialState} from '../types/state.model';
 import {CELL_CONFIG, FEATURE_CONFIG, OPTION_CONFIG} from './entity-config';
@@ -74,6 +74,13 @@ export const GridStore = signalStore(
     canUndo: () => store.undoStack().length > 0,
     /** Whether there is an undone move left to make again. */
     canRedo: () => store.redoStack().length > 0,
+  })),
+  withMethods((store) => ({
+    /**
+     * The grid position of a feature from the left side
+     * @param featureId
+     */
+    featureIndex: (featureId: FeatureId) => store.featurePositions().get(featureId),
   })),
   withDevtools('logicSolver')
 );

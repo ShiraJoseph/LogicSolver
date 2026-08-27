@@ -10,6 +10,7 @@ import {CELL_TILE} from '../../../constants/tile.const';
 import {CellText} from '../../../types/tile.model';
 import {CellId} from '../../../types/entities.model';
 import {MoveFnEnum} from '../../../types/move.model';
+import {TRANSLATION_PROVIDERS} from '../../../app.config';
 
 describe('CellComponent', () => {
   let component: CellComponent;
@@ -32,7 +33,7 @@ describe('CellComponent', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [CellComponent],
-      providers: [{provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
+      providers: [TRANSLATION_PROVIDERS, {provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
     });
     TestBed.inject(StoreService);
     store = TestBed.inject(GridStore);

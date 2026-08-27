@@ -7,6 +7,7 @@ import {GRID_SEED} from '../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../mocks/grid.mock';
 import {CellText} from '../../types/tile.model';
 import {NON_CELL_COLUMN_COUNT} from '../../constants/grid.const';
+import {TRANSLATION_PROVIDERS} from '../../app.config';
 
 describe('GridComponent', () => {
   let component: GridComponent;
@@ -26,7 +27,7 @@ describe('GridComponent', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [GridComponent],
-      providers: [{provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
+      providers: [TRANSLATION_PROVIDERS, {provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
     });
     storeService = TestBed.inject(StoreService);
     store = TestBed.inject(GridStore);
@@ -62,7 +63,8 @@ describe('GridComponent', () => {
     });
 
     it('should render a header component for every header tile', () => {
-      expect(fixture.nativeElement.querySelectorAll('app-header').length).toBe(16);
+      expect(fixture.nativeElement.querySelectorAll('app-feature').length +
+        fixture.nativeElement.querySelectorAll('app-option').length).toBe(16);
     });
 
     it('should render an add button for features and one for options', async () => {
@@ -241,6 +243,17 @@ describe('GridComponent', () => {
       await fixture.whenStable();
 
       expect(event.defaultPrevented).toBe(true);
+    });
+  });
+  describe('the labels a screen reader reads', () => {
+    it('should name the add feature button, which shows only a plus', () => {
+      expect(fixture.nativeElement.querySelector('[data-tile-type="ADD_FEATURE"] button').getAttribute('aria-label'))
+        .toBe('Add a feature');
+    });
+
+    it('should name the add option button, which shows only a plus', () => {
+      expect(fixture.nativeElement.querySelector('[data-tile-type="ADD_OPTION"] button').getAttribute('aria-label'))
+        .toBe('Add an option to every feature');
     });
   });
 });

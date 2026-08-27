@@ -16,19 +16,19 @@ export enum MoveEntityEnum {
   CELL,
 }
 
-/** The cell that was written to, with the value on each side of the change. */
+/** Cell value before and after an update. */
 type CellUpdateMoveArgs = {cellId: CellId; oldValue: CellText; newValue: CellText};
 
-/** The option that was renamed, with the name on each side of the change. */
+/** Option value before and after an update. */
 type OptionUpdateMoveArgs = {optionId: OptionId; oldValue: string; newValue: string};
 
-/** The feature that was renamed, with the name on each side of the change. */
+/** Feature value before and after an update */
 type FeatureUpdateMoveArgs = {featureId: FeatureId, oldValue: string; newValue: string};
 
-/** Every cell as it stood before the clear. Redoing needs no record, since a cleared grid is always empty. */
+/** Cell values before clearing the grid */
 type ClearMoveArgs = {oldCells: Array<Cell>};
 
-/** The entities an ADD or DELETE move put on the grid or took off it, and the slots they belong in. */
+/** The entities an ADD or DELETE move added or removed from the grid and the index slots they belong in. */
 type CollectionMoveArgs =  {
   features?: Array<Feature>;
   options?: Array<Option>;
@@ -46,13 +46,13 @@ export type MoveArgs<T extends MoveFnEnum, E extends MoveEntityEnum = never> =
   T extends MoveFnEnum.UPDATE ? (
     E extends MoveEntityEnum.CELL ? CellUpdateMoveArgs:
       E extends MoveEntityEnum.OPTION ? OptionUpdateMoveArgs :
-        E extends MoveEntityEnum.FEATURE ? FeatureUpdateMoveArgs : never
+        FeatureUpdateMoveArgs
     ) :
     T extends MoveFnEnum.CLEAR ? ClearMoveArgs:
   CollectionMoveArgs;
 
 /** One move paired with the record its own undo runs on. */
-type BaseMove<T extends MoveFnEnum = never, E extends MoveEntityEnum = never> = {
+type BaseMove<T extends MoveFnEnum, E extends MoveEntityEnum = never> = {
   moveFn: T;
   moveArgs: MoveArgs<T, E>;
 }
@@ -61,7 +61,7 @@ type BaseMove<T extends MoveFnEnum = never, E extends MoveEntityEnum = never> = 
 export type Move = BaseMove<MoveFnEnum.ADD>
   | BaseMove<MoveFnEnum.DELETE>
   | BaseMove<MoveFnEnum.CLEAR>
-  | BaseMove<MoveFnEnum.UPDATE, MoveEntityEnum>;
+  | BaseMove<MoveFnEnum.UPDATE, MoveEntityEnum.FEATURE | MoveEntityEnum.OPTION | MoveEntityEnum.CELL>;
 
 /** Moves waiting to be undone or redone, oldest first. */
 export type MoveStack = Array<Move>;

@@ -4,11 +4,13 @@ import {Cell, CellId} from '../../../types/entities.model';
 import {LogicService} from '../../../services/logic.service';
 import {BaseDirective} from '../../../directives/base.directive';
 import {MoveFnEnum} from '../../../types/move.model';
+import {TranslatePipe} from '@ngx-translate/core';
 
 /** One square where two options cross, showing its deduced X or O and the buttons for entering one. */
 @Component({
   selector: 'app-cell',
   templateUrl: './cell.component.html',
+  imports: [TranslatePipe],
   styleUrl: './cell.component.css',
 })
 export class CellComponent extends BaseDirective {
@@ -19,7 +21,7 @@ export class CellComponent extends BaseDirective {
   /** The background this cell takes from the hovered row and column. */
   hoverColor = computed(() => this.colorService.getCellColor(this.tile()));
 
-  /** True while this is the cell whose buttons are open. */
+  /** If this cell's buttons are open */
   isSelected = computed(() => this.store.selectedCellId?.() === this.tile().entityId);
 
   /** An O once one candidate is left for the pairing, an X once it is ruled out, and empty while neither is settled. */

@@ -2,105 +2,126 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {HeaderComponent} from './header.component';
 import {GridStore} from '../../../store/store';
-import {StoreService} from '../../../services/store.service';
-import {ColorService} from '../../../services/color.service';
 import {GRID_SEED} from '../../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../../mocks/grid.mock';
 import {Tile, TileType} from '../../../types/tile.model';
-import {FeatureId, OptionId} from '../../../types/entities.model';
-import {BLACK} from '../../../constants/colors.const';
+import {FeatureId} from '../../../types/entities.model';
 import {MoveArgs, MoveFnEnum} from '../../../types/move.model';
+import {TRANSLATION_PROVIDERS} from '../../../app.config';
+
+/** The feature id the fake rename returns. */
+const RENAMED_ID = 'renamed-feature' as FeatureId;
+
+/** The move args the fake delete returns. */
+const DELETED_MOVE_ARGS = {features: [], featureIndex: 1} as MoveArgs<MoveFnEnum.DELETE>;
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
   let store: InstanceType<typeof GridStore>;
-  let storeService: StoreService;
-  let colorService: ColorService;
+  let renamedName: string | undefined;
+  let deleteCount: number;
 
-  const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
-  const featureId = (name: string) => store.features().find(feature => feature.name === name)!.id;
+  const updateEntity = (newValue: string) => {
+    renamedName = newValue;
 
-  const showHeader = async (type: TileType, text: string, entityId?: FeatureId | OptionId) => {
-    fixture.componentRef.setInput('tile', {text, cols: 1, rows: 1, type, entityId} as Tile);
+    return {featureId: RENAMED_ID};
+  };
+
+  const deleteEntity = () => {
+    deleteCount += 1;
+
+    return DELETED_MOVE_ARGS;
+  };
+
+  const showHeader = async (overrides: Record<string, unknown> = {}) => {
+    const inputs: Record<string, unknown> = {
+      tile: {text: 'Vehicle', cols: 1, rows: 1, type: TileType.TOP_FEATURE_HEADER, entityId: RENAMED_ID} as Tile,
+      entityLabel: 'feature',
+      backgroundColor: 'purple',
+      textColor: 'white',
+      isVertical: false,
+      isDeleteDisabled: false,
+      updateEntity,
+      deleteEntity,
+      ...overrides,
+    };
+
+    Object.entries(inputs).forEach(([name, value]) => fixture.componentRef.setInput(name, value));
     await fixture.whenStable();
   };
+
+  const rename = (name: string) => component.onChangeName({target: {value: name}} as unknown as Event);
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [HeaderComponent],
-      providers: [{provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
+      providers: [TRANSLATION_PROVIDERS, {provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
     });
-    storeService = TestBed.inject(StoreService);
     store = TestBed.inject(GridStore);
-    colorService = TestBed.inject(ColorService);
+    renamedName = undefined;
+    deleteCount = 0;
 
     fixture = TestBed.createComponent(HeaderComponent);
     component = fixture.componentInstance;
-    await showHeader(TileType.TOP_FEATURE_HEADER, 'Vehicle', featureId('Vehicle'));
+    await showHeader();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('isFeature', () => {
-    it('should be true for a top feature header', async () => {
-      await showHeader(TileType.TOP_FEATURE_HEADER, 'Vehicle', featureId('Vehicle'));
-
-      expect(component.isFeature()).toBe(true);
+  describe('what the wrapper passes in', () => {
+    it('should paint the header with the fill', () => {
+      expect(fixture.nativeElement.querySelector('.header').style.backgroundColor).toBe('purple');
     });
 
-    it('should be true for a left feature header', async () => {
-      await showHeader(TileType.LEFT_FEATURE_HEADER, 'Pet', featureId('Pet'));
-
-      expect(component.isFeature()).toBe(true);
+    it('should color the label with the text color', () => {
+      expect(fixture.nativeElement.querySelector('input').style.color).toBe('white');
     });
 
-    it('should be false for an option header', async () => {
-      await showHeader(TileType.TOP_OPTION_HEADER, 'Bike', optionId('Bike'));
-
-      expect(component.isFeature()).toBe(false);
-    });
-  });
-
-  describe('isVertical', () => {
-    it('should be true for a top option header', async () => {
-      await showHeader(TileType.TOP_OPTION_HEADER, 'Bike', optionId('Bike'));
-
-      expect(component.isVertical()).toBe(true);
+    it('should run the label across the tile by default', () => {
+      expect(fixture.nativeElement.querySelector('.header').classList).not.toContain('vertical');
     });
 
-    it('should be true for a left feature header', async () => {
-      await showHeader(TileType.LEFT_FEATURE_HEADER, 'Pet', featureId('Pet'));
+    it('should run the label vertically', async () => {
+      await showHeader({isVertical: true});
 
-      expect(component.isVertical()).toBe(true);
-    });
-
-    it('should be false for a top feature header', () => {
-      expect(component.isVertical()).toBe(false);
+      expect(fixture.nativeElement.querySelector('.header').classList).toContain('vertical');
     });
   });
 
-  describe('color', () => {
-    it('should take a feature header background from its position', () => {
-      expect(component.backgroundColor()).toBe(colorService.getFeatureColor(1));
+  describe('the labels a screen reader reads', () => {
+    it('should name the field after the entity label', () => {
+      expect(component.nameLabel()).toBe('feature name');
     });
 
-    it('should take a feature header label color from its position', () => {
-      expect(component.textColor()).toBe(colorService.getFeatureTextColor(1));
+    it('should name the field after an entity label carrying an owner', async () => {
+      await showHeader({entityLabel: 'Vehicle option'});
+
+      expect(component.nameLabel()).toBe('Vehicle option name');
     });
 
-    it('should take an option header background from the option', async () => {
-      await showHeader(TileType.TOP_OPTION_HEADER, 'Bike', optionId('Bike'));
-
-      expect(component.backgroundColor()).toBe(colorService.getOptionColor(component.tile()));
+    it('should put the field label on the input itself', () => {
+      expect(fixture.nativeElement.querySelector('input').getAttribute('aria-label')).toBe('feature name');
     });
 
-    it('should leave an option header label uncolored', async () => {
-      await showHeader(TileType.TOP_OPTION_HEADER, 'Bike', optionId('Bike'));
+    it('should name the delete button after the entity label and the name', () => {
+      expect(component.deleteLabel()).toBe('Delete feature Vehicle');
+    });
 
-      expect(component.textColor()).toEqual(BLACK);
+    it('should name the delete button of a header with no name yet', async () => {
+      await showHeader({tile: {text: '', cols: 1, rows: 1, type: TileType.TOP_FEATURE_HEADER, entityId: RENAMED_ID}});
+
+      expect(component.deleteLabel()).toBe('Delete feature');
+    });
+
+    it('should put the delete label on the button itself', async () => {
+      component.showMinus();
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('.delete').getAttribute('aria-label'))
+        .toBe('Delete feature Vehicle');
     });
   });
 
@@ -147,18 +168,8 @@ describe('HeaderComponent', () => {
       expect(fixture.nativeElement.querySelector('.delete')).toBeNull();
     });
 
-    it('should delete the header when clicked', async () => {
-      component.showMinus();
-      await fixture.whenStable();
-
-      fixture.nativeElement.querySelector('.delete').click();
-      await fixture.whenStable();
-
-      expect(store.features().map(feature => feature.name)).toEqual(['Pet', 'Name']);
-    });
-
-    it('should be disabled when the last removable header is left', async () => {
-      storeService.deleteFeature(featureId('Name'));
+    it('should be disabled when deleting is no longer allowed', async () => {
+      await showHeader({isDeleteDisabled: true});
       component.showMinus();
       await fixture.whenStable();
 
@@ -166,60 +177,36 @@ describe('HeaderComponent', () => {
     });
   });
 
-  describe('isDeleteDisabled', () => {
-    it('should be false while a feature can still be spared', () => {
-      expect(component.isDeleteDisabled()).toBe(false);
-    });
-
-    it('should be true once only two features are left', () => {
-      storeService.deleteFeature(featureId('Name'));
-
-      expect(component.isDeleteDisabled()).toBe(true);
-    });
-
-    it('should be false for an option while three are left', async () => {
-      await showHeader(TileType.TOP_OPTION_HEADER, 'Bike', optionId('Bike'));
-
-      expect(component.isDeleteDisabled()).toBe(false);
-    });
-
-    it('should be true for an option once only two are left', async () => {
-      storeService.deleteOption(optionId('Bike'));
-      await showHeader(TileType.TOP_OPTION_HEADER, 'Canoe', optionId('Canoe'));
-
-      expect(component.isDeleteDisabled()).toBe(true);
-    });
-  });
-
-  describe('updateHeader', () => {
-    const rename = (name: string) => component.updateHeader({target: {value: name}} as unknown as Event);
-
-    it('should rename the feature', () => {
+  describe('onChangeName', () => {
+    it('should pass the new name to the rename callback', () => {
       rename('Transport');
 
-      expect(store.featureById(featureId('Transport'))).toBeDefined();
+      expect(renamedName).toBe('Transport');
     });
 
-    it('should rename the option', async () => {
-      await showHeader(TileType.TOP_OPTION_HEADER, 'Bike', optionId('Bike'));
+    it('should record the rename against the returned entity', () => {
+      rename('Transport');
 
-      rename('Scooter');
-
-      expect(store.optionById(optionId('Scooter'))).toBeDefined();
+      expect(store.undoStack()).toEqual([{
+        moveFn: MoveFnEnum.UPDATE,
+        moveArgs: {featureId: RENAMED_ID, oldValue: 'Vehicle', newValue: 'Transport'}
+      }]);
     });
 
     it('should do nothing for a header with no entity', async () => {
-      await showHeader(TileType.TOP_FEATURE_HEADER, 'Vehicle');
+      await showHeader({tile: {text: 'Vehicle', cols: 1, rows: 1, type: TileType.TOP_FEATURE_HEADER}});
 
       rename('Transport');
 
-      expect(store.features().map(feature => feature.name)).toEqual(['Pet', 'Vehicle', 'Name']);
+      expect(renamedName).toBeUndefined();
+      expect(store.undoStack()).toEqual([]);
     });
 
     it('should do nothing when the name has not changed', () => {
       rename('Vehicle');
 
-      expect(store.features().map(feature => feature.name)).toEqual(['Pet', 'Vehicle', 'Name']);
+      expect(renamedName).toBeUndefined();
+      expect(store.undoStack()).toEqual([]);
     });
 
     it('should hide the minus button', () => {
@@ -237,86 +224,50 @@ describe('HeaderComponent', () => {
       input.dispatchEvent(new KeyboardEvent('keyup', {key: 'Enter'}));
       await fixture.whenStable();
 
-      expect(store.features().map(feature => feature.name)).toEqual(['Pet', 'Transport', 'Name']);
+      expect(renamedName).toBe('Transport');
+    });
+
+    it('should rename on blur', async () => {
+      const input = fixture.nativeElement.querySelector('input');
+      input.value = 'Transport';
+
+      input.dispatchEvent(new FocusEvent('blur'));
+      await fixture.whenStable();
+
+      expect(renamedName).toBe('Transport');
     });
   });
 
-  describe('deleteHeader', () => {
-    it('should delete the feature', () => {
-      component.deleteHeader();
+  describe('onClickDelete', () => {
+    it('should run the delete callback', () => {
+      component.onClickDelete();
 
-      expect(store.features().map(feature => feature.name)).toEqual(['Pet', 'Name']);
+      expect(deleteCount).toBe(1);
     });
 
-    it('should delete the option from every feature', async () => {
-      await showHeader(TileType.TOP_OPTION_HEADER, 'Bike', optionId('Bike'));
+    it('should record the returned move args', () => {
+      component.onClickDelete();
 
-      component.deleteHeader();
-
-      expect(store.optionCountPerFeature()).toBe(2);
+      expect(store.undoStack()).toEqual([{moveFn: MoveFnEnum.DELETE, moveArgs: DELETED_MOVE_ARGS}]);
     });
 
     it('should do nothing for a header with no entity', async () => {
-      await showHeader(TileType.TOP_FEATURE_HEADER, 'Vehicle');
+      await showHeader({tile: {text: 'Vehicle', cols: 1, rows: 1, type: TileType.TOP_FEATURE_HEADER}});
 
-      component.deleteHeader();
+      component.onClickDelete();
 
-      expect(store.featureCount()).toBe(3);
-    });
-  });
-  describe('recording moves', () => {
-    const rename = (name: string) => component.updateHeader({target: {value: name}} as unknown as Event);
-
-    it('should record a feature rename with the name on each side of it', () => {
-      const id = featureId('Vehicle');
-
-      rename('Transport');
-
-      expect(store.undoStack()).toEqual([{
-        moveFn: MoveFnEnum.UPDATE,
-        moveArgs: {featureId: id, oldValue: 'Vehicle', newValue: 'Transport'}
-      }]);
-    });
-
-    it('should record an option rename with the name on each side of it', async () => {
-      const id = optionId('Bike');
-      await showHeader(TileType.TOP_OPTION_HEADER, 'Bike', id);
-
-      rename('Scooter');
-
-      expect(store.undoStack()).toEqual([{
-        moveFn: MoveFnEnum.UPDATE,
-        moveArgs: {optionId: id, oldValue: 'Bike', newValue: 'Scooter'}
-      }]);
-    });
-
-    it('should record nothing when the name has not changed', () => {
-      rename('Vehicle');
-
+      expect(deleteCount).toBe(0);
       expect(store.undoStack()).toEqual([]);
     });
 
-    it('should record a deleted feature with the slot it sat in', () => {
-      component.deleteHeader();
+    it('should delete when the button is clicked', async () => {
+      component.showMinus();
+      await fixture.whenStable();
 
-      const [move] = store.undoStack();
-      const moveArgs = move.moveArgs as MoveArgs<MoveFnEnum.DELETE>;
-      expect(move.moveFn).toBe(MoveFnEnum.DELETE);
-      expect(moveArgs.features!.map(feature => feature.name)).toEqual(['Vehicle']);
-      expect(moveArgs.featureIndex).toBe(1);
-    });
+      fixture.nativeElement.querySelector('.delete').click();
+      await fixture.whenStable();
 
-    it('should record a deleted option with the slot it sat in and the count it left', async () => {
-      await showHeader(TileType.TOP_OPTION_HEADER, 'Canoe', optionId('Canoe'));
-
-      component.deleteHeader();
-
-      const [move] = store.undoStack();
-      const moveArgs = move.moveArgs as MoveArgs<MoveFnEnum.DELETE>;
-      expect(move.moveFn).toBe(MoveFnEnum.DELETE);
-      expect(moveArgs.options!.length).toBe(3);
-      expect(moveArgs.optionIndex).toBe(1);
-      expect(moveArgs.optionCountPerFeature).toBe(3);
+      expect(deleteCount).toBe(1);
     });
   });
 });
