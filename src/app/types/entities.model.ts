@@ -1,11 +1,9 @@
-
 import {CellText} from './tile.model';
 
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
 export type CellId = UUID;
 export type OptionId = UUID;
 export type FeatureId = UUID;
-
 
 // The relationship between entities is:
 // Feature to Option is 1:many.  All Features must have the same number of options.
@@ -46,4 +44,3 @@ export class Cell {
     this.userValue = CellText.EMPTY;
   }
 }
-

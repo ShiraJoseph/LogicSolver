@@ -71,6 +71,7 @@ export class LogicService {
       if (cell.userValue === CellText.EMPTY) return;
 
       const [optionA, optionB] = cell.optionIds as [OptionId, OptionId];
+
       if (cell.userValue === CellText.X) {
         this.eliminate(candidates, setsChangedLastPass, optionA, optionB);
       } else {
@@ -115,6 +116,7 @@ export class LogicService {
 
       featuresB.forEach(featureB => {
         const optionACandidatesInFeatureB = candidates.get(optionA)?.get(featureB)!;
+
         if (optionACandidatesInFeatureB?.size === 1) {
           const [optionB] = [...optionACandidatesInFeatureB];
           this.removeCandidateFromSiblings(optionB, optionA, candidates, setsChangedThisPass);

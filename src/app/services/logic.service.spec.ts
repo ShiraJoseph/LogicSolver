@@ -2,7 +2,7 @@ import {TestBed} from '@angular/core/testing';
 
 import {LogicService} from './logic.service';
 import {GridStore} from '../store/store';
-import {StoreService} from '../store/store.service';
+import {StoreService} from './store.service';
 import {GRID_SEED} from '../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../mocks/grid.mock';
 import {CellText} from '../types/tile.model';

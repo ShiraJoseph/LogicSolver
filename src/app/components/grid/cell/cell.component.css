@@ -13,7 +13,7 @@
   box-sizing: border-box;
   height: 100%;
   width: 100%;
-  border: dimgray 1px solid;
+  border: var(--grey-border);
 }
 
 .cell-inactive {
@@ -25,6 +25,11 @@
   width: 100%;
   font-size: medium;
   border: var(--grey-border);
+
+  &:hover {
+    cursor: pointer;
+    border: var(--purple-border);
+  }
 }
 
 .xo-buttons {
@@ -43,11 +48,11 @@
   justify-content: center;
   border: transparent 1px solid;
   color: purple;
-}
 
-.xo-button:hover {
-  cursor: pointer;
-  border: purple 1px solid;
+  &:hover {
+    cursor: pointer;
+    border: var(--purple-border);
+  }
 }
 
 .clear-buttons {
@@ -64,19 +69,14 @@
   align-items: center;
   text-align: center;
   justify-content: center;
-  background-color: #800080;
+  background-color: purple;
   color: white;
   border: transparent 2px solid;
-}
 
-.clear-button:hover {
-  cursor: pointer;
-  border: 2px purple solid;
-  background-color: white;
-  color: purple;
-}
-
-.cell-inactive:hover {
-  cursor: pointer;
-  border: var(--purple-border);
+  &:hover {
+    cursor: pointer;
+    border: 2px purple solid;
+    background-color: white;
+    color: purple;
+  }
 }

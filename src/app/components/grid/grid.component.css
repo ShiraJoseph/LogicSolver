@@ -9,7 +9,7 @@
   min-height: 0;
 }
 
-.clear-button {
+.grid-buttons {
   align-self: start;
   margin-top: var(--page-margin);
 }
@@ -45,11 +45,21 @@
     box-shadow: var(--bottom-shadow);
     transform: skewX(var(--header-skew));
     transform-origin: bottom;
+
+    &:has(input:focus) {
+      overflow: visible;
+      z-index: 1;
+    }
   }
 
   &[data-tile-type='LEFT_FEATURE_HEADER'] {
     position: sticky;
     left: 0;
+
+    &:has(input:focus) {
+      overflow: visible;
+      z-index: 1;
+    }
   }
 
   &[data-tile-type='LEFT_OPTION_HEADER'] {
@@ -73,20 +83,20 @@
   &.right-border {
     border-right: var(--thick-border);
   }
+
+  ::ng-deep input,
+  ::ng-deep button {
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  ::ng-deep button {
+    border: none;
+  }
 }
 
 .other {
   width: 100%;
   height: 100%;
   cursor: pointer;
-}
-
-.tile ::ng-deep input,
-.tile ::ng-deep button {
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.tile ::ng-deep button {
-  border: none;
 }

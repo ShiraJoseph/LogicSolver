@@ -9,11 +9,11 @@ export const BLACK = '#000000';
 export const FEATURE_COLORS = [
   {background: '#7733FF', text: WHITE},
   {background: '#FF3377', text: WHITE},
-  {background: '#3377FF', text: WHITE},
+  {background: '#306FEF', text: WHITE},
   {background: '#33FF77', text: BLACK},
   {background: '#FF7733', text: BLACK},
   {background: '#77FF33', text: BLACK},
-  {background: '#BB33FF', text: WHITE},
+  {background: '#B231F3', text: WHITE},
   {background: '#FF33BB', text: BLACK},
   {background: '#33BBFF', text: BLACK},
   {background: '#33FFBB', text: BLACK},
@@ -26,4 +26,3 @@ export const FEATURE_COLORS = [
   {background: '#BB7733', text: WHITE},
   {background: '#77BB33', text: BLACK},
 ];
-

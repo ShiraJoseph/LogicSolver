@@ -2,11 +2,12 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {GridComponent} from './grid.component';
 import {GridStore} from '../../store/store';
-import {StoreService} from '../../store/store.service';
+import {StoreService} from '../../services/store.service';
 import {GRID_SEED} from '../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../mocks/grid.mock';
 import {CellText} from '../../types/tile.model';
 import {NON_CELL_COLUMN_COUNT} from '../../constants/grid.const';
+import {TRANSLATION_PROVIDERS} from '../../app.config';
 
 describe('GridComponent', () => {
   let component: GridComponent;
@@ -14,10 +15,19 @@ describe('GridComponent', () => {
   let store: InstanceType<typeof GridStore>;
   let storeService: StoreService;
 
+  const pressKey = async (key: string, modifiers: Partial<KeyboardEventInit> = {}, target?: HTMLElement) => {
+    (target ?? document).dispatchEvent(new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true, ...modifiers}));
+    await fixture.whenStable();
+  };
+
+  const gridButton = (label: string): HTMLButtonElement =>
+    [...fixture.nativeElement.querySelectorAll('.grid-buttons button')]
+      .find((button: HTMLElement) => button.textContent!.trim() === label)!;
+
   beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [GridComponent],
-      providers: [{provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
+      providers: [TRANSLATION_PROVIDERS, {provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
     });
     storeService = TestBed.inject(StoreService);
     store = TestBed.inject(GridStore);
@@ -53,7 +63,8 @@ describe('GridComponent', () => {
     });
 
     it('should render a header component for every header tile', () => {
-      expect(fixture.nativeElement.querySelectorAll('app-header').length).toBe(16);
+      expect(fixture.nativeElement.querySelectorAll('app-feature').length +
+        fixture.nativeElement.querySelectorAll('app-option').length).toBe(16);
     });
 
     it('should render an add button for features and one for options', async () => {
@@ -90,6 +101,159 @@ describe('GridComponent', () => {
 
       component.tileService.tiles()[bordered].borders!.split(' ')
         .forEach(border => expect(renderedTile.classList).toContain(border));
+    });
+  });
+  describe('recording moves', () => {
+    it('should record one move when a feature is added', async () => {
+      fixture.nativeElement.querySelector('[data-tile-type="ADD_FEATURE"] button').click();
+      await fixture.whenStable();
+
+      expect(store.undoStack().length).toBe(1);
+    });
+
+    it('should record one move when an option is added to every feature', async () => {
+      fixture.nativeElement.querySelector('[data-tile-type="ADD_OPTION"] button').click();
+      await fixture.whenStable();
+
+      expect(store.undoStack().length).toBe(1);
+    });
+
+    it('should record the cells as they stood before they were cleared', async () => {
+      store.updateCell(store.cells()[0].id, {userValue: CellText.X});
+
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+
+      expect(store.undoStack().length).toBe(1);
+      expect(store.canUndo()).toBe(true);
+    });
+  });
+
+  describe('the undo and redo buttons', () => {
+    it('should stay disabled until a move is made', () => {
+      expect(gridButton('Undo').disabled).toBe(true);
+      expect(gridButton('Redo').disabled).toBe(true);
+    });
+
+    it('should offer an undo once a move is made', async () => {
+      storeService.addNewFeature('Sport');
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+
+      expect(gridButton('Undo').disabled).toBe(false);
+    });
+
+    it('should walk the newest move back when undo is clicked', async () => {
+      store.updateCell(store.cells()[0].id, {userValue: CellText.X});
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+
+      gridButton('Undo').click();
+      await fixture.whenStable();
+
+      expect(store.cells()[0].userValue).toBe(CellText.X);
+    });
+
+    it('should offer a redo once a move is walked back', async () => {
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+
+      gridButton('Undo').click();
+      await fixture.whenStable();
+
+      expect(gridButton('Redo').disabled).toBe(false);
+    });
+
+    it('should make the move again when redo is clicked', async () => {
+      store.updateCell(store.cells()[0].id, {userValue: CellText.X});
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+      gridButton('Undo').click();
+      await fixture.whenStable();
+
+      gridButton('Redo').click();
+      await fixture.whenStable();
+
+      expect(store.cells()[0].userValue).toBe(CellText.EMPTY);
+    });
+  });
+  describe('the undo and redo shortcuts', () => {
+    beforeEach(async () => {
+      store.updateCell(store.cells()[0].id, {userValue: CellText.X});
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+    });
+
+    it('should walk the grid back on ctrl z', async () => {
+      await pressKey('z', {ctrlKey: true});
+
+      expect(store.cells()[0].userValue).toBe(CellText.X);
+    });
+
+    it('should walk the grid back on cmd z', async () => {
+      await pressKey('z', {metaKey: true});
+
+      expect(store.cells()[0].userValue).toBe(CellText.X);
+    });
+
+    it('should make the move again on ctrl shift z', async () => {
+      await pressKey('z', {ctrlKey: true});
+
+      await pressKey('z', {ctrlKey: true, shiftKey: true});
+
+      expect(store.cells()[0].userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should make the move again on ctrl y', async () => {
+      await pressKey('z', {ctrlKey: true});
+
+      await pressKey('y', {ctrlKey: true});
+
+      expect(store.cells()[0].userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should take an uppercase key the same way', async () => {
+      await pressKey('Z', {ctrlKey: true});
+
+      expect(store.cells()[0].userValue).toBe(CellText.X);
+    });
+
+    it('should ignore z on its own', async () => {
+      await pressKey('z');
+
+      expect(store.cells()[0].userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should ignore a key it has no shortcut for', async () => {
+      await pressKey('a', {ctrlKey: true});
+
+      expect(store.canUndo()).toBe(true);
+    });
+
+    it('should leave the shortcut to the browser while a header is being typed in', async () => {
+      await pressKey('z', {ctrlKey: true}, fixture.nativeElement.querySelector('input'));
+
+      expect(store.cells()[0].userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should stop the browser handling a shortcut it took', async () => {
+      const event = new KeyboardEvent('keydown', {key: 'z', ctrlKey: true, bubbles: true, cancelable: true});
+
+      document.dispatchEvent(event);
+      await fixture.whenStable();
+
+      expect(event.defaultPrevented).toBe(true);
+    });
+  });
+  describe('the labels a screen reader reads', () => {
+    it('should name the add feature button, which shows only a plus', () => {
+      expect(fixture.nativeElement.querySelector('[data-tile-type="ADD_FEATURE"] button').getAttribute('aria-label'))
+        .toBe('Add a feature');
+    });
+
+    it('should name the add option button, which shows only a plus', () => {
+      expect(fixture.nativeElement.querySelector('[data-tile-type="ADD_OPTION"] button').getAttribute('aria-label'))
+        .toBe('Add an option to every feature');
     });
   });
 });

@@ -1,6 +1,6 @@
 {
   "name": "logic-solver",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -22,6 +22,7 @@
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
     "@ngrx/signals": "^21.1.1",
+    "@ngx-translate/core": "^18.0.0",
     "rxjs": "~7.8.0",
     "signalkin": "^0.2.1",
     "tslib": "^2.3.0"

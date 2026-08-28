@@ -1,0 +1,18 @@
+{
+  "cell": {
+    "clear": "clear"
+  },
+  "grid": {
+    "addFeature": "Add a feature",
+    "addOption": "Add an option to every feature",
+    "clearCells": "Clear Cells",
+    "redo": "Redo",
+    "undo": "Undo"
+  },
+  "header": {
+    "delete": "Delete",
+    "feature": "feature",
+    "name": "name",
+    "option": "option"
+  }
+}

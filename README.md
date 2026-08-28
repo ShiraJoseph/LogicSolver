@@ -56,10 +56,16 @@ Every option belongs to exactly one feature, and every option matches exactly on
 |---|----------------------------------------------------------------------------|
 | Click a cell | Opens O, X and clear                                                       |
 | `x` on a selected cell | Cancels out of it                                                          |
-| Type in a header | Renames the feature or option on enter or blur                             |
+| Type in a header | Renames the feature or option on enter, escape or blur                    |
+| Down arrow in a header | Moves to that header's delete button                                 |
+| Up arrow on a delete button | Moves back to the header name                                   |
 | `-` on a header | Deletes that feature, or the option in that number slot from every feature |
 | `+` at the end of a row or column | Adds a feature or an option to every feature                               |
-| Clear Cells | Empties the cells in the grid, keeping features and options               |
+| Clear Cells | Empties the cells in the grid, keeping features and options                |
+| Undo, or `ctrl` + `z` | Walks the grid back one move                                               |
+| Redo, or `ctrl` + `shift` + `z` or `ctrl` + `y` | Makes the newest undone move again                                         |
+
+On a Mac the shortcuts take `cmd` in place of `ctrl`. While a header is being typed in, `ctrl` + `z` undoes the typing rather than the move.
 
 ---
 
@@ -81,13 +87,15 @@ A cell reads as an O when one candidate is left, an X when the pairing is gone f
 
 | Path | Holds |
 |---|---|
-| `store/` | The signal store, its entity config, and helpers for adding and deleting features, options and cells |
+| `store/` | The signal store, its entity config, and the stacks of moves to undo and redo |
+| `services/store.service.ts` | Adds and deletes features, options and cells, and hands back what an undo of that needs |
+| `services/undo-redo.service.ts` | Walks the grid back and forward through the recorded moves |
 | `services/logic.service.ts` | Candidate sets and the deduction rules |
 | `services/tile.service.ts` | Builds the flat tile array the grid renders, row by row |
 | `services/color.service.ts` | Every color the grid draws |
 | `components/grid/` | The grid and its cell and header components |
 | `constants/tile.const.ts` | The starting shape of each tile type, with a diagram of how they sit on the grid |
 | `directives/base.directive.ts` | The services the grid components share |
-| `types/` | Entities, tiles, solver types and store state |
+| `types/` | Entities, tiles, moves, solver types and store state |
 
 Entity relationships and collection methods come from [signalkin](https://www.npmjs.com/package/signalkin).

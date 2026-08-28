@@ -1,8 +1,8 @@
 import {TestBed} from '@angular/core/testing';
 
 import {StoreService} from './store.service';
-import {GridStore} from './store';
-import {GRID_SEED} from './grid.token';
+import {GridStore} from '../store/store';
+import {GRID_SEED} from '../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../mocks/grid.mock';
 import {CellText} from '../types/tile.model';
 import {FeatureId, OptionId} from '../types/entities.model';
@@ -238,6 +238,78 @@ describe('StoreService', () => {
       const cell = store.cellByOptions(firstFeatureOption, newFeatureOption);
 
       expect(cell?.optionIds?.[0]).toBe(firstFeatureOption);
+    });
+  });
+  describe('the record it hands back', () => {
+    const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+    const featureId = (name: string) => store.features().find(feature => feature.name === name)!.id;
+
+    beforeEach(() => configure());
+
+    it('should hand back the feature it added with its options and cells', () => {
+      const {features, options, cells} = service.addNewFeature('Sport');
+
+      expect(features.map(feature => feature.name)).toEqual(['Sport']);
+      expect(options.length).toBe(3);
+      expect(cells.length).toBe(27);
+    });
+
+    it('should hand back the option count the grid carries once the option is added', () => {
+      const {optionCountPerFeature} = service.addNewOptionToAllFeatures();
+
+      expect(optionCountPerFeature).toBe(4);
+      expect(store.optionCountPerFeature()).toBe(4);
+    });
+
+    it('should hand back one added option per feature', () => {
+      const {options} = service.addNewOptionToAllFeatures();
+
+      expect(options.length).toBe(3);
+    });
+
+    it('should hand back the option count the grid carried while the deleted option existed', () => {
+      const {optionCountPerFeature} = service.deleteOption(optionId('Dog'));
+
+      expect(optionCountPerFeature).toBe(3);
+      expect(store.optionCountPerFeature()).toBe(2);
+    });
+
+    it('should hand back the slot the deleted option sat in', () => {
+      const {optionIndex} = service.deleteOption(optionId('Fish'));
+
+      expect(optionIndex).toBe(2);
+    });
+
+    it('should hand back the option it removed from every feature', () => {
+      const {options} = service.deleteOption(optionId('Dog'));
+
+      expect(options.length).toBe(3);
+    });
+
+    it('should hand back the slot the deleted feature sat in', () => {
+      const record = service.deleteFeature(featureId('Vehicle'));
+
+      expect(record!.featureIndex).toBe(1);
+    });
+
+    it('should hand back the deleted feature with its options and cells', () => {
+      const record = service.deleteFeature(featureId('Vehicle'));
+
+      expect(record!.features.map(feature => feature.name)).toEqual(['Vehicle']);
+      expect(record!.options.length).toBe(3);
+      expect(record!.cells.length).toBe(18);
+    });
+
+    it('should hand back nothing for a feature that is not on the grid', () => {
+      expect(service.deleteFeature('a-b-c-d-e')).toBeUndefined();
+    });
+
+    it('should hand back only the cells that were carrying a value', () => {
+      store.updateCell(store.cells()[0].id, {userValue: CellText.X});
+
+      const {cells} = service.clearCells();
+
+      expect(cells.length).toBe(1);
     });
   });
 });

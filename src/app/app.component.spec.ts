@@ -3,12 +3,13 @@ import {TestBed} from '@angular/core/testing';
 import {AppComponent} from './app.component';
 import {GRID_SEED} from './store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from './mocks/grid.mock';
+import {TRANSLATION_PROVIDERS} from './app.config';
 
 describe('AppComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [{provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
+      providers: [TRANSLATION_PROVIDERS, {provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
     });
   });
 

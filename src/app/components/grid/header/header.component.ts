@@ -1,11 +1,11 @@
-import {Component, computed, input, signal} from '@angular/core';
-import {Tile, TileType} from '../../../types/tile.model';
+import {Component, computed, inject, input} from '@angular/core';
+import {TranslateService} from '@ngx-translate/core';
+import {Tile} from '../../../types/tile.model';
 import {FeatureId, OptionId} from '../../../types/entities.model';
 import {BaseDirective} from '../../../directives/base.directive';
-import {MIN_FEATURE_COUNT, MIN_OPTION_COUNT} from '../../../constants/grid.const';
-import {BLACK} from '../../../constants/colors.const';
+import {MoveArgs, MoveFnEnum} from '../../../types/move.model';
 
-/** A feature or option label on the top or left axis, with its rename and delete controls. */
+/** The rename and delete controls for a grid header. */
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
@@ -14,64 +14,55 @@ import {BLACK} from '../../../constants/colors.const';
 export class HeaderComponent extends BaseDirective {
   tile = input.required<Tile>();
 
-  /** Whether the delete button on the header should be visible */
-  shouldShowMinus = signal(false);
+  /** The header type string, such as "feature" or "Vehicle option". */
+  entityLabel = input.required<string>();
 
-  /** The index of the current feature in the feature list */
-  featurePosition = computed(() => this.store.featurePositions().get(this.tile().entityId as FeatureId));
+  /** Fill color for the header. */
+  backgroundColor = input.required<string>();
 
-  /** Whether the current header is a feature header or, if false, an option header */
-  isFeature = computed(() => [TileType.LEFT_FEATURE_HEADER, TileType.TOP_FEATURE_HEADER].includes(this.tile().type!));
+  /** The label color, which contrasts the fill. */
+  textColor = input.required<string>();
 
-  /** Fill color based on feature index */
-  backgroundColor = computed(() => this.isFeature() ?
-    this.colorService.getFeatureColor(this.featurePosition()) :
-    this.colorService.getOptionColor(this.tile()));
+  /** If the label runs vertically */
+  isVertical = input.required<boolean>();
 
-  /** The label color for the header */
-  textColor = computed(() => this.isFeature() ? this.colorService.getFeatureTextColor(this.featurePosition()) : BLACK);
+  /** If deleting would drop below the minimum */
+  isDeleteDisabled = input.required<boolean>();
 
-  /** True for the headers whose label runs down the tile rather than across it. */
-  isVertical = computed(() => [TileType.TOP_OPTION_HEADER, TileType.LEFT_FEATURE_HEADER].includes(this.tile().type!));
+  /** Renames the entity and returns its id for the move record. */
+  updateEntity = input.required<(newValue: string) => {featureId: FeatureId} | {optionId: OptionId}>();
 
-  /** True once deleting would leave the grid with fewer than two features, or fewer than two options per feature. */
-  isDeleteDisabled = computed(() => this.isFeature() ?
-    this.store.featureCount() <= MIN_FEATURE_COUNT :
-    this.store.optionCountPerFeature() <= MIN_OPTION_COUNT);
+  /** Deletes the entity and returns its move args. */
+  deleteEntity = input.required<() => MoveArgs<MoveFnEnum.DELETE>>();
 
-  showMinus = () => this.shouldShowMinus.set(true);
+  /** Translations */
+  lang = inject(TranslateService).translate('header');
 
-  hideMinus = () => this.shouldShowMinus.set(false);
+  /** The screen reader label for the name field. */
+  nameLabel = computed(() => `${this.entityLabel()} ${this.lang().name}`);
+
+  /** The screen reader label for the delete button. */
+  deleteLabel = computed(() => `${this.lang().delete} ${this.entityLabel()} ${this.tile().text}`.trim());
 
   /**
-   * Renames the feature or option this header stands for, unless the name is unchanged.
+   * Renames the entity and records the move, unless the name is unchanged.
    * @param event
    */
-  updateHeader(event: Event) {
-    this.hideMinus();
+  onChangeName(event: Event) {
+    const newValue = (event.target as HTMLInputElement).value;
+    const oldValue = this.tile().text;
 
-    const name = (event.target as HTMLInputElement).value;
+    if (this.tile().entityId == undefined || newValue === oldValue) return;
 
-    if (this.tile().entityId == undefined || name === this.tile().text) return;
-
-    if (this.isFeature()) {
-      this.store.updateFeature(this.tile().entityId as FeatureId, {name});
-    } else {
-      this.store.updateOption(this.tile().entityId as OptionId, {name});
-    }
+    this.store.recordMove({moveFn: MoveFnEnum.UPDATE, moveArgs: {oldValue, newValue, ...this.updateEntity()(newValue)}});
   }
 
   /**
-   * Deletes the feature from state if this is a feature header
-   * or the option at the current option's index from every feature if it is an option header
+   * Deletes the entity and records the move.
    */
-  deleteHeader() {
+  onClickDelete() {
     if (this.tile().entityId == undefined) return;
 
-    if (this.isFeature()) {
-      this.storeService.deleteFeature(this.tile().entityId as FeatureId);
-    } else {
-      this.storeService.deleteOption(this.tile().entityId as OptionId);
-    }
+    this.store.recordMove({moveFn: MoveFnEnum.DELETE, moveArgs: this.deleteEntity()()});
   }
 }

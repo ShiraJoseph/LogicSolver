@@ -25,14 +25,6 @@ export enum TileType {
   FILLER_BLANK = 'FILLER_BLANK',
 }
 
-/** The four tile types that render an editable header label. */
-export const HEADER_TILE_TYPES = new Set([
-  TileType.TOP_FEATURE_HEADER,
-  TileType.TOP_OPTION_HEADER,
-  TileType.LEFT_FEATURE_HEADER,
-  TileType.LEFT_OPTION_HEADER,
-]);
-
 export enum CellText {
   X = 'X',
   O = 'O',

@@ -17,21 +17,25 @@
           <app-cell [tile]="tile"/>
         }
         @case ('TOP_FEATURE_HEADER')
+        @case ('LEFT_FEATURE_HEADER') {
+          <app-feature [tile]="tile"/>
+        }
         @case ('TOP_OPTION_HEADER')
-        @case ('LEFT_FEATURE_HEADER')
         @case ('LEFT_OPTION_HEADER') {
-          <app-header [tile]="tile"/>
+          <app-option [tile]="tile"/>
         }
         @case ('ADD_FEATURE') {
           <button
             class="other"
-            (click)="storeService.addNewFeature()">{{ tile.text }}
+            [attr.aria-label]="'grid.addFeature' | translate"
+            (click)="onClickAddFeature()">{{ tile.text }}
           </button>
         }
         @case ('ADD_OPTION') {
           <button
             class="other"
-            (click)="this.storeService.addNewOptionToAllFeatures()">{{ tile.text }}
+            [attr.aria-label]="'grid.addOption' | translate"
+            (click)="onClickAddOption()">{{ tile.text }}
           </button>
         }
         @default {
@@ -42,4 +46,8 @@
     </div>
   }
 </div>
-<button (click)="storeService.clearCells()" class="clear-button">Clear Cells</button>
+<div class="grid-buttons">
+  <button class="clear-button" (click)="onClickClearCells()">{{ 'grid.clearCells' | translate }}</button>
+  <button [disabled]="!store.canUndo()" (click)="undo()">{{ 'grid.undo' | translate }}</button>
+  <button [disabled]="!store.canRedo()" (click)="redo()">{{ 'grid.redo' | translate }}</button>
+</div>

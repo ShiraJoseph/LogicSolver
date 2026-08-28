@@ -2,13 +2,15 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {CellComponent} from './cell.component';
 import {GridStore} from '../../../store/store';
-import {StoreService} from '../../../store/store.service';
+import {StoreService} from '../../../services/store.service';
 import {ColorService} from '../../../services/color.service';
 import {GRID_SEED} from '../../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../../mocks/grid.mock';
 import {CELL_TILE} from '../../../constants/tile.const';
 import {CellText} from '../../../types/tile.model';
 import {CellId} from '../../../types/entities.model';
+import {MoveFnEnum} from '../../../types/move.model';
+import {TRANSLATION_PROVIDERS} from '../../../app.config';
 
 describe('CellComponent', () => {
   let component: CellComponent;
@@ -24,14 +26,14 @@ describe('CellComponent', () => {
       .find((button: HTMLElement) => button.textContent!.trim() === label)!.click();
 
   const showCell = async (id: CellId) => {
-    fixture.componentRef.setInput('tile', {...CELL_TILE, entityId: id});
+    fixture.componentRef.setInput('tile', {...CELL_TILE, entityId: id, text: store.cellById(id)!.userValue});
     await fixture.whenStable();
   };
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [CellComponent],
-      providers: [{provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
+      providers: [TRANSLATION_PROVIDERS, {provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
     });
     TestBed.inject(StoreService);
     store = TestBed.inject(GridStore);
@@ -128,12 +130,19 @@ describe('CellComponent', () => {
       expect(store.selectedCellId?.()).toBeUndefined();
     });
 
-    it('should empty the cell when given no value', () => {
+    it('should empty the cell when given no value', async () => {
       component.updateCell(component.tile(), CellText.X);
+      await showCell(store.cells()[0].id);
 
       component.updateCell(component.tile(), CellText.EMPTY);
 
       expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should leave the cell alone when the value has not changed', () => {
+      component.updateCell(component.tile(), CellText.EMPTY);
+
+      expect(store.undoStack()).toEqual([]);
     });
   });
 
@@ -191,6 +200,7 @@ describe('CellComponent', () => {
 
     it('should empty the cell when the clear button is clicked', async () => {
       store.updateCell(store.cells()[0].id, {userValue: CellText.X});
+      await showCell(store.cells()[0].id);
       component.selectCell();
       await fixture.whenStable();
 
@@ -223,6 +233,25 @@ describe('CellComponent', () => {
 
     it('should color the cell from the color service', () => {
       expect(component.hoverColor()).toBe(colorService.getCellColor(component.tile()));
+    });
+  });
+  describe('recording moves', () => {
+    it('should record the value on each side of the write', () => {
+      component.updateCell(component.tile(), CellText.X);
+
+      expect(store.undoStack()).toEqual([{
+        moveFn: MoveFnEnum.UPDATE,
+        moveArgs: {cellId: store.cells()[0].id, oldValue: CellText.EMPTY, newValue: CellText.X}
+      }]);
+    });
+
+    it('should record every write on its own', async () => {
+      component.updateCell(component.tile(), CellText.X);
+      await showCell(store.cells()[0].id);
+
+      component.updateCell(component.tile(), CellText.EMPTY);
+
+      expect(store.undoStack().length).toBe(2);
     });
   });
 });
