@@ -10,7 +10,7 @@ export interface GridState {
   selectedCellId?: CellId;
   /** The moves the user has made, newest last. */
   undoStack: MoveStack;
-  /** The moves the user has walked back, newest last. Recording a new move empties it. */
+  /** The moves the user has walked back, newest last. A new move clears them. */
   redoStack: MoveStack;
 }
 

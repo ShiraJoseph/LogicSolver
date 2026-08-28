@@ -3,7 +3,7 @@ import {TileService} from '../../services/tile.service';
 import {FeatureComponent} from './feature/feature.component';
 import {OptionComponent} from './option/option.component';
 import {CellComponent} from './cell/cell.component';
-import {CELL_SIZE, NON_CELL_COLUMN_COUNT} from '../../constants/grid.const';
+import {CELL_SIZE, NON_CELL_COLUMN_COUNT, REDO_KEY, UNDO_KEY} from '../../constants/grid.const';
 import {BaseDirective} from '../../directives/base.directive';
 import {MoveFnEnum} from '../../types/move.model';
 import {UndoRedoService} from '../../services/undo-redo.service';
@@ -26,25 +26,33 @@ export class GridComponent extends BaseDirective {
 
   protected readonly CELL_SIZE = CELL_SIZE;
 
-  /** Adds a feature with a full set of options, and records it as one move. */
+  /**
+   * Adds a feature with a full set of options, and records it as one move.
+   */
   protected onClickAddFeature() {
     const moveArgs = this.storeService.addNewFeature();
     this.store.recordMove({moveFn: MoveFnEnum.ADD, moveArgs});
   }
 
-  /** Adds one option to every feature, and records it as one move. */
+  /**
+   * Adds one option to every feature, and records it as one move.
+   */
   protected onClickAddOption() {
     const moveArgs = this.storeService.addNewOptionToAllFeatures();
     this.store.recordMove({moveFn: MoveFnEnum.ADD, moveArgs});
   }
 
-  /** Undoes the last user move. */
-  protected undo(){
+  /**
+   * Undoes the last user move.
+   */
+  protected undo() {
     this.undoRedoService.undo();
   }
 
-  /** Makes the newest undone move again. */
-  protected redo(){
+  /**
+   * Makes the newest undone move again.
+   */
+  protected redo() {
     this.undoRedoService.redo();
   }
 
@@ -58,18 +66,20 @@ export class GridComponent extends BaseDirective {
 
     const key = event.key.toLowerCase();
 
-    if (key !== 'z' && key !== 'y') return;
+    if (key !== UNDO_KEY && key !== REDO_KEY) return;
 
     event.preventDefault();
 
-    if (key === 'y' || event.shiftKey) {
+    if (key === REDO_KEY || event.shiftKey) {
       this.redo();
     } else {
       this.undo();
     }
   }
 
-  /** Empties every cell, recording how they stood so the values can come back. */
+  /**
+   * Empties every cell, recording how they stood so the values can come back.
+   */
   protected onClickClearCells() {
     this.store.recordMove({moveFn: MoveFnEnum.CLEAR, moveArgs: {oldCells: this.store.cells()}});
     this.storeService.clearCells();

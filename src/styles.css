@@ -7,6 +7,7 @@
   --thick-border: black 4px solid;
 
   --header-skew: -20deg;
+  --header-input-padding: 4px;
   --header-baseline: calc(var(--cell-size) * 4);
 
   --band-shadow-offset: 3px;
@@ -27,4 +28,9 @@
     margin: 0;
     padding: var(--page-margin);
   }
+}
+
+button {
+  background-color: white;
+  color: black;
 }

@@ -1,7 +1,7 @@
 import {Cell, CellId, Feature, FeatureId, Option, OptionId} from './entities.model';
 import {CellText} from './tile.model';
 
-/** What a move did to the grid, and so which operation undoes it. */
+/** The grid operation a move applied */
 export enum MoveFnEnum {
   ADD,
   UPDATE,
@@ -28,7 +28,7 @@ type FeatureUpdateMoveArgs = {featureId: FeatureId, oldValue: string; newValue: 
 /** Cell values before clearing the grid */
 type ClearMoveArgs = {oldCells: Array<Cell>};
 
-/** The entities an ADD or DELETE move added or removed from the grid and the index slots they belong in. */
+/** The entities an ADD or DELETE move changed, with their index slots */
 type CollectionMoveArgs =  {
   features?: Array<Feature>;
   options?: Array<Option>;
@@ -41,7 +41,7 @@ type CollectionMoveArgs =  {
   optionIndex?: number;
 };
 
-/** Everything an undo needs to put the grid back, in the shape the move that was made calls for. */
+/** The record an undo needs, shaped by the move */
 export type MoveArgs<T extends MoveFnEnum, E extends MoveEntityEnum = never> =
   T extends MoveFnEnum.UPDATE ? (
     E extends MoveEntityEnum.CELL ? CellUpdateMoveArgs:
@@ -51,13 +51,13 @@ export type MoveArgs<T extends MoveFnEnum, E extends MoveEntityEnum = never> =
     T extends MoveFnEnum.CLEAR ? ClearMoveArgs:
   CollectionMoveArgs;
 
-/** One move paired with the record its own undo runs on. */
+/** One move paired with its undo record */
 type BaseMove<T extends MoveFnEnum, E extends MoveEntityEnum = never> = {
   moveFn: T;
   moveArgs: MoveArgs<T, E>;
 }
 
-/** Every move the grid can record, told apart by `moveFn`. */
+/** The moves the grid can record, distinguished by `moveFn` */
 export type Move = BaseMove<MoveFnEnum.ADD>
   | BaseMove<MoveFnEnum.DELETE>
   | BaseMove<MoveFnEnum.CLEAR>

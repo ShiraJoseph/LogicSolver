@@ -28,13 +28,14 @@ export const GridStore = signalStore(
     setSelectedCellId: (selectedCellId: CellId | undefined) => {
       patchState(store, {selectedCellId});
     },
-    /** Adds a move the user just made to the undo stack, and drops the redo stack it branches away from. */
+    /** Adds a new move to the undo stack and clears the redo stack */
     recordMove: (move: Move) => {
       patchState(store, {redoStack: [], undoStack: [...store.undoStack(), move]});
     },
     /** Takes the newest move off the undo stack, hands it back, and parks it on the redo stack. */
     popUndoMove: () => {
       const move = store.undoStack().at(-1);
+
       if (!move) return undefined;
 
       patchState(store, {
@@ -47,6 +48,7 @@ export const GridStore = signalStore(
     /** Takes the newest undone move off the redo stack, hands it back, and parks it on the undo stack. */
     popRedoMove: () => {
       const move = store.redoStack().at(-1);
+
       if (!move) return undefined;
 
       patchState(store, {
@@ -58,7 +60,7 @@ export const GridStore = signalStore(
     },
   })),
   withComputed(store => ({
-    /** Each feature id mapped to the order its feature appears in. */
+    /** Each feature id mapped to its grid position */
     featurePositions: () => {
       const positionMap = new Map();
       store.featureIds().forEach((id, index) => {
@@ -66,6 +68,7 @@ export const GridStore = signalStore(
           positionMap.set(id, index);
         }
       });
+
       return positionMap;
     },
     /** A column per option of every feature after the first, plus the header and button columns. */

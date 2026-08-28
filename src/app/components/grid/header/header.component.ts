@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {Component, computed, inject, input} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {Tile} from '../../../types/tile.model';
 import {FeatureId, OptionId} from '../../../types/entities.model';
@@ -35,9 +35,6 @@ export class HeaderComponent extends BaseDirective {
   /** Deletes the entity and returns its move args. */
   deleteEntity = input.required<() => MoveArgs<MoveFnEnum.DELETE>>();
 
-  /** Whether the delete button on the header should be visible */
-  shouldShowMinus = signal(false);
-
   /** Translations */
   lang = inject(TranslateService).translate('header');
 
@@ -47,19 +44,11 @@ export class HeaderComponent extends BaseDirective {
   /** The screen reader label for the delete button. */
   deleteLabel = computed(() => `${this.lang().delete} ${this.entityLabel()} ${this.tile().text}`.trim());
 
-  /** Shows the delete button on this header. */
-  showMinus = () => this.shouldShowMinus.set(true);
-
-  /** Hides the delete button on this header. */
-  hideMinus = () => this.shouldShowMinus.set(false);
-
   /**
    * Renames the entity and records the move, unless the name is unchanged.
    * @param event
    */
   onChangeName(event: Event) {
-    this.hideMinus();
-
     const newValue = (event.target as HTMLInputElement).value;
     const oldValue = this.tile().text;
 

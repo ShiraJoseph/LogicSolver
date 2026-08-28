@@ -87,7 +87,9 @@ export class StoreService {
    */
   deleteFeature(featureId: FeatureId) {
     const oldFeature = this.store.featureById(featureId);
-    if(!oldFeature) return;
+
+    if (!oldFeature) return;
+
     const oldOptions = this.store.optionsByFeature(featureId);
     const oldCells = this.store.cellsByFeature(featureId);
     const featureIndex = this.store.featureIds().indexOf(oldFeature?.id as FeatureId);
@@ -125,6 +127,7 @@ export class StoreService {
 
     // todo: replace with store.indexOfFeature once I've added it to signalkin
     const featureIndex = this.store.featurePositions().get(feature.id);
+
     if (featureIndex == undefined) {
       throw new Error('cannot find feature with id ' + feature.id);
     }
@@ -136,6 +139,7 @@ export class StoreService {
         const cell = new Cell();
 
         const existingFeatureIndex = this.store.featurePositions().get(existingOption.featureId);
+
         if (existingFeatureIndex == undefined) {
           throw new Error('Cannot find feature with id ' + existingOption.featureId);
         }

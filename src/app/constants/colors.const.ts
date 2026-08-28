@@ -26,4 +26,3 @@ export const FEATURE_COLORS = [
   {background: '#BB7733', text: WHITE},
   {background: '#77BB33', text: BLACK},
 ];
-

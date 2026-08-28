@@ -77,7 +77,7 @@ describe('HeaderComponent', () => {
     });
 
     it('should color the label with the text color', () => {
-      expect(fixture.nativeElement.querySelector('input').style.color).toBe('white');
+      expect(fixture.nativeElement.querySelector('.header').style.color).toBe('white');
     });
 
     it('should run the label across the tile by default', () => {
@@ -116,62 +116,59 @@ describe('HeaderComponent', () => {
       expect(component.deleteLabel()).toBe('Delete feature');
     });
 
-    it('should put the delete label on the button itself', async () => {
-      component.showMinus();
-      await fixture.whenStable();
-
+    it('should put the delete label on the button itself', () => {
       expect(fixture.nativeElement.querySelector('.delete').getAttribute('aria-label'))
         .toBe('Delete feature Vehicle');
     });
   });
 
-  describe('the minus button', () => {
-    it('should stay hidden until the header is hovered', () => {
-      expect(component.shouldShowMinus()).toBe(false);
-      expect(fixture.nativeElement.querySelector('.delete')).toBeNull();
+  describe('the delete button', () => {
+    it('should stay out of the tab order', () => {
+      expect(fixture.nativeElement.querySelector('.delete').getAttribute('tabindex')).toBe('-1');
     });
 
-    it('should appear on hover', async () => {
-      fixture.nativeElement.querySelector('.header').dispatchEvent(new MouseEvent('mouseover'));
-      await fixture.whenStable();
+    it('should take focus on arrow down', () => {
+      fixture.nativeElement.querySelector('input').dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowDown'}));
 
-      expect(fixture.nativeElement.querySelector('.delete')).not.toBeNull();
+      expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.delete'));
     });
 
-    it('should disappear again on mouseleave', async () => {
-      component.showMinus();
-      await fixture.whenStable();
+    it('should leave the caret alone on arrow right', () => {
+      const input = fixture.nativeElement.querySelector('input');
+      input.focus();
 
-      fixture.nativeElement.querySelector('.header').dispatchEvent(new MouseEvent('mouseleave'));
-      await fixture.whenStable();
+      input.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight'}));
 
-      expect(fixture.nativeElement.querySelector('.delete')).toBeNull();
+      expect(document.activeElement).toBe(input);
     });
 
-    it('should stay visible while the pointer is on the button itself', async () => {
-      component.showMinus();
-      await fixture.whenStable();
+    it('should not scroll the page on arrow down', () => {
+      const arrowDown = new KeyboardEvent('keydown', {key: 'ArrowDown', cancelable: true});
 
-      fixture.nativeElement.querySelector('.delete').dispatchEvent(new MouseEvent('mouseover'));
-      await fixture.whenStable();
+      fixture.nativeElement.querySelector('input').dispatchEvent(arrowDown);
 
-      expect(fixture.nativeElement.querySelector('.delete')).not.toBeNull();
+      expect(arrowDown.defaultPrevented).toBe(true);
     });
 
-    it('should disappear when the button loses focus', async () => {
-      component.showMinus();
-      await fixture.whenStable();
+    it('should not scroll the page on arrow up', () => {
+      const arrowUp = new KeyboardEvent('keydown', {key: 'ArrowUp', cancelable: true});
 
-      fixture.nativeElement.querySelector('.delete').dispatchEvent(new FocusEvent('blur'));
-      await fixture.whenStable();
+      fixture.nativeElement.querySelector('.delete').dispatchEvent(arrowUp);
 
-      expect(fixture.nativeElement.querySelector('.delete')).toBeNull();
+      expect(arrowUp.defaultPrevented).toBe(true);
+    });
+
+    it('should hand focus back to the name on arrow up', () => {
+      const deleteButton = fixture.nativeElement.querySelector('.delete');
+      deleteButton.focus();
+
+      deleteButton.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowUp'}));
+
+      expect(document.activeElement).toBe(fixture.nativeElement.querySelector('input'));
     });
 
     it('should be disabled when deleting is no longer allowed', async () => {
       await showHeader({isDeleteDisabled: true});
-      component.showMinus();
-      await fixture.whenStable();
 
       expect(fixture.nativeElement.querySelector('.delete').disabled).toBe(true);
     });
@@ -209,22 +206,28 @@ describe('HeaderComponent', () => {
       expect(store.undoStack()).toEqual([]);
     });
 
-    it('should hide the minus button', () => {
-      component.showMinus();
-
-      rename('Transport');
-
-      expect(component.shouldShowMinus()).toBe(false);
-    });
-
-    it('should rename on enter', async () => {
+    it('should rename and leave the field on enter', async () => {
       const input = fixture.nativeElement.querySelector('input');
+      input.focus();
       input.value = 'Transport';
 
       input.dispatchEvent(new KeyboardEvent('keyup', {key: 'Enter'}));
       await fixture.whenStable();
 
       expect(renamedName).toBe('Transport');
+      expect(document.activeElement).not.toBe(input);
+    });
+
+    it('should rename and leave the field on escape', async () => {
+      const input = fixture.nativeElement.querySelector('input');
+      input.focus();
+      input.value = 'Transport';
+
+      input.dispatchEvent(new KeyboardEvent('keyup', {key: 'Escape'}));
+      await fixture.whenStable();
+
+      expect(renamedName).toBe('Transport');
+      expect(document.activeElement).not.toBe(input);
     });
 
     it('should rename on blur', async () => {
@@ -261,9 +264,6 @@ describe('HeaderComponent', () => {
     });
 
     it('should delete when the button is clicked', async () => {
-      component.showMinus();
-      await fixture.whenStable();
-
       fixture.nativeElement.querySelector('.delete').click();
       await fixture.whenStable();
 

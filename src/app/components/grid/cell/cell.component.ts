@@ -1,6 +1,6 @@
 import {Component, computed, inject, input} from '@angular/core';
 import {CellText, Tile} from '../../../types/tile.model';
-import {Cell, CellId} from '../../../types/entities.model';
+import {CellId} from '../../../types/entities.model';
 import {LogicService} from '../../../services/logic.service';
 import {BaseDirective} from '../../../directives/base.directive';
 import {MoveFnEnum} from '../../../types/move.model';

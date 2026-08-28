@@ -4,5 +4,7 @@ export const TOP_BORDER = 'top-border';
 export const RIGHT_BORDER = 'right-border';
 export const BOTTOM_BORDER = 'bottom-border';
 export const LEFT_BORDER = 'left-border';
+export const UNDO_KEY = 'z';
+export const REDO_KEY = 'y';
 export const MIN_FEATURE_COUNT = 2;
 export const MIN_OPTION_COUNT = 2;

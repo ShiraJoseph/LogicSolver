@@ -12,25 +12,38 @@
   align-items: stretch;
   width: 100%;
   height: 100%;
-  border: 1px solid dimgray;
+  border: var(--grey-border);
 
   &:hover,
   &:focus-within {
-    border: 1px purple solid;
+    border: var(--purple-border);
+
+    .delete {
+      width: 30%;
+      opacity: 1;
+    }
   }
 
   &.vertical {
     flex-direction: column;
 
-    button {
-      height: 30%;
+    .delete {
       width: 100%;
+      height: 0;
+    }
+
+    &:hover,
+    &:focus-within {
+      .delete {
+        height: 30%;
+      }
     }
   }
 }
 
 input {
   border: none;
+  color: inherit;
   outline: none;
   text-align: center;
   width: 100%;
@@ -41,23 +54,47 @@ input {
   text-wrap: wrap;
   box-sizing: border-box;
 
+  &:focus {
+    background-color: white;
+    color: black;
+    outline: var(--grey-border);
+    outline-offset: -1px;
+  }
+
   &.TOP_FEATURE_HEADER {
     transform: skewX(calc(-1 * var(--header-skew)));
   }
 
+  &.LEFT_FEATURE_HEADER:focus {
+    align-self: flex-start;
+    width: fit-content;
+    height: var(--cell-size);
+    margin-block: auto;
+    padding: var(--header-input-padding);
+  }
 
   &.TOP_OPTION_HEADER {
     writing-mode: vertical-rl;
     transform: skewX(calc(-1 * var(--header-skew))) rotate(calc(180deg - var(--header-skew)));
+
+    &:focus {
+      writing-mode: horizontal-tb;
+      transform: skewX(calc(-1 * var(--header-skew)));
+      align-self: center;
+      width: fit-content;
+      height: var(--cell-size);
+      margin-block: auto;
+      padding: var(--header-input-padding);
+    }
   }
 }
 
-button {
-  height: 100%;
-  width: 30%;
-  box-sizing: border-box;
-}
-
 .delete {
+  box-sizing: border-box;
   cursor: pointer;
+  flex-shrink: 0;
+  width: 0;
+  height: 100%;
+  opacity: 0;
+  overflow: hidden;
 }

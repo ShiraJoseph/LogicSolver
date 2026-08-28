@@ -3,7 +3,7 @@ import {GridStore} from '../store/store';
 import {StoreService} from '../services/store.service';
 import {ColorService} from '../services/color.service';
 
-/** The services every grid component reads from. */
+/** The shared grid services */
 @Directive()
 export abstract class BaseDirective {
   store = inject(GridStore);

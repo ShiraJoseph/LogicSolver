@@ -16,6 +16,7 @@ export class UndoRedoService {
    */
   undo() {
     const move = this.store.popUndoMove();
+
     if (!move) return;
 
     switch (move.moveFn) {
@@ -41,7 +42,9 @@ export class UndoRedoService {
    */
   redo() {
     const move = this.store.popRedoMove();
+
     if (!move) return;
+
     switch (move.moveFn) {
       case MoveFnEnum.ADD:
         this.addMultiple(move.moveArgs);
@@ -67,6 +70,7 @@ export class UndoRedoService {
    */
   updateSingle(moveArgs: MoveArgs<MoveFnEnum.UPDATE, MoveEntityEnum>, isUndo: boolean) {
     const value = isUndo ? moveArgs.oldValue : moveArgs.newValue;
+
     if ('cellId' in moveArgs) {
       this.store.updateCell(moveArgs.cellId, {userValue: value as CellText});
     } else if ('optionId' in moveArgs) {

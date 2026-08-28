@@ -1,26 +1,26 @@
 <div
-  (mouseover)="showMinus()"
-  (mouseleave)="hideMinus()"
   class="header"
   [style.background-color]="backgroundColor()"
+  [style.color]="textColor()"
   [class.vertical]="isVertical()">
   <input
+    #headerInput
     name="header-input"
+    aria-keyshortcuts="ArrowDown"
     [attr.aria-label]="nameLabel()"
     [class]="tile().type"
-    [style.color]="textColor()"
-    (keyup.enter)="onChangeName($event)"
+    (keydown.arrowdown)="$event.preventDefault(); deleteButton.focus()"
+    (keyup.enter)="headerInput.blur()"
+    (keyup.escape)="headerInput.blur()"
     (blur)="onChangeName($event)"
     [value]="tile().text">
-  @if (shouldShowMinus()) {
-    <button
-      (mouseover)="showMinus()"
-      (mouseleave)="hideMinus()"
-      (blur)="hideMinus()"
-      class="delete"
-      [attr.aria-label]="deleteLabel()"
-      [disabled]="isDeleteDisabled()"
-      (click)="onClickDelete()">-
-    </button>
-  }
+  <button
+    #deleteButton
+    tabindex="-1"
+    class="delete"
+    [attr.aria-label]="deleteLabel()"
+    [disabled]="isDeleteDisabled()"
+    (keydown.arrowup)="$event.preventDefault(); headerInput.focus()"
+    (click)="onClickDelete()">-
+  </button>
 </div>
