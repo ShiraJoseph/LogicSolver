@@ -42,9 +42,12 @@ export class CellComponent extends BaseDirective {
    * @param value
    */
   updateCell(tile: Tile, value: CellText) {
-    this.store.recordMove({moveFn: MoveFnEnum.UPDATE, moveArgs: {cellId: tile.entityId as CellId, oldValue: tile.text as CellText, newValue: value}});
-    this.store.updateCell(tile.entityId as CellId, {userValue: value});
-    this.store.setSelectedCellId(undefined);
+    if(tile.text !== value) {
+      this.store.recordMove({moveFn: MoveFnEnum.UPDATE, moveArgs: {cellId: tile.entityId as CellId, oldValue: tile.text as CellText, newValue: value}});
+      this.store.updateCell(tile.entityId as CellId, {userValue: value});
+    }
+
+    this.deselectCell();
   }
 
   /**

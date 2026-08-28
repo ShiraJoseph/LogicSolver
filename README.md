@@ -56,7 +56,9 @@ Every option belongs to exactly one feature, and every option matches exactly on
 |---|----------------------------------------------------------------------------|
 | Click a cell | Opens O, X and clear                                                       |
 | `x` on a selected cell | Cancels out of it                                                          |
-| Type in a header | Renames the feature or option on enter or blur                             |
+| Type in a header | Renames the feature or option on enter, escape or blur                    |
+| Down arrow in a header | Moves to that header's delete button                                 |
+| Up arrow on a delete button | Moves back to the header name                                   |
 | `-` on a header | Deletes that feature, or the option in that number slot from every feature |
 | `+` at the end of a row or column | Adds a feature or an option to every feature                               |
 | Clear Cells | Empties the cells in the grid, keeping features and options                |

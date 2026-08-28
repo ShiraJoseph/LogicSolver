@@ -26,7 +26,7 @@ describe('CellComponent', () => {
       .find((button: HTMLElement) => button.textContent!.trim() === label)!.click();
 
   const showCell = async (id: CellId) => {
-    fixture.componentRef.setInput('tile', {...CELL_TILE, entityId: id});
+    fixture.componentRef.setInput('tile', {...CELL_TILE, entityId: id, text: store.cellById(id)!.userValue});
     await fixture.whenStable();
   };
 
@@ -130,12 +130,19 @@ describe('CellComponent', () => {
       expect(store.selectedCellId?.()).toBeUndefined();
     });
 
-    it('should empty the cell when given no value', () => {
+    it('should empty the cell when given no value', async () => {
       component.updateCell(component.tile(), CellText.X);
+      await showCell(store.cells()[0].id);
 
       component.updateCell(component.tile(), CellText.EMPTY);
 
       expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should leave the cell alone when the value has not changed', () => {
+      component.updateCell(component.tile(), CellText.EMPTY);
+
+      expect(store.undoStack()).toEqual([]);
     });
   });
 
@@ -193,6 +200,7 @@ describe('CellComponent', () => {
 
     it('should empty the cell when the clear button is clicked', async () => {
       store.updateCell(store.cells()[0].id, {userValue: CellText.X});
+      await showCell(store.cells()[0].id);
       component.selectCell();
       await fixture.whenStable();
 
@@ -237,8 +245,10 @@ describe('CellComponent', () => {
       }]);
     });
 
-    it('should record every write on its own', () => {
+    it('should record every write on its own', async () => {
       component.updateCell(component.tile(), CellText.X);
+      await showCell(store.cells()[0].id);
+
       component.updateCell(component.tile(), CellText.EMPTY);
 
       expect(store.undoStack().length).toBe(2);
