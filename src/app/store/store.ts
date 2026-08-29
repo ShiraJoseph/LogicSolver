@@ -24,7 +24,7 @@ export const GridStore = signalStore(
     setOptionCountPerFeature: (optionCountPerFeature: number) => {
       patchState(store, {optionCountPerFeature});
     },
-    /** Sets the cell whose buttons are open, or closes them all when given nothing. */
+    /** Sets the cell the keyboard is on, or takes it off every cell when given nothing. */
     setSelectedCellId: (selectedCellId: CellId | undefined) => {
       patchState(store, {selectedCellId});
     },
@@ -63,11 +63,8 @@ export const GridStore = signalStore(
     /** Each feature id mapped to its grid position */
     featurePositions: () => {
       const positionMap = new Map();
-      store.featureIds().forEach((id, index) => {
-        if (id && index != undefined) {
-          positionMap.set(id, index);
-        }
-      });
+
+      store.featureIds().forEach((id, index) => positionMap.set(id, index));
 
       return positionMap;
     },

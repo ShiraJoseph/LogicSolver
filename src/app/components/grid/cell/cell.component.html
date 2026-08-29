@@ -1,38 +1,10 @@
-@if (isSelected()) {
-  <div
-    (mouseenter)="onHover()" [style.background-color]="hoverColor()"
-    class="cell-active">
-    <div class="xo-buttons">
-      <button
-        type="button"
-        class="xo-button"
-        (click)="updateCell(tile(), CellText.O)">O
-      </button>
-      <button
-        type="button"
-        class="xo-button"
-        (click)="updateCell(tile(), CellText.X)">X
-      </button>
-    </div>
-
-    <div class="clear-buttons">
-      <button
-        type="button"
-        class="clear-button"
-        (click)="updateCell(tile(), CellText.EMPTY)">{{ 'cell.clear' | translate }}
-      </button>
-      <button
-        type="button"
-        class="clear-button"
-        (click)="deselectCell()">x
-      </button>
-    </div>
-  </div>
-} @else {
-  <div
-    (mouseenter)="onHover()" [style.background-color]="hoverColor()"
-    class="cell-inactive"
-    (click)="selectCell()">
-    {{ cellValue() }}
-  </div>
-}
+<button
+  #cellButton
+  type="button"
+  class="cell"
+  [style.background-color]="hoverColor()"
+  (mouseenter)="onHover()"
+  (focus)="onFocus()"
+  (keydown)="onKeydown($event)"
+  (click)="updateCellValue(NEXT_CELL_TEXT[cellValue()])">{{ cellValue() }}
+</button>

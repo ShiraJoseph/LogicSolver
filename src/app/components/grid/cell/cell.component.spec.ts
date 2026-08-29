@@ -21,12 +21,19 @@ describe('CellComponent', () => {
   const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
   const cellId = (nameA: string, nameB: string) => store.cellByOptions(optionId(nameA), optionId(nameB))!.id;
 
-  const clickButton = (label: string) =>
-    [...fixture.nativeElement.querySelectorAll('button')]
-      .find((button: HTMLElement) => button.textContent!.trim() === label)!.click();
-
   const showCell = async (id: CellId) => {
     fixture.componentRef.setInput('tile', {...CELL_TILE, entityId: id, text: store.cellById(id)!.userValue});
+    await fixture.whenStable();
+  };
+
+  const clickCell = async () => {
+    fixture.nativeElement.querySelector('.cell').click();
+    await fixture.whenStable();
+  };
+
+  const pressKey = async (key: string) => {
+    fixture.nativeElement.querySelector('.cell')
+      .dispatchEvent(new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true}));
     await fixture.whenStable();
   };
 
@@ -75,157 +82,192 @@ describe('CellComponent', () => {
     });
   });
 
-  describe('isSelected', () => {
-    it('should be false while another cell is selected', () => {
+  describe('updateCellValue', () => {
+    it('should write the value onto the cell', () => {
+      component.updateCellValue(CellText.O);
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.O);
+    });
+
+    it('should empty the cell when given no value', () => {
+      component.updateCellValue(CellText.X);
+
+      component.updateCellValue(CellText.EMPTY);
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should leave the cell alone when it already holds the value', () => {
+      component.updateCellValue(CellText.EMPTY);
+
+      expect(store.undoStack()).toEqual([]);
+    });
+
+    it('should write over a deduced value the user never entered', async () => {
+      store.updateCell(cellId('Cat', 'Bike'), {userValue: CellText.O});
+      await showCell(cellId('Dog', 'Bike'));
+
+      component.updateCellValue(CellText.X);
+
+      expect(store.cellById(cellId('Dog', 'Bike'))!.userValue).toBe(CellText.X);
+    });
+  });
+
+  describe('the keyboard', () => {
+    it('should write an X on x', async () => {
+      await pressKey('x');
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.X);
+    });
+
+    it('should write an O on o', async () => {
+      await pressKey('o');
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.O);
+    });
+
+    it('should empty the cell on backspace', async () => {
+      await pressKey('x');
+
+      await pressKey('Backspace');
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should empty the cell on delete', async () => {
+      await pressKey('x');
+
+      await pressKey('Delete');
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should hold on to the page on backspace', async () => {
+      const backspace = new KeyboardEvent('keydown', {key: 'Backspace', bubbles: true, cancelable: true});
+
+      fixture.nativeElement.querySelector('.cell').dispatchEvent(backspace);
+
+      expect(backspace.defaultPrevented).toBe(true);
+    });
+
+    it('should write an X on a capital X', async () => {
+      await pressKey('X');
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.X);
+    });
+
+    it('should write an O on a capital O', async () => {
+      await pressKey('O');
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.O);
+    });
+
+    it('should leave the cell alone on a key it does not listen for', async () => {
+      await pressKey('q');
+
+      expect(store.undoStack()).toEqual([]);
+    });
+
+    it('should hold on to the page on the arrow keys', async () => {
+      const arrowRight = new KeyboardEvent('keydown', {key: 'ArrowRight', bubbles: true, cancelable: true});
+
+      fixture.nativeElement.querySelector('.cell').dispatchEvent(arrowRight);
+
+      expect(arrowRight.defaultPrevented).toBe(true);
+    });
+
+    it('should let go of the cell on escape without changing it', async () => {
+      const cell = fixture.nativeElement.querySelector('.cell');
+      cell.focus();
+      await pressKey('x');
+
+      await pressKey('Escape');
+
+      expect(document.activeElement).not.toBe(cell);
+      expect(store.selectedCellId?.()).toBeUndefined();
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.X);
+    });
+  });
+
+  describe('the selected cell', () => {
+    it('should take the keyboard when the cell is focused', async () => {
+      fixture.nativeElement.querySelector('.cell').focus();
+      await fixture.whenStable();
+
+      expect(store.selectedCellId?.()).toBe(store.cells()[0].id);
+    });
+
+    it('should be false while the keyboard is on another cell', async () => {
       store.setSelectedCellId(store.cells()[1].id);
+      await fixture.whenStable();
 
       expect(component.isSelected()).toBe(false);
     });
 
-    it('should be true once this cell is selected', () => {
+    it('should be true once the keyboard is on this cell', async () => {
       store.setSelectedCellId(store.cells()[0].id);
+      await fixture.whenStable();
 
       expect(component.isSelected()).toBe(true);
     });
-  });
 
-  describe('selectCell', () => {
-    it('should select this cell', () => {
-      component.selectCell();
-
-      expect(store.selectedCellId?.()).toBe(store.cells()[0].id);
-    });
-  });
-
-  describe('deselectCell', () => {
-    it('should clear the selection', () => {
-      component.selectCell();
-
-      component.deselectCell();
-
-      expect(store.selectedCellId?.()).toBeUndefined();
-    });
-
-    it('should leave the value of the cell alone', () => {
-      component.selectCell();
-
-      component.deselectCell();
-
-      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.EMPTY);
-    });
-  });
-
-  describe('updateCell', () => {
-    it('should write the value onto the cell', () => {
-      component.updateCell(component.tile(), CellText.X);
-
-      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.X);
-    });
-
-    it('should clear the selection', () => {
-      component.selectCell();
-
-      component.updateCell(component.tile(), CellText.X);
-
-      expect(store.selectedCellId?.()).toBeUndefined();
-    });
-
-    it('should empty the cell when given no value', async () => {
-      component.updateCell(component.tile(), CellText.X);
-      await showCell(store.cells()[0].id);
-
-      component.updateCell(component.tile(), CellText.EMPTY);
-
-      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.EMPTY);
-    });
-
-    it('should leave the cell alone when the value has not changed', () => {
-      component.updateCell(component.tile(), CellText.EMPTY);
-
-      expect(store.undoStack()).toEqual([]);
-    });
-  });
-
-  describe('the template', () => {
-    it('should show the value of an unselected cell', async () => {
-      await showCell(cellId('Cat', 'Bike'));
-      store.updateCell(cellId('Cat', 'Bike'), {userValue: CellText.O});
+    it('should move the keyboard onto the cell the store picks', async () => {
+      store.setSelectedCellId(store.cells()[0].id);
       await fixture.whenStable();
 
-      expect(fixture.nativeElement.querySelector('.cell-inactive').textContent.trim()).toBe(CellText.O);
+      expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.cell'));
     });
 
-    it('should show the buttons of a selected cell', async () => {
-      component.selectCell();
-      await fixture.whenStable();
-
-      expect([...fixture.nativeElement.querySelectorAll('button')].map((button: HTMLElement) => button.textContent!.trim()))
-        .toEqual(['O', 'X', 'clear', 'x']);
-    });
-
-    it('should select the cell when it is clicked', async () => {
-      fixture.nativeElement.querySelector('.cell-inactive').click();
-      await fixture.whenStable();
-
-      expect(store.selectedCellId?.()).toBe(store.cells()[0].id);
-    });
-
-    it('should mark the cell hovered on mouseenter', async () => {
-      fixture.nativeElement.querySelector('.cell-inactive').dispatchEvent(new MouseEvent('mouseenter'));
+    it('should light the row and column of the focused cell', async () => {
+      fixture.nativeElement.querySelector('.cell').focus();
       await fixture.whenStable();
 
       expect(colorService.hoveredCellId()).toBe(store.cells()[0].id);
     });
+  });
 
-    it('should write an O when the O button is clicked', async () => {
-      component.selectCell();
-      await fixture.whenStable();
+  describe('the template', () => {
+    it('should show the value of the cell', async () => {
+      store.updateCell(cellId('Cat', 'Bike'), {userValue: CellText.O});
+      await showCell(cellId('Cat', 'Bike'));
 
-      clickButton('O');
-      await fixture.whenStable();
-
-      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.O);
-      expect(store.selectedCellId?.()).toBeUndefined();
+      expect(fixture.nativeElement.querySelector('.cell').textContent.trim()).toBe(CellText.O);
     });
 
-    it('should write an X when the X button is clicked', async () => {
-      component.selectCell();
-      await fixture.whenStable();
-
-      clickButton('X');
-      await fixture.whenStable();
+    it('should move an empty cell on to an X when it is clicked', async () => {
+      await clickCell();
 
       expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.X);
     });
 
-    it('should empty the cell when the clear button is clicked', async () => {
-      store.updateCell(store.cells()[0].id, {userValue: CellText.X});
-      await showCell(store.cells()[0].id);
-      component.selectCell();
-      await fixture.whenStable();
+    it('should move an X on to an O', async () => {
+      await clickCell();
 
-      clickButton('clear');
-      await fixture.whenStable();
+      await clickCell();
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.O);
+    });
+
+    it('should move an O back to empty', async () => {
+      await clickCell();
+      await clickCell();
+
+      await clickCell();
 
       expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.EMPTY);
     });
 
-    it('should close a selected cell without writing when the x button is clicked', async () => {
-      component.selectCell();
-      await fixture.whenStable();
+    it('should move on from the value the cell shows rather than the one it holds', async () => {
+      store.updateCell(cellId('Cat', 'Bike'), {userValue: CellText.O});
+      await showCell(cellId('Dog', 'Bike'));
 
-      clickButton('x');
-      await fixture.whenStable();
+      await clickCell();
 
-      expect(store.selectedCellId?.()).toBeUndefined();
-      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.EMPTY);
+      expect(store.cellById(cellId('Dog', 'Bike'))!.userValue).toBe(CellText.O);
     });
 
-    it('should mark a selected cell hovered on mouseenter', async () => {
-      component.selectCell();
-      await fixture.whenStable();
-
-      fixture.nativeElement.querySelector('.cell-active').dispatchEvent(new MouseEvent('mouseenter'));
+    it('should mark the cell hovered on mouseenter', async () => {
+      fixture.nativeElement.querySelector('.cell').dispatchEvent(new MouseEvent('mouseenter'));
       await fixture.whenStable();
 
       expect(colorService.hoveredCellId()).toBe(store.cells()[0].id);
@@ -235,9 +277,10 @@ describe('CellComponent', () => {
       expect(component.hoverColor()).toBe(colorService.getCellColor(component.tile()));
     });
   });
+
   describe('recording moves', () => {
     it('should record the value on each side of the write', () => {
-      component.updateCell(component.tile(), CellText.X);
+      component.updateCellValue(CellText.X);
 
       expect(store.undoStack()).toEqual([{
         moveFn: MoveFnEnum.UPDATE,
@@ -245,11 +288,10 @@ describe('CellComponent', () => {
       }]);
     });
 
-    it('should record every write on its own', async () => {
-      component.updateCell(component.tile(), CellText.X);
-      await showCell(store.cells()[0].id);
+    it('should record every write on its own', () => {
+      component.updateCellValue(CellText.X);
 
-      component.updateCell(component.tile(), CellText.EMPTY);
+      component.updateCellValue(CellText.O);
 
       expect(store.undoStack().length).toBe(2);
     });

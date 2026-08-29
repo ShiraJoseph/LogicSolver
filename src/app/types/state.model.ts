@@ -1,12 +1,11 @@
 import {CellId} from './entities.model';
-
 import {MoveStack} from './move.model';
 
 /** The grid state that belongs to no single entity. */
 export interface GridState {
   /** How many options every feature carries. */
   optionCountPerFeature: number;
-  /** The cell whose buttons are open, if one of them is. */
+  /** The cell that is currently active via keyboard navigation */
   selectedCellId?: CellId;
   /** The moves the user has made, newest last. */
   undoStack: MoveStack;
@@ -14,6 +13,7 @@ export interface GridState {
   redoStack: MoveStack;
 }
 
+/** The grid state before anything is on the board. */
 export const initialState: GridState = {
   optionCountPerFeature: 0,
   selectedCellId: undefined,

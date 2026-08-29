@@ -1,32 +1,37 @@
-import {Component, computed, inject, input} from '@angular/core';
+import {Component, computed, effect, ElementRef, inject, input, viewChild} from '@angular/core';
 import {CellText, Tile} from '../../../types/tile.model';
 import {CellId} from '../../../types/entities.model';
 import {LogicService} from '../../../services/logic.service';
 import {BaseDirective} from '../../../directives/base.directive';
 import {MoveFnEnum} from '../../../types/move.model';
-import {TranslatePipe} from '@ngx-translate/core';
+import {ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, BACKSPACE_KEY, DELETE_KEY, ESCAPE_KEY, O_KEY, X_KEY} from '../../../constants/keyboard.const';
+import {NEXT_CELL_TEXT} from '../../../constants/grid.const';
 
-/** One square where two options cross, showing its deduced X or O and the buttons for entering one. */
+/** One square where two options cross, taking an X or an O by click or keystroke. */
 @Component({
   selector: 'app-cell',
   templateUrl: './cell.component.html',
-  imports: [TranslatePipe],
   styleUrl: './cell.component.css',
 })
 export class CellComponent extends BaseDirective {
   logicService = inject(LogicService);
 
+  cellButton = viewChild<ElementRef<HTMLButtonElement>>('cellButton');
+
   tile = input.required<Tile>();
+
+  /** The cell this tile stands for. */
+  cell = computed(() => this.store.cellById(this.tile().entityId as CellId)!);
+
+  /** If the keyboard is on this cell */
+  isSelected = computed(() => this.store.selectedCellId?.() === this.cell().id);
 
   /** The background this cell takes from the hovered row and column. */
   hoverColor = computed(() => this.colorService.getCellColor(this.tile()));
 
-  /** If this cell's buttons are open */
-  isSelected = computed(() => this.store.selectedCellId?.() === this.tile().entityId);
-
   /** An O once one candidate is left for the pairing, an X once it is ruled out, and empty while neither is settled. */
   cellValue = computed(() => {
-    const [leftOptionId, topOptionId] = this.store.cellById(this.tile().entityId as CellId)!.optionIds!;
+    const [leftOptionId, topOptionId] = this.cell().optionIds!;
     const possibleTopOptions = this.logicService.candidates().get(leftOptionId)!
       .get(this.store.optionById(topOptionId)!.featureId!)!;
 
@@ -37,31 +42,32 @@ export class CellComponent extends BaseDirective {
   });
 
   /**
-   * Writes the value onto the cell and closes it.
-   * @param tile
-   * @param value
+   * Moves the keyboard onto this cell whenever the grid picks it as the selected one.
    */
-  updateCell(tile: Tile, value: CellText) {
-    if(tile.text !== value) {
-      this.store.recordMove({moveFn: MoveFnEnum.UPDATE, moveArgs: {cellId: tile.entityId as CellId, oldValue: tile.text as CellText, newValue: value}});
-      this.store.updateCell(tile.entityId as CellId, {userValue: value});
-    }
+  constructor() {
+    super();
 
-    this.deselectCell();
+    effect(() => {
+      if (this.isSelected()) {
+        this.cellButton()?.nativeElement.focus();
+      }
+    });
   }
 
   /**
-   * Sets the current cell as selected
+   * Writes the value onto the cell and records it as one move, leaving a cell already holding that value alone.
+   * @param newValue
    */
-  selectCell() {
-    this.store.setSelectedCellId(this.tile().entityId as CellId);
-  }
+  updateCellValue(newValue: CellText) {
+    const {id, userValue} = this.cell();
 
-  /**
-   * Clears out selection from all cells
-   */
-  deselectCell() {
-    this.store.setSelectedCellId(undefined);
+    if (userValue === newValue) return;
+
+    this.store.updateCell(id, {userValue: newValue});
+    this.store.recordMove({
+      moveFn: MoveFnEnum.UPDATE,
+      moveArgs: {cellId: id, oldValue: userValue as CellText, newValue}
+    });
   }
 
   /**
@@ -71,5 +77,68 @@ export class CellComponent extends BaseDirective {
     this.colorService.hoveredCellId.set(this.tile().entityId as CellId);
   }
 
+  /**
+   * Hands this cell the keyboard and lights its row and column.
+   */
+  onFocus() {
+    this.store.setSelectedCellId(this.cell().id);
+    this.onHover();
+  }
+
+  /**
+   * Takes the keyboard off the cell, leaving its value alone.
+   */
+  deselectCell() {
+    this.store.setSelectedCellId(undefined);
+    this.cellButton()?.nativeElement.blur();
+  }
+
+  /**
+   * Writes, empties or lets go of the cell, taking either case of x and o.
+   * @param event
+   */
+  protected onKeydown(event: KeyboardEvent) {
+    switch (event.key.toLowerCase()) {
+      case X_KEY:
+        this.updateCellValue(CellText.X);
+        break;
+      case O_KEY:
+        this.updateCellValue(CellText.O);
+        break;
+      case BACKSPACE_KEY:
+      case DELETE_KEY:
+        event.preventDefault();
+        this.updateCellValue(CellText.EMPTY);
+        break;
+      case ESCAPE_KEY:
+        this.deselectCell();
+        break;
+      case ARROW_UP_KEY:
+        event.preventDefault();
+
+        // todo: select the cell one option up the left axis
+        break;
+      case ARROW_DOWN_KEY:
+        event.preventDefault();
+
+        // todo: select the cell one option down the left axis
+        break;
+      case ARROW_LEFT_KEY:
+        event.preventDefault();
+
+        // todo: select the cell one option back along the top axis
+        break;
+      case ARROW_RIGHT_KEY:
+        event.preventDefault();
+
+        // todo: select the cell one option on along the top axis
+        break;
+      default:
+        return;
+    }
+  }
+
   protected readonly CellText = CellText;
+
+  protected readonly NEXT_CELL_TEXT = NEXT_CELL_TEXT;
 }

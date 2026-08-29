@@ -1,7 +1,4 @@
 {
-  "cell": {
-    "clear": "clear"
-  },
   "grid": {
     "addFeature": "Add a feature",
     "addOption": "Add an option to every feature",

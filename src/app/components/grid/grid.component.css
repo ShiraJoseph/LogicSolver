@@ -26,7 +26,7 @@
     z-index: 2;
     transform-origin: bottom;
     transform: skewX(var(--header-skew));
-    /* white shadow to cover the triangle the skewing revealed on the left */
+    /* white "shadow" to cover the triangle the skewing revealed on the left */
     box-shadow: calc(var(--header-baseline) * tan(var(--header-skew))) 0 0 0 white;
   }
 
@@ -90,7 +90,8 @@
     box-sizing: border-box;
   }
 
-  ::ng-deep button {
+  ::ng-deep .other,
+  ::ng-deep .delete {
     border: none;
   }
 }

@@ -3,11 +3,12 @@ import {TileService} from '../../services/tile.service';
 import {FeatureComponent} from './feature/feature.component';
 import {OptionComponent} from './option/option.component';
 import {CellComponent} from './cell/cell.component';
-import {CELL_SIZE, NON_CELL_COLUMN_COUNT, REDO_KEY, UNDO_KEY} from '../../constants/grid.const';
+import {CELL_SIZE, NON_CELL_COLUMN_COUNT} from '../../constants/grid.const';
 import {BaseDirective} from '../../directives/base.directive';
 import {MoveFnEnum} from '../../types/move.model';
 import {UndoRedoService} from '../../services/undo-redo.service';
 import {TranslatePipe} from '@ngx-translate/core';
+import {REDO_KEY, UNDO_KEY} from '../../constants/keyboard.const';
 
 /** Lays the tiles out on one CSS grid, sized to the current feature and option counts. */
 @Component({

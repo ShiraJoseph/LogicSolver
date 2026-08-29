@@ -1,0 +1,11 @@
+export const UNDO_KEY = 'z';
+export const REDO_KEY = 'y';
+export const X_KEY = 'x';
+export const O_KEY = 'o';
+export const BACKSPACE_KEY = 'backspace';
+export const DELETE_KEY = 'delete';
+export const ESCAPE_KEY = 'escape';
+export const ARROW_UP_KEY = 'arrowup';
+export const ARROW_DOWN_KEY = 'arrowdown';
+export const ARROW_LEFT_KEY = 'arrowleft';
+export const ARROW_RIGHT_KEY = 'arrowright';

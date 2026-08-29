@@ -54,8 +54,11 @@ Every option belongs to exactly one feature, and every option matches exactly on
 
 | Action | Result                                                                     |
 |---|----------------------------------------------------------------------------|
-| Click a cell | Opens O, X and clear                                                       |
-| `x` on a selected cell | Cancels out of it                                                          |
+| Click a cell | Moves it on from the value it shows: empty, then X, then O, then empty again |
+| `x` or `o` on a focused cell | Writes that value straight onto it                    |
+| Backspace or delete on a focused cell | Empties it                                   |
+| Escape on a focused cell | Lets go of it without changing it                         |
+| Arrow keys on a focused cell | Not wired up yet                                      |
 | Type in a header | Renames the feature or option on enter, escape or blur                    |
 | Down arrow in a header | Moves to that header's delete button                                 |
 | Up arrow on a delete button | Moves back to the header name                                   |

@@ -19,8 +19,8 @@ export class ColorService {
   hoveredTopOptionId = computed(() => this.store.cellById(this.hoveredCellId() as CellId)?.optionIds?.[1]);
 
   /**
-   * White for the selected cell and for cells off both hovered lines. Cells on one hovered line take a
-   * pale tint of that line's feature color, and the hovered cell itself mixes both.
+   * White for non-hovered cells. Cells in a hovered row or column take a pale tint of that line's
+   * feature color, and the hovered cell itself mixes both.  Once active the cell will be white.
    * @param tile
    */
   getCellColor(tile: Tile) {
@@ -41,9 +41,9 @@ export class ColorService {
     }
 
     if (this.hoveredCellId() === tile.entityId) {
-      return `color-mix(in oklab, color-mix(in oklab, ${topOptionColor}, ${leftOptionColor}), white 80%)`;
+      return `color-mix(in oklab, color-mix(in oklab, ${topOptionColor}, ${leftOptionColor}), ${WHITE} 80%)`;
     } else if (topOptionColor || leftOptionColor) {
-      return `color-mix(in oklab, ${topOptionColor || leftOptionColor}, white 90%)`;
+      return `color-mix(in oklab, ${topOptionColor || leftOptionColor}, ${WHITE} 90%)`;
     }
 
     return WHITE;
@@ -58,10 +58,10 @@ export class ColorService {
 
     if (!(featureIndex >= 0)) return WHITE;
 
-    const isHovered = tile.type === TileType.LEFT_OPTION_HEADER && this.hoveredLeftOptionId() === tile.entityId as OptionId ||
+    const isOptionHovered = tile.type === TileType.LEFT_OPTION_HEADER && this.hoveredLeftOptionId() === tile.entityId as OptionId ||
       tile.type === TileType.TOP_OPTION_HEADER && this.hoveredTopOptionId() === tile.entityId as OptionId;
 
-    return `color-mix(in oklab, ${WHITE} ${isHovered ? 40 : 70}%, ${this.getFeatureColor(featureIndex)})`;
+    return `color-mix(in oklab, ${WHITE} ${isOptionHovered ? 40 : 70}%, ${this.getFeatureColor(featureIndex)})`;
   }
 
   /**
@@ -69,7 +69,7 @@ export class ColorService {
    * @param position
    */
   getFeatureColor(position: number | undefined): string {
-    return position != null && position >= 0 ? FEATURE_COLORS[position % FEATURE_COLORS.length].background : 'transparent';
+    return position !== undefined && position >= 0 ? FEATURE_COLORS[position % FEATURE_COLORS.length].background : 'transparent';
   }
 
   /**
@@ -77,6 +77,6 @@ export class ColorService {
    * @param position
    */
   getFeatureTextColor(position: number | undefined): string {
-    return position != null && position >= 0 ? FEATURE_COLORS[position % FEATURE_COLORS.length].text : BLACK;
+    return position !== undefined && position >= 0 ? FEATURE_COLORS[position % FEATURE_COLORS.length].text : BLACK;
   }
 }

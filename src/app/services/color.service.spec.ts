@@ -44,14 +44,6 @@ describe('ColorService', () => {
   });
 
   describe('getCellColor', () => {
-    it('should be white for the selected cell', () => {
-      const selected = cellId('Cat', 'Bike');
-      store.setSelectedCellId(selected);
-      service.hoveredCellId.set(selected);
-
-      expect(service.getCellColor(cellTile(selected))).toBe(WHITE);
-    });
-
     it('should be white for a cell on neither hovered line', () => {
       service.hoveredCellId.set(cellId('Cat', 'Bike'));
 
@@ -69,21 +61,21 @@ describe('ColorService', () => {
       service.hoveredCellId.set(hovered);
 
       expect(service.getCellColor(cellTile(hovered)))
-        .toBe(`color-mix(in oklab, color-mix(in oklab, ${FEATURE_COLORS[1].background}, ${FEATURE_COLORS[0].background}), white 80%)`);
+        .toBe(`color-mix(in oklab, color-mix(in oklab, ${FEATURE_COLORS[1].background}, ${FEATURE_COLORS[0].background}), ${WHITE} 80%)`);
     });
 
     it('should tint a cell sharing the hovered row', () => {
       service.hoveredCellId.set(cellId('Cat', 'Bike'));
 
       expect(service.getCellColor(cellTile(cellId('Cat', 'Alice'))))
-        .toBe(`color-mix(in oklab, ${FEATURE_COLORS[0].background}, white 90%)`);
+        .toBe(`color-mix(in oklab, ${FEATURE_COLORS[0].background}, ${WHITE} 90%)`);
     });
 
     it('should tint a cell sharing the hovered column', () => {
       service.hoveredCellId.set(cellId('Dog', 'Bike'));
 
       expect(service.getCellColor(cellTile(cellId('Cat', 'Bike'))))
-        .toBe(`color-mix(in oklab, ${FEATURE_COLORS[1].background}, white 90%)`);
+        .toBe(`color-mix(in oklab, ${FEATURE_COLORS[1].background}, ${WHITE} 90%)`);
     });
   });
 

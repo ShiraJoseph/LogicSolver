@@ -68,7 +68,7 @@ describe('GridStore', () => {
   });
 
   describe('setSelectedCellId', () => {
-    it('should start with nothing selected', () => {
+    it('should start with the keyboard on no cell', () => {
       expect(store.selectedCellId?.()).toBeUndefined();
     });
 
@@ -80,7 +80,7 @@ describe('GridStore', () => {
       expect(store.selectedCellId?.()).toBe(cell.id);
     });
 
-    it('should clear the selection when given nothing', () => {
+    it('should take the keyboard off every cell when given nothing', () => {
       store.setSelectedCellId(store.cells()[0].id);
 
       store.setSelectedCellId(undefined);
@@ -88,6 +88,7 @@ describe('GridStore', () => {
       expect(store.selectedCellId?.()).toBeUndefined();
     });
   });
+
   describe('recordMove', () => {
     it('should put the move on the undo stack', () => {
       store.recordMove(clearMove);
