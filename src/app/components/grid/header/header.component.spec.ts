@@ -193,6 +193,15 @@ describe('HeaderComponent', () => {
       expect(fixture.nativeElement.querySelector('input').getAttribute('aria-keyshortcuts')).toBe('ArrowDown');
     });
 
+    it('should hold on to focus on a key that is not its axis', () => {
+      const deleteButton = fixture.nativeElement.querySelector('.delete');
+      deleteButton.focus();
+
+      pressKey('.delete', 'ArrowUp');
+
+      expect(document.activeElement).toBe(deleteButton);
+    });
+
     it('should be disabled when deleting is no longer allowed', async () => {
       await showHeader({isDeleteDisabled: true});
 

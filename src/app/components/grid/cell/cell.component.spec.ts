@@ -173,12 +173,16 @@ describe('CellComponent', () => {
       expect(store.undoStack()).toEqual([]);
     });
 
-    it('should hold on to the page on the arrow keys', async () => {
-      const arrowRight = new KeyboardEvent('keydown', {key: 'ArrowRight', bubbles: true, cancelable: true});
+    it('should hold on to the page on every arrow key', async () => {
+      const held = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].map(key => {
+        const arrow = new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true});
 
-      fixture.nativeElement.querySelector('.cell').dispatchEvent(arrowRight);
+        fixture.nativeElement.querySelector('.cell').dispatchEvent(arrow);
 
-      expect(arrowRight.defaultPrevented).toBe(true);
+        return arrow.defaultPrevented;
+      });
+
+      expect(held).toEqual([true, true, true, true]);
     });
 
     it('should let go of the cell on escape without changing it', async () => {
@@ -272,6 +276,36 @@ describe('CellComponent', () => {
     });
   });
 
+  describe('cellLabel', () => {
+    const cellLabel = () => fixture.nativeElement.querySelector('.cell').getAttribute('aria-label');
+
+    it('should name the row and column the cell sits between', async () => {
+      await showCell(cellId('Cat', 'Bike'));
+
+      expect(cellLabel()).toBe('row Cat column Bike');
+    });
+
+    it('should read the row option before the column one', async () => {
+      await showCell(cellId('Dog', 'Canoe'));
+
+      expect(cellLabel()).toBe('row Dog column Canoe');
+    });
+
+    it('should end on the value once the cell shows one', async () => {
+      store.updateCell(cellId('Cat', 'Bike'), {userValue: CellText.O});
+      await showCell(cellId('Cat', 'Bike'));
+
+      expect(cellLabel()).toBe('row Cat column Bike value O');
+    });
+
+    it('should follow a deduced value the user never entered', async () => {
+      store.updateCell(cellId('Cat', 'Bike'), {userValue: CellText.O});
+      await showCell(cellId('Dog', 'Bike'));
+
+      expect(cellLabel()).toBe('row Dog column Bike value X');
+    });
+  });
+
   describe('the selected cell', () => {
     it('should take the keyboard when the cell is focused', async () => {
       fixture.nativeElement.querySelector('.cell').focus();
@@ -327,6 +361,12 @@ describe('CellComponent', () => {
       await clickCell();
 
       expect(store.selectedCellId?.()).toBe(store.cells()[0].id);
+    });
+
+    it('should put the focus on the clicked cell', async () => {
+      await clickCell();
+
+      expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.cell'));
     });
 
     it('should mark the clicked cell selected', async () => {

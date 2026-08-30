@@ -1,4 +1,9 @@
 {
+  "cell": {
+    "column": "column",
+    "row": "row",
+    "value": "value"
+  },
   "grid": {
     "addFeature": "Add a feature",
     "addOption": "Add an option to every feature",

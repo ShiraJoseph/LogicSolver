@@ -27,24 +27,27 @@ export class GridComponent extends BaseDirective {
 
   /**
    * Sends Tab off the last header on into the grid cells, and Tab off a cell on to the buttons below the grid,
-   * so the one cell Tab reaches sits after every header rather than in the row it belongs to.
+   * so the one cell Tab reaches sits after every header rather than in the row it belongs to. Leaving the cells
+   * lets go of the selected one.
    * @param event
    */
   protected onTabForward(event: Event) {
     if (this.isCell(event.target)) {
       this.moveFocus(event, this.gridButton());
+      this.store.setSelectedCellId(undefined);
     } else if (event.target === this.headerInputs().at(-1)) {
       this.moveFocus(event, this.cellTabStop());
     }
   }
 
   /**
-   * Sends Shift Tab off a cell back to the last header.
+   * Sends Shift Tab off a cell back to the last header, letting go of the selected cell.
    * @param event
    */
   protected onTabBack(event: Event) {
     if (this.isCell(event.target)) {
       this.moveFocus(event, this.headerInputs().at(-1));
+      this.store.setSelectedCellId(undefined);
     }
   }
 

@@ -55,8 +55,8 @@ input {
   &:focus {
     background-color: white;
     color: black;
-    outline: var(--grey-border);
-    outline-offset: -1px;
+    outline: var(--thick-border);
+    outline-offset: calc(-1 * var(--thick-border-width));
   }
 
   &.TOP_FEATURE_HEADER {

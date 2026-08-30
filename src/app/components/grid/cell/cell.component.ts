@@ -6,6 +6,7 @@ import {BaseDirective} from '../../../directives/base.directive';
 import {MoveFnEnum} from '../../../types/move.model';
 import {ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, BACKSPACE_KEY, DELETE_KEY, ESCAPE_KEY, O_KEY, X_KEY} from '../../../constants/keyboard.const';
 import {NEXT_CELL_TEXT} from '../../../constants/grid.const';
+import {TranslateService} from '@ngx-translate/core';
 
 /** One square where two options cross, taking an X or an O by click or keystroke. */
 @Component({
@@ -18,6 +19,9 @@ export class CellComponent extends BaseDirective {
 
   cellButton = viewChild<ElementRef<HTMLButtonElement>>('cellButton');
 
+  /** Translations */
+  lang = inject(TranslateService).translate('cell');
+
   tile = input.required<Tile>();
 
   /** The cell this tile stands for. */
@@ -26,9 +30,18 @@ export class CellComponent extends BaseDirective {
   /** If the keyboard is on this cell */
   isSelected = computed(() => this.store.selectedCellId?.() === this.cell().id);
 
-  /** If this cell holds the grid's one tab stop, which is the selected cell or the first one while none is. */
-  isTabStop = computed(() => this.store.selectedCellId?.() ?
-    this.isSelected() : this.store.firstCellId() === this.cell().id);
+  /** If this cell holds the grid's one tab stop */
+  isTabStop = computed(() => this.store.tabStopCellId() === this.cell().id);
+
+  /** The screen reader name for the cell: the options it sits between, then the value it shows. */
+  cellLabel = computed(() => {
+    const [leftOptionId, topOptionId] = this.cell().optionIds!;
+    const {row, column, value} = this.lang();
+    const cellValue = this.cellValue();
+    const cellPosition = `${row} ${this.store.optionById(leftOptionId)!.name} ${column} ${this.store.optionById(topOptionId)!.name}`;
+
+    return cellValue ? `${cellPosition} ${value} ${cellValue}` : cellPosition;
+  });
 
   /** The background this cell takes from the hovered row and column. */
   hoverColor = computed(() => this.colorService.getCellColor(this.tile()));
@@ -90,9 +103,10 @@ export class CellComponent extends BaseDirective {
   }
 
   /**
-   * Hands this cell the keyboard and moves it on to the next value.
+   * Puts the keyboard on this cell and moves it on to the next value.
    */
   onClickCell() {
+    this.cellButton()?.nativeElement.focus();
     this.onFocus();
     this.updateCellValue(NEXT_CELL_TEXT[this.cellValue()]);
   }

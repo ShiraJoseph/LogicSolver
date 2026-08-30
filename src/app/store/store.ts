@@ -25,9 +25,9 @@ export const GridStore = signalStore(
     setOptionCountPerFeature: (optionCountPerFeature: number) => {
       patchState(store, {optionCountPerFeature});
     },
-    /** Sets the cell the keyboard is on, or takes it off every cell when given nothing. */
+    /** Sets the cell the keyboard is on, or takes it off every cell when given nothing, remembering the last one. */
     setSelectedCellId: (selectedCellId: CellId | undefined) => {
-      patchState(store, {selectedCellId});
+      patchState(store, {selectedCellId, lastSelectedCellId: selectedCellId ?? store.lastSelectedCellId?.()});
     },
     /** Adds a new move to the undo stack and clears the redo stack */
     recordMove: (move: Move) => {
@@ -82,8 +82,15 @@ export const GridStore = signalStore(
     ),
   })),
   withComputed(store => ({
-    /** The cell in the top left corner of the grid, which holds the tab stop while no cell is selected. */
-    firstCellId: () => {
+    /**
+     * The cell Tab reaches: the active one, the one that was active last, or the top left corner while neither
+     * of those is on the grid.
+     */
+    tabStopCellId: () => {
+      const cellId = store.selectedCellId?.() ?? store.lastSelectedCellId?.();
+
+      if (cellId && store.cellById(cellId)) return cellId;
+
       const {leftOptionIds, topOptionIds} = store.gridAxes();
 
       return leftOptionIds.length && topOptionIds.length ?

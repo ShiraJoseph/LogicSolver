@@ -94,6 +94,12 @@
   ::ng-deep .delete {
     border: none;
   }
+
+  ::ng-deep .other:focus,
+  ::ng-deep .delete:focus {
+    outline: none;
+    border: var(--thick-border);
+  }
 }
 
 .other {

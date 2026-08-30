@@ -78,6 +78,64 @@ describe('GridComponent', () => {
       expect(document.activeElement).toBe(headerInputs().at(-1));
     });
 
+    it('should let go of the selected cell on the way out', async () => {
+      const cell = cellTabStop();
+      cell.focus();
+      await fixture.whenStable();
+
+      await pressKey('Tab', {}, cell);
+
+      expect(store.selectedCellId?.()).toBeUndefined();
+    });
+
+    it('should let go of the selected cell on the way back out', async () => {
+      const cell = cellTabStop();
+      cell.focus();
+      await fixture.whenStable();
+
+      await pressKey('Tab', {shiftKey: true}, cell);
+
+      expect(store.selectedCellId?.()).toBeUndefined();
+    });
+
+    it('should hold on to the selected cell while tabbing between headers', async () => {
+      store.setSelectedCellId(store.cells()[0].id);
+      await fixture.whenStable();
+
+      await pressKey('Tab', {}, headerInputs()[0]);
+
+      expect(store.selectedCellId?.()).toBe(store.cells()[0].id);
+    });
+
+    it('should come back to the cell the keyboard was on last', async () => {
+      const cells = fixture.nativeElement.querySelectorAll('.cell');
+      cells[4].focus();
+      await fixture.whenStable();
+
+      await pressKey('Tab', {}, cells[4]);
+      await fixture.whenStable();
+
+      expect(cellTabStop()).toBe(cells[4]);
+    });
+
+    it('should leave shift tab alone on a header', () => {
+      const tab = new KeyboardEvent('keydown', {key: 'Tab', shiftKey: true, bubbles: true, cancelable: true});
+
+      headerInputs()[0].dispatchEvent(tab);
+
+      expect(tab.defaultPrevented).toBe(false);
+    });
+
+    it('should leave tab alone when the grid holds no cell to move to', async () => {
+      store.features().forEach(feature => storeService.deleteFeature(feature.id));
+      await fixture.whenStable();
+      const tab = new KeyboardEvent('keydown', {key: 'Tab', shiftKey: true, bubbles: true, cancelable: true});
+
+      gridButton('Clear Cells').dispatchEvent(tab);
+
+      expect(tab.defaultPrevented).toBe(false);
+    });
+
     it('should send shift tab off the clear button back into the cells', async () => {
       await pressKey('Tab', {shiftKey: true}, gridButton('Clear Cells'));
 

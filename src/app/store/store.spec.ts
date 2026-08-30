@@ -68,17 +68,41 @@ describe('GridStore', () => {
     });
   });
 
-  describe('firstCellId', () => {
-    it('should be the cell where the first left option crosses the first top option', () => {
-      const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+  describe('tabStopCellId', () => {
+    const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+    const cellId = (nameA: string, nameB: string) => store.cellByOptions(optionId(nameA), optionId(nameB))!.id;
 
-      expect(store.firstCellId()).toBe(store.cellByOptions(optionId('Cat'), optionId('Bike'))!.id);
+    it('should open on the cell where the first left option crosses the first top option', () => {
+      expect(store.tabStopCellId()).toBe(cellId('Cat', 'Bike'));
+    });
+
+    it('should follow the active cell', () => {
+      store.setSelectedCellId(cellId('Dog', 'Canoe'));
+
+      expect(store.tabStopCellId()).toBe(cellId('Dog', 'Canoe'));
+    });
+
+    it('should stay on the cell that was active last once the keyboard leaves the grid', () => {
+      store.setSelectedCellId(cellId('Dog', 'Canoe'));
+
+      store.setSelectedCellId(undefined);
+
+      expect(store.tabStopCellId()).toBe(cellId('Dog', 'Canoe'));
+    });
+
+    it('should fall back to the corner once the remembered cell has left the grid', () => {
+      store.setSelectedCellId(cellId('Dog', 'Canoe'));
+      store.setSelectedCellId(undefined);
+
+      TestBed.inject(StoreService).deleteOption(optionId('Dog'));
+
+      expect(store.tabStopCellId()).toBe(cellId('Cat', 'Bike'));
     });
 
     it('should be nothing for a grid with no cells', () => {
       store.features().forEach(feature => TestBed.inject(StoreService).deleteFeature(feature.id));
 
-      expect(store.firstCellId()).toBeUndefined();
+      expect(store.tabStopCellId()).toBeUndefined();
     });
   });
 
@@ -102,6 +126,15 @@ describe('GridStore', () => {
   });
 
   describe('setSelectedCellId', () => {
+    it('should remember the cell after the keyboard leaves it', () => {
+      const cell = store.cells()[0];
+
+      store.setSelectedCellId(cell.id);
+      store.setSelectedCellId(undefined);
+
+      expect(store.lastSelectedCellId?.()).toBe(cell.id);
+    });
+
     it('should start with the keyboard on no cell', () => {
       expect(store.selectedCellId?.()).toBeUndefined();
     });
