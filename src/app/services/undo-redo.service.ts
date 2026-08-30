@@ -3,8 +3,8 @@ import {MoveArgs, MoveEntityEnum, MoveFnEnum} from '../types/move.model';
 import {GridStore} from '../store/store';
 import {CellText} from '../types/tile.model';
 import {addEntities, removeEntities} from '@ngrx/signals/entities';
-import {CELL_CONFIG, FEATURE_CONFIG, OPTION_CONFIG} from '../store/entity-config';
 import {patchState} from '@ngrx/signals';
+import {CELL_CONFIG, FEATURE_CONFIG, OPTION_CONFIG} from "../constants/store.const";
 
 /** Walks the grid back and forward through the moves the store recorded. */
 @Service()
@@ -21,13 +21,13 @@ export class UndoRedoService {
 
     switch (move.moveFn) {
       case MoveFnEnum.ADD:
-        this.deleteMultiple(move.moveArgs);
+        this.deleteMultipleEntities(move.moveArgs);
         break;
       case MoveFnEnum.DELETE:
-        this.addMultiple(move.moveArgs);
+        this.addMultipleEntities(move.moveArgs);
         break;
       case MoveFnEnum.UPDATE:
-        this.updateSingle(move.moveArgs, true);
+        this.updateSingleEntity(move.moveArgs, true);
         break;
       case MoveFnEnum.CLEAR:
         this.store.upsertCells(move.moveArgs.oldCells);
@@ -47,13 +47,13 @@ export class UndoRedoService {
 
     switch (move.moveFn) {
       case MoveFnEnum.ADD:
-        this.addMultiple(move.moveArgs);
+        this.addMultipleEntities(move.moveArgs);
         break;
       case MoveFnEnum.DELETE:
-        this.deleteMultiple(move.moveArgs);
+        this.deleteMultipleEntities(move.moveArgs);
         break;
       case MoveFnEnum.UPDATE:
-        this.updateSingle(move.moveArgs, false);
+        this.updateSingleEntity(move.moveArgs, false);
         break;
       case MoveFnEnum.CLEAR:
         this.store.updateAllCells({userValue: CellText.EMPTY});
@@ -68,7 +68,7 @@ export class UndoRedoService {
    * @param moveArgs
    * @param isUndo whether to write the value from before the move rather than the one from after it
    */
-  updateSingle(moveArgs: MoveArgs<MoveFnEnum.UPDATE, MoveEntityEnum>, isUndo: boolean) {
+  updateSingleEntity(moveArgs: MoveArgs<MoveFnEnum.UPDATE, MoveEntityEnum>, isUndo: boolean) {
     const value = isUndo ? moveArgs.oldValue : moveArgs.newValue;
 
     if ('cellId' in moveArgs) {
@@ -84,7 +84,7 @@ export class UndoRedoService {
    * Puts the recorded entities back on the grid, each in the slot it came from.
    * @param moveArgs
    */
-  addMultiple(moveArgs: MoveArgs<MoveFnEnum.ADD>) {
+  addMultipleEntities(moveArgs: MoveArgs<MoveFnEnum.ADD>) {
     const {features, options, cells, optionCountPerFeature, featureIndex, optionIndex} = moveArgs;
     const adds = [
       ...features ? [addEntities(features, FEATURE_CONFIG)] : [],
@@ -109,7 +109,7 @@ export class UndoRedoService {
    * Takes the recorded entities off the grid, leaving the option count as it stands without them.
    * @param moveArgs
    */
-  deleteMultiple(moveArgs: MoveArgs<MoveFnEnum.DELETE>) {
+  deleteMultipleEntities(moveArgs: MoveArgs<MoveFnEnum.DELETE>) {
     const deletes = [
       ...moveArgs.features ? [removeEntities(moveArgs.features.map(feature => feature.id), FEATURE_CONFIG)] : [],
       ...moveArgs.options ? [removeEntities(moveArgs.options.map(option => option.id), OPTION_CONFIG)] : [],

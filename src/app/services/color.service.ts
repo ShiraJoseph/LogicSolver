@@ -2,7 +2,7 @@ import {computed, inject, Service, signal} from '@angular/core';
 import {Tile, TileType} from '../types/tile.model';
 import {CellId, FeatureId, OptionId} from '../types/entities.model';
 import {GridStore} from '../store/store';
-import {BLACK, FEATURE_COLORS, WHITE} from '../constants/colors.const';
+import {BLACK, FEATURE_COLORS, WHITE} from '../constants/color.const';
 
 /** The colors each tile takes from its feature and from what the pointer is over. */
 @Service()

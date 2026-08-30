@@ -26,6 +26,10 @@ export class CellComponent extends BaseDirective {
   /** If the keyboard is on this cell */
   isSelected = computed(() => this.store.selectedCellId?.() === this.cell().id);
 
+  /** If this cell holds the grid's one tab stop, which is the selected cell or the first one while none is. */
+  isTabStop = computed(() => this.store.selectedCellId?.() ?
+    this.isSelected() : this.store.firstCellId() === this.cell().id);
+
   /** The background this cell takes from the hovered row and column. */
   hoverColor = computed(() => this.colorService.getCellColor(this.tile()));
 
@@ -86,6 +90,14 @@ export class CellComponent extends BaseDirective {
   }
 
   /**
+   * Hands this cell the keyboard and moves it on to the next value.
+   */
+  onClickCell() {
+    this.onFocus();
+    this.updateCellValue(NEXT_CELL_TEXT[this.cellValue()]);
+  }
+
+  /**
    * Takes the keyboard off the cell, leaving its value alone.
    */
   deselectCell() {
@@ -114,24 +126,11 @@ export class CellComponent extends BaseDirective {
         this.deselectCell();
         break;
       case ARROW_UP_KEY:
-        event.preventDefault();
-
-        // todo: select the cell one option up the left axis
-        break;
       case ARROW_DOWN_KEY:
-        event.preventDefault();
-
-        // todo: select the cell one option down the left axis
-        break;
       case ARROW_LEFT_KEY:
-        event.preventDefault();
-
-        // todo: select the cell one option back along the top axis
-        break;
       case ARROW_RIGHT_KEY:
         event.preventDefault();
-
-        // todo: select the cell one option on along the top axis
+        this.store.selectNeighborCell(this.cell().id, event.key.toLowerCase());
         break;
       default:
         return;
@@ -139,6 +138,4 @@ export class CellComponent extends BaseDirective {
   }
 
   protected readonly CellText = CellText;
-
-  protected readonly NEXT_CELL_TEXT = NEXT_CELL_TEXT;
 }

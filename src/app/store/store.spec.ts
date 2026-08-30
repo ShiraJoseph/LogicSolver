@@ -6,6 +6,7 @@ import {GRID_SEED} from './grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../mocks/grid.mock';
 import {NON_CELL_COLUMN_COUNT} from '../constants/grid.const';
 import {Move, MoveFnEnum} from '../types/move.model';
+import {ARROW_LEFT_KEY, ARROW_RIGHT_KEY} from '../constants/keyboard.const';
 
 describe('GridStore', () => {
   let store: InstanceType<typeof GridStore>;
@@ -64,6 +65,39 @@ describe('GridStore', () => {
       store.setOptionCountPerFeature(7);
 
       expect(store.optionCountPerFeature()).toBe(7);
+    });
+  });
+
+  describe('firstCellId', () => {
+    it('should be the cell where the first left option crosses the first top option', () => {
+      const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+
+      expect(store.firstCellId()).toBe(store.cellByOptions(optionId('Cat'), optionId('Bike'))!.id);
+    });
+
+    it('should be nothing for a grid with no cells', () => {
+      store.features().forEach(feature => TestBed.inject(StoreService).deleteFeature(feature.id));
+
+      expect(store.firstCellId()).toBeUndefined();
+    });
+  });
+
+  describe('selectNeighborCell', () => {
+    const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+    const cellId = (nameA: string, nameB: string) => store.cellByOptions(optionId(nameA), optionId(nameB))!.id;
+
+    it('should hand the keyboard to the neighbour', () => {
+      store.selectNeighborCell(cellId('Cat', 'Bike'), ARROW_RIGHT_KEY);
+
+      expect(store.selectedCellId?.()).toBe(cellId('Cat', 'Canoe'));
+    });
+
+    it('should leave the selection alone where the grid runs out', () => {
+      store.setSelectedCellId(cellId('Cat', 'Bike'));
+
+      store.selectNeighborCell(cellId('Cat', 'Bike'), ARROW_LEFT_KEY);
+
+      expect(store.selectedCellId?.()).toBe(cellId('Cat', 'Bike'));
     });
   });
 

@@ -1,9 +1,9 @@
-import {Component, computed, inject} from '@angular/core';
+import {Component, ElementRef, inject} from '@angular/core';
 import {TileService} from '../../services/tile.service';
 import {FeatureComponent} from './feature/feature.component';
 import {OptionComponent} from './option/option.component';
 import {CellComponent} from './cell/cell.component';
-import {CELL_SIZE, NON_CELL_COLUMN_COUNT} from '../../constants/grid.const';
+import {CELL_SIZE} from '../../constants/grid.const';
 import {BaseDirective} from '../../directives/base.directive';
 import {MoveFnEnum} from '../../types/move.model';
 import {UndoRedoService} from '../../services/undo-redo.service';
@@ -19,13 +19,89 @@ import {REDO_KEY, UNDO_KEY} from '../../constants/keyboard.const';
   host: {'(document:keydown)': 'onKeydown($event)'},
 })
 export class GridComponent extends BaseDirective {
-  tileService: TileService = inject(TileService);
-  undoRedoService: UndoRedoService = inject(UndoRedoService);
-
-  /** A column per option of every feature after the first, plus the header and button columns. */
-  columnCount = computed(() => this.store.optionCountPerFeature() * (this.store.featureCount() - 1) + NON_CELL_COLUMN_COUNT);
+  tileService = inject(TileService);
+  undoRedoService = inject(UndoRedoService);
+  element = inject(ElementRef<HTMLElement>);
 
   protected readonly CELL_SIZE = CELL_SIZE;
+
+  /**
+   * Sends Tab off the last header on into the grid cells, and Tab off a cell on to the buttons below the grid,
+   * so the one cell Tab reaches sits after every header rather than in the row it belongs to.
+   * @param event
+   */
+  protected onTabForward(event: Event) {
+    if (this.isCell(event.target)) {
+      this.moveFocus(event, this.gridButton());
+    } else if (event.target === this.headerInputs().at(-1)) {
+      this.moveFocus(event, this.cellTabStop());
+    }
+  }
+
+  /**
+   * Sends Shift Tab off a cell back to the last header.
+   * @param event
+   */
+  protected onTabBack(event: Event) {
+    if (this.isCell(event.target)) {
+      this.moveFocus(event, this.headerInputs().at(-1));
+    }
+  }
+
+  /**
+   * Sends Shift Tab off the buttons below the grid back into the cells.
+   * @param event
+   */
+  protected onTabBackIntoGrid(event: Event) {
+    this.moveFocus(event, this.cellTabStop());
+  }
+
+  /**
+   * Puts the keyboard on the element and holds the browser's own Tab, leaving it alone when there is no element
+   * to move to.
+   * @param event
+   * @param element
+   * @private
+   */
+  private moveFocus(event: Event, element?: HTMLElement | null) {
+    if (!element) return;
+
+    event.preventDefault();
+    element.focus();
+  }
+
+  /**
+   * Whether the keyboard is on one of the grid's cells.
+   * @param target
+   * @private
+   */
+  private isCell(target: EventTarget | null) {
+    return target instanceof HTMLElement && target.classList.contains('cell');
+  }
+
+  /**
+   * Every header name field, in the order they run through the grid.
+   * @private
+   */
+  private headerInputs() {
+    return [...this.element.nativeElement.querySelectorAll('.grid input')] as Array<HTMLInputElement>;
+  }
+
+  /**
+   * The one cell Tab reaches: the selected cell, or the first one while none is selected.
+   * @private
+   */
+  private cellTabStop() {
+    return this.element.nativeElement.querySelector('.cell.tab-stop') as HTMLButtonElement | null;
+  }
+
+  /**
+   * The first button below the grid.
+   * @private
+   */
+  private gridButton() {
+    return this.element.nativeElement.querySelector('.grid-buttons button') as HTMLButtonElement | null;
+  }
 
   /**
    * Adds a feature with a full set of options, and records it as one move.

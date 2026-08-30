@@ -58,14 +58,14 @@ export class TileService {
     const tiles: Array<Tile> = [];
     const topOptionTiles: Array<Tile> = [];
     const optionCount: number = this.store.optionCountPerFeature();
-    const featuresLength = this.store.featureCount();
+    const featureCount = this.store.featureCount();
 
     tiles.push(CORNER_BLANK_TILE);
     this.pushTopFeatures(tiles, optionCount, topOptionTiles);
     tiles.push(NEW_FEATURE_BUTTON_TILE);
     tiles.push(...topOptionTiles);
     tiles.push(NEW_OPTION_BUTTON_TILE);
-    this.pushGridRows(featuresLength, optionCount, tiles, topOptionTiles);
+    this.pushGridRows(featureCount, optionCount, tiles, topOptionTiles);
 
     return tiles;
   });
@@ -108,46 +108,35 @@ export class TileService {
    * x No such thing as a feature matching itself
    * xx We already have DC so we don't need CD
    * ```
-   * @param featuresLength
+   * @param featureCount
    * @param optionCount
    * @param tiles
    * @param topOptionTiles
    * @private
    */
-  private pushGridRows(featuresLength: number, optionCount: number, tiles: Tile[], topOptionTiles: Tile[]) {
-    const blanks: Array<Tile> = [];
+  private pushGridRows(featureCount: number, optionCount: number, tiles: Tile[], topOptionTiles: Tile[]) {
+    const blankTiles: Array<Tile> = [];
 
-    this.leftFeatureIndices(featuresLength).forEach((leftFeatureIndex, blockIndex) => {
-      const feature = this.store.features()[leftFeatureIndex];
+    this.store.gridAxes().leftFeatureIds.forEach((featureId, blockIndex) => {
+      const feature = this.store.featureById(featureId) as Feature;
 
       tiles.push({...LEFT_FEATURE_TILE, text: feature?.name, entityId: feature?.id, rows: optionCount});
-      this.fillOptionRowsForFeature(feature, tiles, (featuresLength - 1 - blockIndex) * optionCount, topOptionTiles, blanks, optionCount);
-      blanks.push({...FILLER_BLANK_TILE, cols: optionCount, rows: optionCount});
+      this.fillOptionRowsForFeature(feature, tiles, (featureCount - 1 - blockIndex) * optionCount, topOptionTiles, blankTiles, optionCount);
+      blankTiles.push({...FILLER_BLANK_TILE, cols: optionCount, rows: optionCount});
     });
   }
 
   /**
-   * The order of features going down the left side of the grid: first 0, then the rest in reverse order down to 1.
-   * @param featuresLength
-   * @private
-   */
-  private leftFeatureIndices(featuresLength: number): Array<number> {
-    const afterTheFirst = Array.from({length: Math.max(featuresLength - 2, 0)}, (_, index) => featuresLength - 1 - index);
-
-    return featuresLength ? [0, ...afterTheFirst] : [];
-  }
-
-  /**
-   * Pushes one row per option of the given left feature: the option header, the cells, and on the blanks on the right side to hold the grid shape.
+   * Pushes one row per option of the given left feature: the option header, the cells, and the blanks on the right side that hold the grid shape.
    * @param feature
    * @param tiles
    * @param rowCellCount
    * @param topOptionTiles
-   * @param blanks
+   * @param blankTiles
    * @param optionCount
    * @private
    */
-  private fillOptionRowsForFeature(feature: Feature, tiles: Tile[], rowCellCount: number, topOptionTiles: Tile[], blanks: Tile[], optionCount: number) {
+  private fillOptionRowsForFeature(feature: Feature, tiles: Tile[], rowCellCount: number, topOptionTiles: Tile[], blankTiles: Tile[], optionCount: number) {
     const lastOptionIndex = optionCount - 1;
 
     this.store.optionsByFeature(feature)?.forEach((leftOption, rowInFeature) => {
@@ -161,17 +150,17 @@ export class TileService {
       });
 
       for (let i = 0; i < rowCellCount; i++) {
-        const currCell = this.store.cellByOptions(leftOption.id, topOptionTiles[i]?.entityId as OptionId) as Cell;
+        const cell = this.store.cellByOptions(leftOption.id, topOptionTiles[i]?.entityId as OptionId) as Cell;
         tiles.push({
           ...CELL_TILE,
-          text: currCell?.userValue || CellText.EMPTY,
-          entityId: currCell?.id,
+          text: cell?.userValue || CellText.EMPTY,
+          entityId: cell?.id,
           borders: this.joinBorders(i % optionCount === lastOptionIndex && RIGHT_BORDER, isLastRowInBlock && BOTTOM_BORDER)
         });
       }
 
       if (rowInFeature === 0) {
-        tiles.push(...blanks, {...RIGHT_BLANK_TILE, rows: optionCount});
+        tiles.push(...blankTiles, {...RIGHT_BLANK_TILE, rows: optionCount});
       }
     });
   }

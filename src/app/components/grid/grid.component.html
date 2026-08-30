@@ -1,7 +1,9 @@
 <div
   class="grid"
+  (keydown.tab)="onTabForward($event)"
+  (keydown.shift.tab)="onTabBack($event)"
   [style.grid-auto-rows]="CELL_SIZE"
-  [style.grid-template-columns]="`repeat(${columnCount()}, ${CELL_SIZE})`">
+  [style.grid-template-columns]="`repeat(${store.columnCount()}, ${CELL_SIZE})`">
 
   @for (tile of tileService.tiles(); track `${$index}-${tile.type}`) {
     <div
@@ -47,7 +49,11 @@
   }
 </div>
 <div class="grid-buttons">
-  <button class="clear-button" (click)="onClickClearCells()">{{ 'grid.clearCells' | translate }}</button>
+  <button
+    class="clear-button"
+    (keydown.shift.tab)="onTabBackIntoGrid($event)"
+    (click)="onClickClearCells()">{{ 'grid.clearCells' | translate }}
+  </button>
   <button [disabled]="!store.canUndo()" (click)="undo()">{{ 'grid.undo' | translate }}</button>
   <button [disabled]="!store.canRedo()" (click)="redo()">{{ 'grid.redo' | translate }}</button>
 </div>

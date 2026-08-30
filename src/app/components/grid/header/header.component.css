@@ -16,8 +16,6 @@
 
   &:hover,
   &:focus-within {
-    border: var(--purple-border);
-
     .delete {
       width: 30%;
       opacity: 1;

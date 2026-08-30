@@ -34,6 +34,14 @@ describe('HeaderComponent', () => {
     return DELETED_MOVE_ARGS;
   };
 
+  const pressKey = (selector: string, key: string) => {
+    const event = new KeyboardEvent('keydown', {key, cancelable: true});
+
+    fixture.nativeElement.querySelector(selector).dispatchEvent(event);
+
+    return event;
+  };
+
   const showHeader = async (overrides: Record<string, unknown> = {}) => {
     const inputs: Record<string, unknown> = {
       tile: {text: 'Vehicle', cols: 1, rows: 1, type: TileType.TOP_FEATURE_HEADER, entityId: RENAMED_ID} as Tile,
@@ -127,44 +135,62 @@ describe('HeaderComponent', () => {
       expect(fixture.nativeElement.querySelector('.delete').getAttribute('tabindex')).toBe('-1');
     });
 
-    it('should take focus on arrow down', () => {
-      fixture.nativeElement.querySelector('input').dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowDown'}));
+    it('should take focus on arrow right in a horizontal header', () => {
+      pressKey('input', 'ArrowRight');
 
       expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.delete'));
     });
 
-    it('should leave the caret alone on arrow right', () => {
+    it('should take focus on arrow down in a vertical header', async () => {
+      await showHeader({isVertical: true});
+
+      pressKey('input', 'ArrowDown');
+
+      expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.delete'));
+    });
+
+    it('should leave the caret alone on the axis the header does not run on', () => {
       const input = fixture.nativeElement.querySelector('input');
       input.focus();
 
-      input.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight'}));
+      pressKey('input', 'ArrowDown');
 
       expect(document.activeElement).toBe(input);
     });
 
-    it('should not scroll the page on arrow down', () => {
-      const arrowDown = new KeyboardEvent('keydown', {key: 'ArrowDown', cancelable: true});
-
-      fixture.nativeElement.querySelector('input').dispatchEvent(arrowDown);
-
-      expect(arrowDown.defaultPrevented).toBe(true);
+    it('should not scroll the page when it takes focus', () => {
+      expect(pressKey('input', 'ArrowRight').defaultPrevented).toBe(true);
     });
 
-    it('should not scroll the page on arrow up', () => {
-      const arrowUp = new KeyboardEvent('keydown', {key: 'ArrowUp', cancelable: true});
-
-      fixture.nativeElement.querySelector('.delete').dispatchEvent(arrowUp);
-
-      expect(arrowUp.defaultPrevented).toBe(true);
+    it('should not scroll the page when it hands focus back', () => {
+      expect(pressKey('.delete', 'ArrowLeft').defaultPrevented).toBe(true);
     });
 
-    it('should hand focus back to the name on arrow up', () => {
-      const deleteButton = fixture.nativeElement.querySelector('.delete');
-      deleteButton.focus();
+    it('should hand focus back on arrow left in a horizontal header', () => {
+      fixture.nativeElement.querySelector('.delete').focus();
 
-      deleteButton.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowUp'}));
+      pressKey('.delete', 'ArrowLeft');
 
       expect(document.activeElement).toBe(fixture.nativeElement.querySelector('input'));
+    });
+
+    it('should hand focus back on arrow up in a vertical header', async () => {
+      await showHeader({isVertical: true});
+      fixture.nativeElement.querySelector('.delete').focus();
+
+      pressKey('.delete', 'ArrowUp');
+
+      expect(document.activeElement).toBe(fixture.nativeElement.querySelector('input'));
+    });
+
+    it('should name the key that reaches it for a horizontal header', () => {
+      expect(fixture.nativeElement.querySelector('input').getAttribute('aria-keyshortcuts')).toBe('ArrowRight');
+    });
+
+    it('should name the key that reaches it for a vertical header', async () => {
+      await showHeader({isVertical: true});
+
+      expect(fixture.nativeElement.querySelector('input').getAttribute('aria-keyshortcuts')).toBe('ArrowDown');
     });
 
     it('should be disabled when deleting is no longer allowed', async () => {

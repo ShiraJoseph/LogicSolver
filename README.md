@@ -58,7 +58,8 @@ Every option belongs to exactly one feature, and every option matches exactly on
 | `x` or `o` on a focused cell | Writes that value straight onto it                    |
 | Backspace or delete on a focused cell | Empties it                                   |
 | Escape on a focused cell | Lets go of it without changing it                         |
-| Arrow keys on a focused cell | Not wired up yet                                      |
+| Arrow keys on a focused cell | Moves to the neighbouring cell, and stays put at the edge |
+| Tab through the grid | Walks every header name, then the selected cell or the first one, then the buttons below the grid |
 | Type in a header | Renames the feature or option on enter, escape or blur                    |
 | Down arrow in a header | Moves to that header's delete button                                 |
 | Up arrow on a delete button | Moves back to the header name                                   |

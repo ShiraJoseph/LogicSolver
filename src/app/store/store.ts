@@ -1,12 +1,13 @@
 import {patchState, signalStore, withComputed, withMethods, withState} from '@ngrx/signals';
 import {withEntities} from '@ngrx/signals/entities';
 import {withDevtools} from '@angular-architects/ngrx-toolkit';
-import {CellId, FeatureId} from '../types/entities.model';
+import {CellId, FeatureId, OptionId} from '../types/entities.model';
 import {withEntityAccessors, withEntityRelationship, withTransitiveRelationship} from 'signalkin';
 import {GridState, initialState} from '../types/state.model';
-import {CELL_CONFIG, FEATURE_CONFIG, OPTION_CONFIG} from './entity-config';
 import {NON_CELL_COLUMN_COUNT} from '../constants/grid.const';
 import {Move} from '../types/move.model';
+import {CELL_CONFIG, FEATURE_CONFIG, OPTION_CONFIG} from '../constants/store.const';
+import {buildGridAxes, findNeighborCellId} from './utils';
 
 /** Holds the features, options and cells of the grid, and the relationships between them. */
 export const GridStore = signalStore(
@@ -74,13 +75,40 @@ export const GridStore = signalStore(
     canUndo: () => store.undoStack().length > 0,
     /** Whether there is an undone move left to make again. */
     canRedo: () => store.redoStack().length > 0,
+    /** The features and options along both axes of the grid, in the order it lays them out. */
+    gridAxes: () => buildGridAxes(
+      store.featureIds() as Array<FeatureId>,
+      featureId => store.optionIdsByFeature(featureId) as Array<OptionId>
+    ),
+  })),
+  withComputed(store => ({
+    /** The cell in the top left corner of the grid, which holds the tab stop while no cell is selected. */
+    firstCellId: () => {
+      const {leftOptionIds, topOptionIds} = store.gridAxes();
+
+      return leftOptionIds.length && topOptionIds.length ?
+        store.cellIdByOptions(leftOptionIds[0], topOptionIds[0]) as CellId : undefined;
+    },
   })),
   withMethods((store) => ({
     /**
-     * The grid position of a feature from the left side
-     * @param featureId
+     * Hands the keyboard to the cell one step from this one under the arrow key, and stays put where the grid
+     * runs out.
+     * @param cellId
+     * @param arrowKey
      */
-    featureIndex: (featureId: FeatureId) => store.featurePositions().get(featureId),
+    selectNeighborCell: (cellId: CellId, arrowKey: string) => {
+      const neighborCellId = findNeighborCellId(
+        store.cellById(cellId)!.optionIds as Array<OptionId>,
+        arrowKey,
+        store.gridAxes(),
+        (leftOptionId, topOptionId) => store.cellIdByOptions(leftOptionId, topOptionId) as CellId
+      );
+
+      if (!neighborCellId) return;
+
+      store.setSelectedCellId(neighborCellId);
+    },
   })),
   withDevtools('logicSolver')
 );

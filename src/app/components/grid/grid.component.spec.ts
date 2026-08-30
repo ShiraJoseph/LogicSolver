@@ -6,7 +6,6 @@ import {StoreService} from '../../services/store.service';
 import {GRID_SEED} from '../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../mocks/grid.mock';
 import {CellText} from '../../types/tile.model';
-import {NON_CELL_COLUMN_COUNT} from '../../constants/grid.const';
 import {TRANSLATION_PROVIDERS} from '../../app.config';
 
 describe('GridComponent', () => {
@@ -23,6 +22,10 @@ describe('GridComponent', () => {
   const gridButton = (label: string): HTMLButtonElement =>
     [...fixture.nativeElement.querySelectorAll('.grid-buttons button')]
       .find((button: HTMLElement) => button.textContent!.trim() === label)!;
+
+  const headerInputs = (): Array<HTMLInputElement> => [...fixture.nativeElement.querySelectorAll('.grid input')];
+
+  const cellTabStop = (): HTMLButtonElement => fixture.nativeElement.querySelector('.cell.tab-stop');
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
@@ -41,15 +44,44 @@ describe('GridComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('columnCount', () => {
-    it('should give a column to every option of every feature after the first', () => {
-      expect(component.columnCount()).toBe(3 * 2 + NON_CELL_COLUMN_COUNT);
+  describe('the tab order', () => {
+    it('should keep every cell but one out of the tab stops', () => {
+      const tabbableCells = [...fixture.nativeElement.querySelectorAll('.cell')]
+        .filter((cell: HTMLElement) => cell.getAttribute('tabindex') !== '-1');
+
+      expect(tabbableCells.length).toBe(0);
     });
 
-    it('should grow when a feature is added', () => {
-      storeService.addNewFeature('Sport');
+    it('should send tab off the last header into the cells', async () => {
+      await pressKey('Tab', {}, headerInputs().at(-1));
 
-      expect(component.columnCount()).toBe(3 * 3 + NON_CELL_COLUMN_COUNT);
+      expect(document.activeElement).toBe(cellTabStop());
+    });
+
+    it('should leave tab alone on every other header', async () => {
+      const tab = new KeyboardEvent('keydown', {key: 'Tab', bubbles: true, cancelable: true});
+
+      headerInputs()[0].dispatchEvent(tab);
+
+      expect(tab.defaultPrevented).toBe(false);
+    });
+
+    it('should send tab off a cell on to the buttons below the grid', async () => {
+      await pressKey('Tab', {}, cellTabStop());
+
+      expect(document.activeElement).toBe(gridButton('Clear Cells'));
+    });
+
+    it('should send shift tab off a cell back to the last header', async () => {
+      await pressKey('Tab', {shiftKey: true}, cellTabStop());
+
+      expect(document.activeElement).toBe(headerInputs().at(-1));
+    });
+
+    it('should send shift tab off the clear button back into the cells', async () => {
+      await pressKey('Tab', {shiftKey: true}, gridButton('Clear Cells'));
+
+      expect(document.activeElement).toBe(cellTabStop());
     });
   });
 

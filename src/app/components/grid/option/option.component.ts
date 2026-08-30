@@ -4,7 +4,7 @@ import {HeaderComponent} from '../header/header.component';
 import {Tile, TileType} from '../../../types/tile.model';
 import {BaseDirective} from '../../../directives/base.directive';
 import {OptionId} from '../../../types/entities.model';
-import {BLACK} from '../../../constants/colors.const';
+import {BLACK} from '../../../constants/color.const';
 import {MIN_OPTION_COUNT} from '../../../constants/grid.const';
 import {MoveArgs, MoveFnEnum} from '../../../types/move.model';
 

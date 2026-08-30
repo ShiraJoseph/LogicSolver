@@ -19,11 +19,13 @@
 
   &:hover {
     cursor: pointer;
-    border: var(--purple-border);
   }
 
   &:focus-visible {
     outline: none;
+  }
+
+  &.selected {
     border: var(--thick-border);
   }
 }

@@ -5,7 +5,7 @@ import {GridStore} from '../store/store';
 import {StoreService} from './store.service';
 import {GRID_SEED} from '../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../mocks/grid.mock';
-import {BLACK, FEATURE_COLORS, WHITE} from '../constants/colors.const';
+import {BLACK, FEATURE_COLORS, WHITE} from '../constants/color.const';
 import {Tile, TileType} from '../types/tile.model';
 import {CellId, OptionId} from '../types/entities.model';
 

@@ -6,10 +6,10 @@
   <input
     #headerInput
     name="header-input"
-    aria-keyshortcuts="ArrowDown"
+    [attr.aria-keyshortcuts]="deleteShortcut()"
     [attr.aria-label]="nameLabel()"
     [class]="tile().type"
-    (keydown.arrowdown)="$event.preventDefault(); deleteButton.focus()"
+    (keydown)="onNameKeydown($event)"
     (keyup.enter)="headerInput.blur()"
     (keyup.escape)="headerInput.blur()"
     (blur)="onChangeName($event)"
@@ -20,7 +20,7 @@
     class="delete"
     [attr.aria-label]="deleteLabel()"
     [disabled]="isDeleteDisabled()"
-    (keydown.arrowup)="$event.preventDefault(); headerInput.focus()"
+    (keydown)="onDeleteKeydown($event)"
     (click)="onClickDelete()">-
   </button>
 </div>

@@ -31,6 +31,11 @@ describe('CellComponent', () => {
     await fixture.whenStable();
   };
 
+  const focusCell = async () => {
+    fixture.nativeElement.querySelector('.cell').focus();
+    await fixture.whenStable();
+  };
+
   const pressKey = async (key: string) => {
     fixture.nativeElement.querySelector('.cell')
       .dispatchEvent(new KeyboardEvent('keydown', {key, bubbles: true, cancelable: true}));
@@ -189,6 +194,84 @@ describe('CellComponent', () => {
     });
   });
 
+  describe('arrow navigation', () => {
+    it('should hand the keyboard to the cell on the right', async () => {
+      await showCell(cellId('Cat', 'Bike'));
+      await focusCell();
+
+      await pressKey('ArrowRight');
+
+      expect(store.selectedCellId?.()).toBe(cellId('Cat', 'Canoe'));
+    });
+
+    it('should hand the keyboard to the cell below', async () => {
+      await showCell(cellId('Cat', 'Bike'));
+      await focusCell();
+
+      await pressKey('ArrowDown');
+
+      expect(store.selectedCellId?.()).toBe(cellId('Dog', 'Bike'));
+    });
+
+    it('should stay put at the edge of the grid', async () => {
+      await showCell(cellId('Cat', 'Bike'));
+      await focusCell();
+
+      await pressKey('ArrowLeft');
+
+      expect(store.selectedCellId?.()).toBe(cellId('Cat', 'Bike'));
+    });
+
+    it('should leave the value of the cell alone', async () => {
+      await showCell(cellId('Cat', 'Bike'));
+      await focusCell();
+
+      await pressKey('ArrowRight');
+
+      expect(store.undoStack()).toEqual([]);
+    });
+  });
+
+  describe('the tab stop', () => {
+    const cellClasses = () => fixture.nativeElement.querySelector('.cell').classList;
+
+    it('should keep every cell out of the browser tab order', async () => {
+      await showCell(cellId('Cat', 'Bike'));
+
+      expect(fixture.nativeElement.querySelector('.cell').getAttribute('tabindex')).toBe('-1');
+    });
+
+    it('should sit on the first cell while no cell is selected', async () => {
+      await showCell(cellId('Cat', 'Bike'));
+
+      expect(cellClasses()).toContain('tab-stop');
+    });
+
+    it('should stay off every other cell while no cell is selected', async () => {
+      await showCell(cellId('Dog', 'Bike'));
+
+      expect(cellClasses()).not.toContain('tab-stop');
+    });
+
+    it('should move to the selected cell', async () => {
+      await showCell(cellId('Dog', 'Bike'));
+
+      store.setSelectedCellId(cellId('Dog', 'Bike'));
+      await fixture.whenStable();
+
+      expect(cellClasses()).toContain('tab-stop');
+    });
+
+    it('should leave the first cell once another one is selected', async () => {
+      await showCell(cellId('Cat', 'Bike'));
+
+      store.setSelectedCellId(cellId('Dog', 'Bike'));
+      await fixture.whenStable();
+
+      expect(cellClasses()).not.toContain('tab-stop');
+    });
+  });
+
   describe('the selected cell', () => {
     it('should take the keyboard when the cell is focused', async () => {
       fixture.nativeElement.querySelector('.cell').focus();
@@ -238,6 +321,24 @@ describe('CellComponent', () => {
       await clickCell();
 
       expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.X);
+    });
+
+    it('should hand the clicked cell the keyboard', async () => {
+      await clickCell();
+
+      expect(store.selectedCellId?.()).toBe(store.cells()[0].id);
+    });
+
+    it('should mark the clicked cell selected', async () => {
+      await clickCell();
+
+      expect(fixture.nativeElement.querySelector('.cell').classList).toContain('selected');
+    });
+
+    it('should leave an unselected cell unmarked', async () => {
+      await showCell(cellId('Dog', 'Bike'));
+
+      expect(fixture.nativeElement.querySelector('.cell').classList).not.toContain('selected');
     });
 
     it('should move an X on to an O', async () => {

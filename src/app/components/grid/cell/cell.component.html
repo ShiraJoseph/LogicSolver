@@ -2,9 +2,12 @@
   #cellButton
   type="button"
   class="cell"
+  [class.selected]="isSelected()"
+  [class.tab-stop]="isTabStop()"
+  tabindex="-1"
   [style.background-color]="hoverColor()"
   (mouseenter)="onHover()"
   (focus)="onFocus()"
   (keydown)="onKeydown($event)"
-  (click)="updateCellValue(NEXT_CELL_TEXT[cellValue()])">{{ cellValue() }}
+  (click)="onClickCell()">{{ cellValue() }}
 </button>
