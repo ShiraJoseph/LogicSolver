@@ -10,5 +10,5 @@
   (mouseenter)="onHover()"
   (focus)="onFocus()"
   (keydown)="onKeydown($event)"
-  (click)="onClickCell()">{{ cellValue() }}
+  (pointerdown)="onClickCell($event)">{{ cellValue() }}
 </button>

@@ -55,6 +55,7 @@ Every option belongs to exactly one feature, and every option matches exactly on
 | Action | Result                                                                     |
 |---|----------------------------------------------------------------------------|
 | Click a cell | Moves it on from the value it shows: empty, then X, then O, then empty again |
+| Enter or space on a focused cell | Moves it on the same way                          |
 | `x` or `o` on a focused cell | Writes that value straight onto it                    |
 | Backspace or delete on a focused cell | Empties it                                   |
 | Escape on a focused cell | Lets go of it without changing it                         |

@@ -11,6 +11,9 @@ import {CellText} from '../../../types/tile.model';
 import {CellId} from '../../../types/entities.model';
 import {MoveFnEnum} from '../../../types/move.model';
 import {TRANSLATION_PROVIDERS} from '../../../app.config';
+import {PRIMARY_POINTER_BUTTON} from '../../../constants/keyboard.const';
+
+const SECONDARY_POINTER_BUTTON = 2;
 
 describe('CellComponent', () => {
   let component: CellComponent;
@@ -26,8 +29,9 @@ describe('CellComponent', () => {
     await fixture.whenStable();
   };
 
-  const clickCell = async () => {
-    fixture.nativeElement.querySelector('.cell').click();
+  const clickCell = async (button = PRIMARY_POINTER_BUTTON) => {
+    fixture.nativeElement.querySelector('.cell')
+      .dispatchEvent(new PointerEvent('pointerdown', {button, bubbles: true, cancelable: true}));
     await fixture.whenStable();
   };
 
@@ -153,6 +157,28 @@ describe('CellComponent', () => {
       fixture.nativeElement.querySelector('.cell').dispatchEvent(backspace);
 
       expect(backspace.defaultPrevented).toBe(true);
+    });
+
+    it('should move the cell on to the next value on enter', async () => {
+      await pressKey('Enter');
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.X);
+    });
+
+    it('should move the cell on to the next value on space', async () => {
+      await pressKey('x');
+
+      await pressKey(' ');
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.O);
+    });
+
+    it('should hold on to the page on space', async () => {
+      const space = new KeyboardEvent('keydown', {key: ' ', bubbles: true, cancelable: true});
+
+      fixture.nativeElement.querySelector('.cell').dispatchEvent(space);
+
+      expect(space.defaultPrevented).toBe(true);
     });
 
     it('should write an X on a capital X', async () => {
@@ -355,6 +381,12 @@ describe('CellComponent', () => {
       await clickCell();
 
       expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.X);
+    });
+
+    it('should leave the cell alone when a button other than the primary one is clicked', async () => {
+      await clickCell(SECONDARY_POINTER_BUTTON);
+
+      expect(store.cellById(store.cells()[0].id)!.userValue).toBe(CellText.EMPTY);
     });
 
     it('should hand the clicked cell the keyboard', async () => {

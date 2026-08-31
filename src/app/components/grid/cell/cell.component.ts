@@ -4,7 +4,7 @@ import {CellId} from '../../../types/entities.model';
 import {LogicService} from '../../../services/logic.service';
 import {BaseDirective} from '../../../directives/base.directive';
 import {MoveFnEnum} from '../../../types/move.model';
-import {ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, BACKSPACE_KEY, DELETE_KEY, ESCAPE_KEY, O_KEY, X_KEY} from '../../../constants/keyboard.const';
+import {ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, BACKSPACE_KEY, DELETE_KEY, ENTER_KEY, ESCAPE_KEY, O_KEY, PRIMARY_POINTER_BUTTON, SPACE_KEY, X_KEY} from '../../../constants/keyboard.const';
 import {NEXT_CELL_TEXT} from '../../../constants/grid.const';
 import {TranslateService} from '@ngx-translate/core';
 
@@ -103,12 +103,15 @@ export class CellComponent extends BaseDirective {
   }
 
   /**
-   * Puts the keyboard on this cell and moves it on to the next value.
+   * Focuses the cell and toggles its value.
+   * @param event
    */
-  onClickCell() {
+  onClickCell(event: PointerEvent) {
+    if (event.button !== PRIMARY_POINTER_BUTTON) return;
+
     this.cellButton()?.nativeElement.focus();
     this.onFocus();
-    this.updateCellValue(NEXT_CELL_TEXT[this.cellValue()]);
+    this.cycleValue();
   }
 
   /**
@@ -120,7 +123,7 @@ export class CellComponent extends BaseDirective {
   }
 
   /**
-   * Writes, empties or lets go of the cell, taking either case of x and o.
+   * Writes, cycles, empties or lets go of the cell, taking either case of x and o.
    * @param event
    */
   protected onKeydown(event: KeyboardEvent) {
@@ -139,6 +142,11 @@ export class CellComponent extends BaseDirective {
       case ESCAPE_KEY:
         this.deselectCell();
         break;
+      case ENTER_KEY:
+      case SPACE_KEY:
+        event.preventDefault();
+        this.cycleValue();
+        break;
       case ARROW_UP_KEY:
       case ARROW_DOWN_KEY:
       case ARROW_LEFT_KEY:
@@ -149,6 +157,14 @@ export class CellComponent extends BaseDirective {
       default:
         return;
     }
+  }
+
+  /**
+   * Moves the cell on to the next value in the ring.
+   * @private
+   */
+  private cycleValue() {
+    this.updateCellValue(NEXT_CELL_TEXT[this.cellValue()]);
   }
 
   protected readonly CellText = CellText;
