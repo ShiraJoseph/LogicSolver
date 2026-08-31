@@ -10,6 +10,7 @@
     "addOption": "Add an option to every feature",
     "clearCells": "Clear Cells",
     "invalidGrid": "Invalid grid",
+    "name": "Logic Solver Grid",
     "redo": "Redo",
     "undo": "Undo"
   },

@@ -1,5 +1,7 @@
 <div
   class="grid"
+  role="group"
+  [attr.aria-label]="'grid.name' | translate"
   (keydown.tab)="onTabForward($event)"
   (keydown.shift.tab)="onTabBack($event)"
   [style.grid-auto-rows]="CELL_SIZE"

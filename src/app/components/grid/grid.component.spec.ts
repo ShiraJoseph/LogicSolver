@@ -359,6 +359,10 @@ describe('GridComponent', () => {
         .toBe('Add a feature');
     });
 
+    it('should name the grid itself', () => {
+      expect(fixture.nativeElement.querySelector('.grid').getAttribute('aria-label')).toBe('Logic Solver Grid');
+    });
+
     it('should name the add option button, which shows only a plus', () => {
       expect(fixture.nativeElement.querySelector('[data-tile-type="ADD_OPTION"] button').getAttribute('aria-label'))
         .toBe('Add an option to every feature');
