@@ -1,6 +1,9 @@
 export const WHITE = '#FFFFFF';
 export const BLACK = '#000000';
 
+/** The background of a cell holding a value the grid contradicts. */
+export const FADED_RED = 'var(--faded-red)';
+
 /**
  * Feature header backgrounds paired with their label text color, applied in
  * the order features appear on the grid. Wraps when there are more features

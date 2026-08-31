@@ -1,12 +1,14 @@
 import {patchState, signalStore, withComputed, withMethods, withState} from '@ngrx/signals';
 import {withEntities} from '@ngrx/signals/entities';
 import {withDevtools} from '@angular-architects/ngrx-toolkit';
-import {CellId, FeatureId} from '../types/entities.model';
+import {CellId, FeatureId, OptionId} from '../types/entities.model';
+import {CellText} from '../types/tile.model';
 import {withEntityAccessors, withEntityRelationship, withTransitiveRelationship} from 'signalkin';
 import {GridState, initialState} from '../types/state.model';
-import {CELL_CONFIG, FEATURE_CONFIG, OPTION_CONFIG} from './entity-config';
 import {NON_CELL_COLUMN_COUNT} from '../constants/grid.const';
 import {Move} from '../types/move.model';
+import {CELL_CONFIG, FEATURE_CONFIG, OPTION_CONFIG} from '../constants/store.const';
+import {buildGridAxes, findNeighborCellId} from './utils';
 
 /** Holds the features, options and cells of the grid, and the relationships between them. */
 export const GridStore = signalStore(
@@ -24,9 +26,27 @@ export const GridStore = signalStore(
     setOptionCountPerFeature: (optionCountPerFeature: number) => {
       patchState(store, {optionCountPerFeature});
     },
-    /** Sets the cell whose buttons are open, or closes them all when given nothing. */
+    /** Sets the cell the keyboard is on, or takes it off every cell when given nothing, remembering the last one. */
     setSelectedCellId: (selectedCellId: CellId | undefined) => {
-      patchState(store, {selectedCellId});
+      patchState(store, {selectedCellId, lastSelectedCellId: selectedCellId ?? store.lastSelectedCellId?.()});
+    },
+    /** Sets the value the grid contradicts on this cell, or drops it when given none. */
+    setInvalidCellValue: (cellId: CellId, invalidValue: CellText) => {
+      if ((store.invalidCellValues().get(cellId) ?? CellText.EMPTY) === invalidValue) return;
+
+      const invalidCellValues = new Map(store.invalidCellValues());
+
+      if (invalidValue) {
+        invalidCellValues.set(cellId, invalidValue);
+      } else {
+        invalidCellValues.delete(cellId);
+      }
+
+      patchState(store, {invalidCellValues});
+    },
+    /** Replaces every value the grid contradicts at once. */
+    setInvalidCellValues: (invalidCellValues: Map<CellId, CellText>) => {
+      patchState(store, {invalidCellValues});
     },
     /** Adds a new move to the undo stack and clears the redo stack */
     recordMove: (move: Move) => {
@@ -63,11 +83,8 @@ export const GridStore = signalStore(
     /** Each feature id mapped to its grid position */
     featurePositions: () => {
       const positionMap = new Map();
-      store.featureIds().forEach((id, index) => {
-        if (id && index != undefined) {
-          positionMap.set(id, index);
-        }
-      });
+
+      store.featureIds().forEach((id, index) => positionMap.set(id, index));
 
       return positionMap;
     },
@@ -77,13 +94,47 @@ export const GridStore = signalStore(
     canUndo: () => store.undoStack().length > 0,
     /** Whether there is an undone move left to make again. */
     canRedo: () => store.redoStack().length > 0,
+    /** The features and options along both axes of the grid, in the order it lays them out. */
+    gridAxes: () => buildGridAxes(
+      store.featureIds() as Array<FeatureId>,
+      featureId => store.optionIdsByFeature(featureId) as Array<OptionId>
+    ),
+  })),
+  withComputed(store => ({
+    /**
+     * The cell Tab reaches: the active one, the one that was active last, or the top left corner while neither
+     * of those is on the grid.
+     */
+    tabStopCellId: () => {
+      const cellId = store.selectedCellId?.() ?? store.lastSelectedCellId?.();
+
+      if (cellId && store.cellById(cellId)) return cellId;
+
+      const {leftOptionIds, topOptionIds} = store.gridAxes();
+
+      return leftOptionIds.length && topOptionIds.length ?
+        store.cellIdByOptions(leftOptionIds[0], topOptionIds[0]) as CellId : undefined;
+    },
   })),
   withMethods((store) => ({
     /**
-     * The grid position of a feature from the left side
-     * @param featureId
+     * Hands the keyboard to the cell one step from this one under the arrow key, and stays put where the grid
+     * runs out.
+     * @param cellId
+     * @param arrowKey
      */
-    featureIndex: (featureId: FeatureId) => store.featurePositions().get(featureId),
+    selectNeighborCell: (cellId: CellId, arrowKey: string) => {
+      const neighborCellId = findNeighborCellId(
+        store.cellById(cellId)!.optionIds as Array<OptionId>,
+        arrowKey,
+        store.gridAxes(),
+        (leftOptionId, topOptionId) => store.cellIdByOptions(leftOptionId, topOptionId) as CellId
+      );
+
+      if (!neighborCellId) return;
+
+      store.setSelectedCellId(neighborCellId);
+    },
   })),
   withDevtools('logicSolver')
 );

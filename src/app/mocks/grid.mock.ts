@@ -13,3 +13,9 @@ export const MOCK_SMALL_GRID_SEED: GridSeed = {
   featureNames: MOCK_SMALL_FEATURE_NAMES,
   optionNames: MOCK_SMALL_OPTION_NAMES
 };
+
+/** 2 features of 4 options. */
+export const MOCK_FOUR_OPTION_GRID_SEED: GridSeed = {
+  featureNames: ['Pet', 'Vehicle'],
+  optionNames: ['Cat', 'Dog', 'Fish', 'Bird', 'Bike', 'Canoe', 'Tractor', 'Kayak']
+};

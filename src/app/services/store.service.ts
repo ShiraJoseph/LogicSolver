@@ -1,14 +1,17 @@
 import {inject, Service} from '@angular/core';
-import {Cell, Feature, FeatureId, Option, OptionId} from '../types/entities.model';
+import {Cell, CellId, Feature, FeatureId, Option, OptionId} from '../types/entities.model';
 import {GridStore} from '../store/store';
 import {GridSeed} from '../types/grid.model';
 import {CellText} from '../types/tile.model';
 import {GRID_SEED} from '../store/grid.token';
+import {LogicService} from './logic.service';
+import {MoveFnEnum} from '../types/move.model';
 
 /** Helper functions for updating store entities */
 @Service()
 export class StoreService {
   store = inject(GridStore);
+  logicService = inject(LogicService);
 
   constructor() {
     this.populateGridStore(inject(GRID_SEED));
@@ -101,14 +104,79 @@ export class StoreService {
   }
 
   /**
-   * Clears all cells in the grid. (Leaves features and options as they are)
+   * Clears all cells in the grid, along with every held-aside value. (Leaves features and options as they are)
    */
   clearCells() {
     const oldCells = this.store.cells().filter(cell => !!cell.userValue);
 
     this.store.updateCells(oldCells, {userValue: CellText.EMPTY});
+    this.store.setInvalidCellValues(new Map());
 
     return {cells: oldCells};
+  }
+
+  /**
+   * Writes the value onto the cell and records it as one move, leaving a cell already showing that value alone.
+   * A value the grid contradicts comes straight back off the cell and is held aside instead.
+   * @param cellId
+   * @param newValue
+   */
+  updateCellValue(cellId: CellId, newValue: CellText) {
+    const oldValue = this.store.cellById(cellId)!.userValue as CellText;
+    const oldInvalidValue = this.store.invalidCellValues().get(cellId) ?? CellText.EMPTY;
+
+    if (newValue === (oldInvalidValue || this.logicService.deducedValue(cellId))) return;
+
+    this.store.setInvalidCellValue(cellId, CellText.EMPTY);
+    this.store.updateCell(cellId, {userValue: newValue});
+
+    const isContradicted = this.logicService.isContradicted();
+
+    if (isContradicted) {
+      this.store.updateCell(cellId, {userValue: CellText.EMPTY});
+      this.store.setInvalidCellValue(cellId, newValue);
+    }
+
+    const newlyValidCells = this.promoteInvalidCellValues();
+
+    this.store.recordMove({
+      moveFn: MoveFnEnum.UPDATE,
+      moveArgs: {
+        cellId,
+        oldValue,
+        oldInvalidValue,
+        newValue: isContradicted ? CellText.EMPTY : newValue,
+        newInvalidValue: isContradicted ? newValue : CellText.EMPTY,
+        newlyValidCells
+      }
+    });
+  }
+
+  /**
+   * Puts back every held-aside value the deductions no longer contradict, leaves the rest where they are,
+   * and hands back the cells it put a value back on.
+   */
+  promoteInvalidCellValues(): Map<CellId, CellText> {
+    const newlyValidCells = new Map<CellId, CellText>();
+
+    this.store.invalidCellValues().forEach((invalidValue, cellId) => {
+      const deducedValue = this.logicService.deducedValue(cellId);
+
+      if (deducedValue && deducedValue !== invalidValue) return;
+
+      this.store.updateCell(cellId, {userValue: invalidValue});
+
+      if (deducedValue !== invalidValue && this.logicService.isContradicted()) {
+        this.store.updateCell(cellId, {userValue: CellText.EMPTY});
+
+        return;
+      }
+
+      this.store.setInvalidCellValue(cellId, CellText.EMPTY);
+      newlyValidCells.set(cellId, invalidValue);
+    });
+
+    return newlyValidCells;
   }
 
   /**

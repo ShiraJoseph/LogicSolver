@@ -21,7 +21,7 @@ export class FeatureComponent extends BaseDirective {
   entityLabel = inject(TranslateService).translate('header.feature');
 
   /** The index of this feature in the feature list */
-  featureIndex = computed(() => this.store.featureIndex(this.tile().entityId as FeatureId));
+  featureIndex = computed(() => this.store.featurePositions().get(this.tile().entityId as FeatureId));
 
   /** Fill color based on feature index */
   backgroundColor = computed(() => this.colorService.getFeatureColor(this.featureIndex()));

@@ -2,9 +2,13 @@
   --cell-size: 60px;
   --page-margin: 8px;
 
+  --red: #CC3333;
+  --faded-red: color-mix(in oklab, var(--red), white 40%);
+
   --grey-border: dimgrey 1px solid;
-  --purple-border: purple 1px solid;
-  --thick-border: black 4px solid;
+  --red-border: var(--red) 1px solid;
+  --thick-border-width: 4px;
+  --thick-border: black var(--thick-border-width) solid;
 
   --header-skew: -20deg;
   --header-input-padding: 4px;
@@ -28,6 +32,11 @@
     margin: 0;
     padding: var(--page-margin);
   }
+}
+
+button,
+input {
+  border-radius: 0;
 }
 
 button {

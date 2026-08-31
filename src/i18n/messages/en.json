@@ -1,11 +1,16 @@
 {
   "cell": {
-    "clear": "clear"
+    "column": "column",
+    "invalidValue": "invalid value",
+    "row": "row",
+    "value": "value"
   },
   "grid": {
     "addFeature": "Add a feature",
     "addOption": "Add an option to every feature",
     "clearCells": "Clear Cells",
+    "invalidGrid": "Invalid grid",
+    "name": "Logic Solver Grid",
     "redo": "Redo",
     "undo": "Undo"
   },

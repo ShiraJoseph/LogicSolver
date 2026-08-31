@@ -6,11 +6,14 @@ import {GRID_SEED} from './grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../mocks/grid.mock';
 import {NON_CELL_COLUMN_COUNT} from '../constants/grid.const';
 import {Move, MoveFnEnum} from '../types/move.model';
+import {ARROW_LEFT_KEY, ARROW_RIGHT_KEY} from '../constants/keyboard.const';
+import {CellText} from '../types/tile.model';
+import {CellId} from '../types/entities.model';
 
 describe('GridStore', () => {
   let store: InstanceType<typeof GridStore>;
 
-  const clearMove: Move = {moveFn: MoveFnEnum.CLEAR, moveArgs: {oldCells: []}};
+  const clearMove: Move = {moveFn: MoveFnEnum.CLEAR, moveArgs: {oldCells: [], oldInvalidCellValues: new Map()}};
   const renameMove: Move = {moveFn: MoveFnEnum.UPDATE, moveArgs: {featureId: 'a-b-c-d-e', oldValue: 'Pet', newValue: 'Animal'}};
 
   beforeEach(() => {
@@ -67,8 +70,110 @@ describe('GridStore', () => {
     });
   });
 
+  describe('tabStopCellId', () => {
+    const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+    const cellId = (nameA: string, nameB: string) => store.cellByOptions(optionId(nameA), optionId(nameB))!.id;
+
+    it('should open on the cell where the first left option crosses the first top option', () => {
+      expect(store.tabStopCellId()).toBe(cellId('Cat', 'Bike'));
+    });
+
+    it('should follow the active cell', () => {
+      store.setSelectedCellId(cellId('Dog', 'Canoe'));
+
+      expect(store.tabStopCellId()).toBe(cellId('Dog', 'Canoe'));
+    });
+
+    it('should stay on the cell that was active last once the keyboard leaves the grid', () => {
+      store.setSelectedCellId(cellId('Dog', 'Canoe'));
+
+      store.setSelectedCellId(undefined);
+
+      expect(store.tabStopCellId()).toBe(cellId('Dog', 'Canoe'));
+    });
+
+    it('should fall back to the corner once the remembered cell has left the grid', () => {
+      store.setSelectedCellId(cellId('Dog', 'Canoe'));
+      store.setSelectedCellId(undefined);
+
+      TestBed.inject(StoreService).deleteOption(optionId('Dog'));
+
+      expect(store.tabStopCellId()).toBe(cellId('Cat', 'Bike'));
+    });
+
+    it('should be nothing for a grid with no cells', () => {
+      store.features().forEach(feature => TestBed.inject(StoreService).deleteFeature(feature.id));
+
+      expect(store.tabStopCellId()).toBeUndefined();
+    });
+  });
+
+  describe('selectNeighborCell', () => {
+    const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+    const cellId = (nameA: string, nameB: string) => store.cellByOptions(optionId(nameA), optionId(nameB))!.id;
+
+    it('should hand the keyboard to the neighbour', () => {
+      store.selectNeighborCell(cellId('Cat', 'Bike'), ARROW_RIGHT_KEY);
+
+      expect(store.selectedCellId?.()).toBe(cellId('Cat', 'Canoe'));
+    });
+
+    it('should leave the selection alone where the grid runs out', () => {
+      store.setSelectedCellId(cellId('Cat', 'Bike'));
+
+      store.selectNeighborCell(cellId('Cat', 'Bike'), ARROW_LEFT_KEY);
+
+      expect(store.selectedCellId?.()).toBe(cellId('Cat', 'Bike'));
+    });
+  });
+
+  describe('setInvalidCellValue', () => {
+    const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+    const cellId = (nameA: string, nameB: string) => store.cellByOptions(optionId(nameA), optionId(nameB))!.id as CellId;
+
+    it('should hold the value aside on the cell', () => {
+      store.setInvalidCellValue(cellId('Cat', 'Bike'), CellText.O);
+
+      expect(store.invalidCellValues().get(cellId('Cat', 'Bike'))).toBe(CellText.O);
+    });
+
+    it('should drop the held-aside value on the cell when given none', () => {
+      store.setInvalidCellValue(cellId('Cat', 'Bike'), CellText.O);
+
+      store.setInvalidCellValue(cellId('Cat', 'Bike'), CellText.EMPTY);
+
+      expect(store.invalidCellValues().size).toBe(0);
+    });
+
+    it('should leave the state alone when the cell already holds that value', () => {
+      store.setInvalidCellValue(cellId('Cat', 'Bike'), CellText.O);
+      const invalidCellValues = store.invalidCellValues();
+
+      store.setInvalidCellValue(cellId('Cat', 'Bike'), CellText.O);
+
+      expect(store.invalidCellValues()).toBe(invalidCellValues);
+    });
+
+    it('should leave the state alone when there is no held-aside value to drop', () => {
+      const invalidCellValues = store.invalidCellValues();
+
+      store.setInvalidCellValue(cellId('Cat', 'Bike'), CellText.EMPTY);
+
+      expect(store.invalidCellValues()).toBe(invalidCellValues);
+    });
+  });
+
   describe('setSelectedCellId', () => {
-    it('should start with nothing selected', () => {
+    it('should remember the cell after the keyboard leaves it', () => {
+      const cell = store.cells()[0];
+
+      store.setSelectedCellId(cell.id);
+      store.setSelectedCellId(undefined);
+
+      expect(store.lastSelectedCellId?.()).toBe(cell.id);
+    });
+
+    it('should start with the keyboard on no cell', () => {
       expect(store.selectedCellId?.()).toBeUndefined();
     });
 
@@ -80,7 +185,7 @@ describe('GridStore', () => {
       expect(store.selectedCellId?.()).toBe(cell.id);
     });
 
-    it('should clear the selection when given nothing', () => {
+    it('should take the keyboard off every cell when given nothing', () => {
       store.setSelectedCellId(store.cells()[0].id);
 
       store.setSelectedCellId(undefined);
@@ -88,6 +193,7 @@ describe('GridStore', () => {
       expect(store.selectedCellId?.()).toBeUndefined();
     });
   });
+
   describe('recordMove', () => {
     it('should put the move on the undo stack', () => {
       store.recordMove(clearMove);

@@ -16,8 +16,19 @@ export enum MoveEntityEnum {
   CELL,
 }
 
-/** Cell value before and after an update. */
-type CellUpdateMoveArgs = {cellId: CellId; oldValue: CellText; newValue: CellText};
+/**
+ * Cell value before and after an update, on whichever side of the split it sat.
+ * At most one of each pair is filled: a value lives either on the cell or in the invalid map, never both.
+ */
+type CellUpdateMoveArgs = {
+  cellId: CellId;
+  oldValue: CellText;
+  oldInvalidValue: CellText;
+  newValue: CellText;
+  newInvalidValue: CellText;
+  /** The cells whose held-aside value the move put back, and the value each of them took. */
+  newlyValidCells: Map<CellId, CellText>;
+};
 
 /** Option value before and after an update. */
 type OptionUpdateMoveArgs = {optionId: OptionId; oldValue: string; newValue: string};
@@ -25,8 +36,8 @@ type OptionUpdateMoveArgs = {optionId: OptionId; oldValue: string; newValue: str
 /** Feature value before and after an update */
 type FeatureUpdateMoveArgs = {featureId: FeatureId, oldValue: string; newValue: string};
 
-/** Cell values before clearing the grid */
-type ClearMoveArgs = {oldCells: Array<Cell>};
+/** Cell values and held-aside invalid values before clearing the grid */
+type ClearMoveArgs = {oldCells: Array<Cell>; oldInvalidCellValues: Map<CellId, CellText>};
 
 /** The entities an ADD or DELETE move changed, with their index slots */
 type CollectionMoveArgs =  {

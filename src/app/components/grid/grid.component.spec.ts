@@ -6,7 +6,6 @@ import {StoreService} from '../../services/store.service';
 import {GRID_SEED} from '../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../mocks/grid.mock';
 import {CellText} from '../../types/tile.model';
-import {NON_CELL_COLUMN_COUNT} from '../../constants/grid.const';
 import {TRANSLATION_PROVIDERS} from '../../app.config';
 
 describe('GridComponent', () => {
@@ -23,6 +22,10 @@ describe('GridComponent', () => {
   const gridButton = (label: string): HTMLButtonElement =>
     [...fixture.nativeElement.querySelectorAll('.grid-buttons button')]
       .find((button: HTMLElement) => button.textContent!.trim() === label)!;
+
+  const headerInputs = (): Array<HTMLInputElement> => [...fixture.nativeElement.querySelectorAll('.grid input')];
+
+  const cellTabStop = (): HTMLButtonElement => fixture.nativeElement.querySelector('.cell.tab-stop');
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
@@ -41,15 +44,120 @@ describe('GridComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  describe('columnCount', () => {
-    it('should give a column to every option of every feature after the first', () => {
-      expect(component.columnCount()).toBe(3 * 2 + NON_CELL_COLUMN_COUNT);
+  describe('the tab order', () => {
+    it('should keep every cell but one out of the tab stops', () => {
+      const tabbableCells = [...fixture.nativeElement.querySelectorAll('.cell')]
+        .filter((cell: HTMLElement) => cell.getAttribute('tabindex') !== '-1');
+
+      expect(tabbableCells.length).toBe(0);
     });
 
-    it('should grow when a feature is added', () => {
-      storeService.addNewFeature('Sport');
+    it('should send tab off the last header into the cells', async () => {
+      await pressKey('Tab', {}, headerInputs().at(-1));
 
-      expect(component.columnCount()).toBe(3 * 3 + NON_CELL_COLUMN_COUNT);
+      expect(document.activeElement).toBe(cellTabStop());
+    });
+
+    it('should leave tab alone on every other header', async () => {
+      const tab = new KeyboardEvent('keydown', {key: 'Tab', bubbles: true, cancelable: true});
+
+      headerInputs()[0].dispatchEvent(tab);
+
+      expect(tab.defaultPrevented).toBe(false);
+    });
+
+    it('should send tab off a cell on to the buttons below the grid', async () => {
+      await pressKey('Tab', {}, cellTabStop());
+
+      expect(document.activeElement).toBe(gridButton('Clear Cells'));
+    });
+
+    it('should send tab off a cell on to undo once there is a move to walk back', async () => {
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+
+      await pressKey('Tab', {}, cellTabStop());
+
+      expect(document.activeElement).toBe(gridButton('Undo'));
+    });
+
+    it('should send shift tab off a cell back to the last header', async () => {
+      await pressKey('Tab', {shiftKey: true}, cellTabStop());
+
+      expect(document.activeElement).toBe(headerInputs().at(-1));
+    });
+
+    it('should let go of the selected cell on the way out', async () => {
+      const cell = cellTabStop();
+      cell.focus();
+      await fixture.whenStable();
+
+      await pressKey('Tab', {}, cell);
+
+      expect(store.selectedCellId?.()).toBeUndefined();
+    });
+
+    it('should let go of the selected cell on the way back out', async () => {
+      const cell = cellTabStop();
+      cell.focus();
+      await fixture.whenStable();
+
+      await pressKey('Tab', {shiftKey: true}, cell);
+
+      expect(store.selectedCellId?.()).toBeUndefined();
+    });
+
+    it('should hold on to the selected cell while tabbing between headers', async () => {
+      store.setSelectedCellId(store.cells()[0].id);
+      await fixture.whenStable();
+
+      await pressKey('Tab', {}, headerInputs()[0]);
+
+      expect(store.selectedCellId?.()).toBe(store.cells()[0].id);
+    });
+
+    it('should come back to the cell the keyboard was on last', async () => {
+      const cells = fixture.nativeElement.querySelectorAll('.cell');
+      cells[4].focus();
+      await fixture.whenStable();
+
+      await pressKey('Tab', {}, cells[4]);
+      await fixture.whenStable();
+
+      expect(cellTabStop()).toBe(cells[4]);
+    });
+
+    it('should leave shift tab alone on a header', () => {
+      const tab = new KeyboardEvent('keydown', {key: 'Tab', shiftKey: true, bubbles: true, cancelable: true});
+
+      headerInputs()[0].dispatchEvent(tab);
+
+      expect(tab.defaultPrevented).toBe(false);
+    });
+
+    it('should leave tab alone when the grid holds no cell to move to', async () => {
+      store.features().forEach(feature => storeService.deleteFeature(feature.id));
+      await fixture.whenStable();
+      const tab = new KeyboardEvent('keydown', {key: 'Tab', shiftKey: true, bubbles: true, cancelable: true});
+
+      gridButton('Clear Cells').dispatchEvent(tab);
+
+      expect(tab.defaultPrevented).toBe(false);
+    });
+
+    it('should send shift tab off the first button below the grid back into the cells', async () => {
+      await pressKey('Tab', {shiftKey: true}, gridButton('Clear Cells'));
+
+      expect(document.activeElement).toBe(cellTabStop());
+    });
+
+    it('should leave shift tab alone on a button that is not the first one below the grid', async () => {
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+
+      await pressKey('Tab', {shiftKey: true}, gridButton('Redo'));
+
+      expect(document.activeElement).not.toBe(cellTabStop());
     });
   });
 
@@ -251,9 +359,43 @@ describe('GridComponent', () => {
         .toBe('Add a feature');
     });
 
+    it('should name the grid itself', () => {
+      expect(fixture.nativeElement.querySelector('.grid').getAttribute('aria-label')).toBe('Logic Solver Grid');
+    });
+
     it('should name the add option button, which shows only a plus', () => {
       expect(fixture.nativeElement.querySelector('[data-tile-type="ADD_OPTION"] button').getAttribute('aria-label'))
         .toBe('Add an option to every feature');
+    });
+  });
+
+  describe('the invalid grid tag', () => {
+    const invalidTag = () => fixture.nativeElement.querySelector('.invalid-tag');
+
+    const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+
+    const cellId = (nameA: string, nameB: string) => store.cellByOptions(optionId(nameA), optionId(nameB))!.id;
+
+    it('should stay off the bottom bar while every value on the grid stands', () => {
+      expect(invalidTag()).toBeNull();
+    });
+
+    it('should show once the grid is holding a value it contradicts', async () => {
+      storeService.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      storeService.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+      await fixture.whenStable();
+
+      expect(invalidTag().textContent.trim()).toBe('Invalid grid');
+    });
+
+    it('should go once the last held-aside value is back on the grid', async () => {
+      storeService.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      storeService.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      storeService.updateCellValue(cellId('Cat', 'Bike'), CellText.EMPTY);
+      await fixture.whenStable();
+
+      expect(invalidTag()).toBeNull();
     });
   });
 });

@@ -35,14 +35,24 @@ describe('UndoRedoService', () => {
     store.recordMove({moveFn: MoveFnEnum.DELETE, moveArgs: storeService.deleteOption(id)});
 
   const clearCells = () => {
-    store.recordMove({moveFn: MoveFnEnum.CLEAR, moveArgs: {oldCells: store.cells()}});
+    store.recordMove({
+      moveFn: MoveFnEnum.CLEAR,
+      moveArgs: {oldCells: store.cells(), oldInvalidCellValues: store.invalidCellValues()}
+    });
     storeService.clearCells();
   };
 
   const writeCell = (id: CellId, newValue: CellText) => {
     store.recordMove({
       moveFn: MoveFnEnum.UPDATE,
-      moveArgs: {cellId: id, oldValue: store.cellById(id)!.userValue!, newValue}
+      moveArgs: {
+        cellId: id,
+        oldValue: store.cellById(id)!.userValue!,
+        oldInvalidValue: CellText.EMPTY,
+        newValue,
+        newInvalidValue: CellText.EMPTY,
+        newlyValidCells: new Map()
+      }
     });
     store.updateCell(id, {userValue: newValue});
   };
@@ -449,6 +459,108 @@ describe('UndoRedoService', () => {
 
       expect(store.canUndo()).toBe(true);
       expect(store.canRedo()).toBe(false);
+    });
+  });
+
+  describe('values the grid contradicts', () => {
+    const cellId = (nameA: string, nameB: string) =>
+      store.cellByOptions(optionId(nameA), optionId(nameB))!.id as CellId;
+
+    const invalidValue = (nameA: string, nameB: string) => store.invalidCellValues().get(cellId(nameA, nameB));
+
+    const userValue = (nameA: string, nameB: string) => store.cellById(cellId(nameA, nameB))!.userValue;
+
+    const holdAValueAside = () => {
+      storeService.updateCellValue(cellId('Dog', 'Bike'), CellText.X);
+      storeService.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      storeService.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+    };
+
+    it('should put the cell back the way it stood before a value was held aside', () => {
+      holdAValueAside();
+
+      service.undo();
+
+      expect(userValue('Dog', 'Bike')).toBe(CellText.X);
+      expect(invalidValue('Dog', 'Bike')).toBeUndefined();
+    });
+
+    it('should hold the value aside again when the write is made a second time', () => {
+      holdAValueAside();
+      service.undo();
+
+      service.redo();
+
+      expect(userValue('Dog', 'Bike')).toBe(CellText.EMPTY);
+      expect(invalidValue('Dog', 'Bike')).toBe(CellText.O);
+    });
+
+    it('should put a held-aside value back when the write that cleared it is walked back', () => {
+      holdAValueAside();
+      storeService.updateCellValue(cellId('Dog', 'Bike'), CellText.EMPTY);
+
+      service.undo();
+
+      expect(invalidValue('Dog', 'Bike')).toBe(CellText.O);
+    });
+
+    it('should clear the held-aside value again when that write is made a second time', () => {
+      holdAValueAside();
+      storeService.updateCellValue(cellId('Dog', 'Bike'), CellText.EMPTY);
+      service.undo();
+
+      service.redo();
+
+      expect(invalidValue('Dog', 'Bike')).toBeUndefined();
+    });
+
+    it('should hold a value aside again when the write that put it back is walked back', () => {
+      holdAValueAside();
+
+      storeService.updateCellValue(cellId('Cat', 'Bike'), CellText.EMPTY);
+      service.undo();
+
+      expect(invalidValue('Dog', 'Bike')).toBe(CellText.O);
+      expect(userValue('Dog', 'Bike')).toBe(CellText.EMPTY);
+    });
+
+    it('should put a value back on the grid again when that write is made a second time', () => {
+      holdAValueAside();
+      storeService.updateCellValue(cellId('Cat', 'Bike'), CellText.EMPTY);
+      service.undo();
+
+      service.redo();
+
+      expect(invalidValue('Dog', 'Bike')).toBeUndefined();
+      expect(userValue('Dog', 'Bike')).toBe(CellText.O);
+    });
+
+    it('should walk back a write that never left the cell', () => {
+      storeService.updateCellValue(cellId('Dog', 'Bike'), CellText.X);
+
+      service.undo();
+
+      expect(userValue('Dog', 'Bike')).toBe(CellText.EMPTY);
+      expect(store.invalidCellValues().size).toBe(0);
+    });
+
+    it('should bring the held-aside values back when the grid is cleared and that is walked back', () => {
+      holdAValueAside();
+      clearCells();
+
+      service.undo();
+
+      expect(invalidValue('Dog', 'Bike')).toBe(CellText.O);
+    });
+
+    it('should empty the held-aside values again when the clear is made a second time', () => {
+      holdAValueAside();
+      clearCells();
+      service.undo();
+
+      service.redo();
+
+      expect(store.invalidCellValues().size).toBe(0);
     });
   });
 });

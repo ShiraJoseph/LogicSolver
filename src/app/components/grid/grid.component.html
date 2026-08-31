@@ -1,7 +1,11 @@
 <div
   class="grid"
+  role="group"
+  [attr.aria-label]="'grid.name' | translate"
+  (keydown.tab)="onTabForward($event)"
+  (keydown.shift.tab)="onTabBack($event)"
   [style.grid-auto-rows]="CELL_SIZE"
-  [style.grid-template-columns]="`repeat(${columnCount()}, ${CELL_SIZE})`">
+  [style.grid-template-columns]="`repeat(${store.columnCount()}, ${CELL_SIZE})`">
 
   @for (tile of tileService.tiles(); track `${$index}-${tile.type}`) {
     <div
@@ -46,8 +50,11 @@
     </div>
   }
 </div>
-<div class="grid-buttons">
-  <button class="clear-button" (click)="onClickClearCells()">{{ 'grid.clearCells' | translate }}</button>
+<div class="grid-buttons" (keydown.shift.tab)="onTabBackIntoGrid($event)">
   <button [disabled]="!store.canUndo()" (click)="undo()">{{ 'grid.undo' | translate }}</button>
   <button [disabled]="!store.canRedo()" (click)="redo()">{{ 'grid.redo' | translate }}</button>
+  @if (store.invalidCellValues().size) {
+    <span class="invalid-tag">{{ 'grid.invalidGrid' | translate }}</span>
+  }
+  <button class="clear-button" (click)="onClickClearCells()">{{ 'grid.clearCells' | translate }}</button>
 </div>
