@@ -112,13 +112,13 @@ describe('CellComponent', () => {
       expect(store.undoStack()).toEqual([]);
     });
 
-    it('should write over a deduced value the user never entered', async () => {
+    it('should leave the cell alone when the value matches the one it shows', async () => {
       store.updateCell(cellId('Cat', 'Bike'), {userValue: CellText.O});
       await showCell(cellId('Dog', 'Bike'));
 
       component.updateCellValue(CellText.X);
 
-      expect(store.cellById(cellId('Dog', 'Bike'))!.userValue).toBe(CellText.X);
+      expect(store.undoStack()).toEqual([]);
     });
   });
 
@@ -330,6 +330,15 @@ describe('CellComponent', () => {
 
       expect(cellLabel()).toBe('row Dog column Bike value X');
     });
+
+    it('should call the value invalid once the grid contradicts it', async () => {
+      store.updateCell(cellId('Cat', 'Bike'), {userValue: CellText.O});
+      await showCell(cellId('Dog', 'Bike'));
+
+      await clickCell();
+
+      expect(cellLabel()).toBe('row Dog column Bike invalid value O');
+    });
   });
 
   describe('the selected cell', () => {
@@ -436,7 +445,7 @@ describe('CellComponent', () => {
 
       await clickCell();
 
-      expect(store.cellById(cellId('Dog', 'Bike'))!.userValue).toBe(CellText.O);
+      expect(store.invalidCellValues().get(cellId('Dog', 'Bike'))).toBe(CellText.O);
     });
 
     it('should mark the cell hovered on mouseenter', async () => {
@@ -457,7 +466,14 @@ describe('CellComponent', () => {
 
       expect(store.undoStack()).toEqual([{
         moveFn: MoveFnEnum.UPDATE,
-        moveArgs: {cellId: store.cells()[0].id, oldValue: CellText.EMPTY, newValue: CellText.X}
+        moveArgs: {
+          cellId: store.cells()[0].id,
+          oldValue: CellText.EMPTY,
+          oldInvalidValue: CellText.EMPTY,
+          newValue: CellText.X,
+          newInvalidValue: CellText.EMPTY,
+          newlyValidCells: new Map()
+        }
       }]);
     });
 

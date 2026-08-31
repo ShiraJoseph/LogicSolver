@@ -1,7 +1,7 @@
 import {computed, inject, Service} from '@angular/core';
-import {FeatureId, OptionId} from '../types/entities.model';
+import {CellId, FeatureId, OptionId} from '../types/entities.model';
 import {CellText} from '../types/tile.model';
-import {CandidateOptionSetsByFeatureIds, Candidates, ChangedSets} from '../types/logic.model';
+import {CandidateOptionSetsByFeatureIds, Candidates, ChangedSets, Deduction} from '../types/logic.model';
 import {GridStore} from '../store/store';
 
 /** Deduces which option pairings are still possible from the Xs and Os the user entered. */
@@ -9,25 +9,53 @@ import {GridStore} from '../store/store';
 export class LogicService {
   store = inject(GridStore);
 
+  /** One run of the deduction rules over the values on the grid. */
+  private deduction = computed(() => this.deduceCandidates());
+
   /**
    * Every option in the grid has a set of potential matches for every feature that is not its own.
    * Eventually each of those options in the grid will be matched (marked with an "O" in the grid) with only one other option per feature.
    * So we store a list of candidates and eliminate them one by one until we know what that matching option is in each of those features.
    */
-  candidates = computed(() => this.deduceCandidates());
+  candidates = computed(() => this.deduction().candidates);
+
+  /** If some option on the grid has no possible match left in a feature. */
+  isContradicted = computed(() => this.deduction().isContradicted);
+
+  /** If the pass has emptied a candidate set. */
+  private hasEmptyCandidateSet = false;
+
+  /**
+   * The value the deductions give a cell: an O once one candidate is left for the pairing, an X once it is ruled
+   * out, and empty while neither is settled.
+   * @param cellId
+   */
+  deducedValue(cellId: CellId): CellText {
+    const [leftOptionId, topOptionId] = this.store.cellById(cellId)!.optionIds as [OptionId, OptionId];
+    const possibleTopOptions = this.candidates().get(leftOptionId)!
+      .get(this.store.optionById(topOptionId)!.featureId as FeatureId)!;
+
+    return !possibleTopOptions.has(topOptionId) ?
+      CellText.X : possibleTopOptions.size === 1 ?
+        CellText.O :
+        CellText.EMPTY;
+  }
 
   /**
    * Uses a process of elimination to update every option's candidate map based on user entered Xs and Os.
-   * Reruns on the updated sets until no more deductions can be made with the available information.
+   * Reruns on the updated sets until no more deductions can be made with the available information,
+   * or until an option runs out of candidates in some feature.
    * @private
    */
-  private deduceCandidates(): Candidates {
+  private deduceCandidates(): Deduction {
     const candidates = this.rebuildCandidates();
+
+    this.hasEmptyCandidateSet = false;
 
     let setsChangedLastPass: ChangedSets = new Map();
     this.applyUserValuesToCandidates(candidates, setsChangedLastPass);
 
-    while (setsChangedLastPass.size > 0) {
+    while (setsChangedLastPass.size > 0 && !this.hasEmptyCandidateSet) {
       const setsChangedThisPass: ChangedSets = new Map();
 
       this.updateCandidatesForChangedSets(candidates, setsChangedLastPass, setsChangedThisPass);
@@ -35,7 +63,7 @@ export class LogicService {
       setsChangedLastPass = setsChangedThisPass;
     }
 
-    return candidates;
+    return {candidates, isContradicted: this.hasEmptyCandidateSet};
   }
 
   /**
@@ -97,6 +125,10 @@ export class LogicService {
 
     optionACandidatesInFeatureB.delete(optionB);
     candidates.get(optionB)?.get(optionAFeatureId)?.delete(optionA);
+
+    if (!optionACandidatesInFeatureB.size || !candidates.get(optionB)?.get(optionAFeatureId)?.size) {
+      this.hasEmptyCandidateSet = true;
+    }
 
     (setsChangedThisPass.get(optionA) || setsChangedThisPass.set(optionA, new Set()).get(optionA))?.add(optionBFeatureId);
     (setsChangedThisPass.get(optionB) || setsChangedThisPass.set(optionB, new Set()).get(optionB))?.add(optionAFeatureId);

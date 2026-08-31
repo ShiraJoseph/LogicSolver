@@ -11,7 +11,7 @@ import {ARROW_LEFT_KEY, ARROW_RIGHT_KEY} from '../constants/keyboard.const';
 describe('GridStore', () => {
   let store: InstanceType<typeof GridStore>;
 
-  const clearMove: Move = {moveFn: MoveFnEnum.CLEAR, moveArgs: {oldCells: []}};
+  const clearMove: Move = {moveFn: MoveFnEnum.CLEAR, moveArgs: {oldCells: [], oldInvalidCellValues: new Map()}};
   const renameMove: Move = {moveFn: MoveFnEnum.UPDATE, moveArgs: {featureId: 'a-b-c-d-e', oldValue: 'Pet', newValue: 'Animal'}};
 
   beforeEach(() => {

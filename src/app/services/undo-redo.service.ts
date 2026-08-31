@@ -5,6 +5,7 @@ import {CellText} from '../types/tile.model';
 import {addEntities, removeEntities} from '@ngrx/signals/entities';
 import {patchState} from '@ngrx/signals';
 import {CELL_CONFIG, FEATURE_CONFIG, OPTION_CONFIG} from "../constants/store.const";
+import {CellId} from '../types/entities.model';
 
 /** Walks the grid back and forward through the moves the store recorded. */
 @Service()
@@ -31,6 +32,7 @@ export class UndoRedoService {
         break;
       case MoveFnEnum.CLEAR:
         this.store.upsertCells(move.moveArgs.oldCells);
+        this.store.setInvalidCellValues(move.moveArgs.oldInvalidCellValues);
         break;
       default:
         return;
@@ -57,6 +59,7 @@ export class UndoRedoService {
         break;
       case MoveFnEnum.CLEAR:
         this.store.updateAllCells({userValue: CellText.EMPTY});
+        this.store.setInvalidCellValues(new Map());
         break;
       default:
         return;
@@ -73,11 +76,26 @@ export class UndoRedoService {
 
     if ('cellId' in moveArgs) {
       this.store.updateCell(moveArgs.cellId, {userValue: value as CellText});
+      this.store.setInvalidCellValue(moveArgs.cellId, isUndo ? moveArgs.oldInvalidValue : moveArgs.newInvalidValue);
+      this.setNewlyValidCells(moveArgs.newlyValidCells, isUndo);
     } else if ('optionId' in moveArgs) {
       this.store.updateOption(moveArgs.optionId, {name: value});
     } else {
       this.store.updateFeature(moveArgs.featureId, {name: value});
     }
+  }
+
+  /**
+   * Holds the values the move put back aside again, or puts them back on the grid a second time.
+   * @param newlyValidCells
+   * @param isUndo whether to hold the values aside rather than put them back on the grid
+   * @private
+   */
+  private setNewlyValidCells(newlyValidCells: Map<CellId, CellText>, isUndo: boolean) {
+    newlyValidCells.forEach((newlyValidValue, cellId) => {
+      this.store.updateCell(cellId, {userValue: isUndo ? CellText.EMPTY : newlyValidValue});
+      this.store.setInvalidCellValue(cellId, isUndo ? newlyValidValue : CellText.EMPTY);
+    });
   }
 
   /**

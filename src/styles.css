@@ -2,7 +2,11 @@
   --cell-size: 60px;
   --page-margin: 8px;
 
+  --red: #CC3333;
+  --faded-red: color-mix(in oklab, var(--red), white 40%);
+
   --grey-border: dimgrey 1px solid;
+  --red-border: var(--red) 1px solid;
   --thick-border-width: 4px;
   --thick-border: black var(--thick-border-width) solid;
 

@@ -52,10 +52,12 @@ export class GridComponent extends BaseDirective {
   }
 
   /**
-   * Sends Shift Tab off the buttons below the grid back into the cells.
+   * Sends Shift Tab off the first button below the grid back into the cells.
    * @param event
    */
   protected onTabBackIntoGrid(event: Event) {
+    if (event.target !== this.gridButton()) return;
+
     this.moveFocus(event, this.cellTabStop());
   }
 
@@ -99,11 +101,11 @@ export class GridComponent extends BaseDirective {
   }
 
   /**
-   * The first button below the grid.
+   * The first button below the grid the keyboard can reach.
    * @private
    */
   private gridButton() {
-    return this.element.nativeElement.querySelector('.grid-buttons button') as HTMLButtonElement | null;
+    return this.element.nativeElement.querySelector('.grid-buttons button:not(:disabled)') as HTMLButtonElement | null;
   }
 
   /**
@@ -161,7 +163,10 @@ export class GridComponent extends BaseDirective {
    * Empties every cell, recording how they stood so the values can come back.
    */
   protected onClickClearCells() {
-    this.store.recordMove({moveFn: MoveFnEnum.CLEAR, moveArgs: {oldCells: this.store.cells()}});
+    this.store.recordMove({
+      moveFn: MoveFnEnum.CLEAR,
+      moveArgs: {oldCells: this.store.cells(), oldInvalidCellValues: this.store.invalidCellValues()}
+    });
     this.storeService.clearCells();
   }
 }

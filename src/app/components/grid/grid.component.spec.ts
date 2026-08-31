@@ -72,6 +72,15 @@ describe('GridComponent', () => {
       expect(document.activeElement).toBe(gridButton('Clear Cells'));
     });
 
+    it('should send tab off a cell on to undo once there is a move to walk back', async () => {
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+
+      await pressKey('Tab', {}, cellTabStop());
+
+      expect(document.activeElement).toBe(gridButton('Undo'));
+    });
+
     it('should send shift tab off a cell back to the last header', async () => {
       await pressKey('Tab', {shiftKey: true}, cellTabStop());
 
@@ -136,10 +145,19 @@ describe('GridComponent', () => {
       expect(tab.defaultPrevented).toBe(false);
     });
 
-    it('should send shift tab off the clear button back into the cells', async () => {
+    it('should send shift tab off the first button below the grid back into the cells', async () => {
       await pressKey('Tab', {shiftKey: true}, gridButton('Clear Cells'));
 
       expect(document.activeElement).toBe(cellTabStop());
+    });
+
+    it('should leave shift tab alone on a button that is not the first one below the grid', async () => {
+      gridButton('Clear Cells').click();
+      await fixture.whenStable();
+
+      await pressKey('Tab', {shiftKey: true}, gridButton('Redo'));
+
+      expect(document.activeElement).not.toBe(cellTabStop());
     });
   });
 
@@ -344,6 +362,36 @@ describe('GridComponent', () => {
     it('should name the add option button, which shows only a plus', () => {
       expect(fixture.nativeElement.querySelector('[data-tile-type="ADD_OPTION"] button').getAttribute('aria-label'))
         .toBe('Add an option to every feature');
+    });
+  });
+
+  describe('the invalid grid tag', () => {
+    const invalidTag = () => fixture.nativeElement.querySelector('.invalid-tag');
+
+    const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+
+    const cellId = (nameA: string, nameB: string) => store.cellByOptions(optionId(nameA), optionId(nameB))!.id;
+
+    it('should stay off the bottom bar while every value on the grid stands', () => {
+      expect(invalidTag()).toBeNull();
+    });
+
+    it('should show once the grid is holding a value it contradicts', async () => {
+      storeService.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      storeService.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+      await fixture.whenStable();
+
+      expect(invalidTag().textContent.trim()).toBe('Invalid grid');
+    });
+
+    it('should go once the last held-aside value is back on the grid', async () => {
+      storeService.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      storeService.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      storeService.updateCellValue(cellId('Cat', 'Bike'), CellText.EMPTY);
+      await fixture.whenStable();
+
+      expect(invalidTag()).toBeNull();
     });
   });
 });

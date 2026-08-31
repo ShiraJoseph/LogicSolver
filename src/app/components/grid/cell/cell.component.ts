@@ -3,7 +3,6 @@ import {CellText, Tile} from '../../../types/tile.model';
 import {CellId} from '../../../types/entities.model';
 import {LogicService} from '../../../services/logic.service';
 import {BaseDirective} from '../../../directives/base.directive';
-import {MoveFnEnum} from '../../../types/move.model';
 import {ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, BACKSPACE_KEY, DELETE_KEY, ENTER_KEY, ESCAPE_KEY, O_KEY, PRIMARY_POINTER_BUTTON, SPACE_KEY, X_KEY} from '../../../constants/keyboard.const';
 import {NEXT_CELL_TEXT} from '../../../constants/grid.const';
 import {TranslateService} from '@ngx-translate/core';
@@ -36,27 +35,20 @@ export class CellComponent extends BaseDirective {
   /** The screen reader name for the cell: the options it sits between, then the value it shows. */
   cellLabel = computed(() => {
     const [leftOptionId, topOptionId] = this.cell().optionIds!;
-    const {row, column, value} = this.lang();
+    const {row, column, value, invalidValue} = this.lang();
     const cellValue = this.cellValue();
     const cellPosition = `${row} ${this.store.optionById(leftOptionId)!.name} ${column} ${this.store.optionById(topOptionId)!.name}`;
+    const valueName = this.store.invalidCellValues().has(this.cell().id) ? invalidValue : value;
 
-    return cellValue ? `${cellPosition} ${value} ${cellValue}` : cellPosition;
+    return cellValue ? `${cellPosition} ${valueName} ${cellValue}` : cellPosition;
   });
 
   /** The background this cell takes from the hovered row and column. */
   hoverColor = computed(() => this.colorService.getCellColor(this.tile()));
 
-  /** An O once one candidate is left for the pairing, an X once it is ruled out, and empty while neither is settled. */
-  cellValue = computed(() => {
-    const [leftOptionId, topOptionId] = this.cell().optionIds!;
-    const possibleTopOptions = this.logicService.candidates().get(leftOptionId)!
-      .get(this.store.optionById(topOptionId)!.featureId!)!;
-
-    return !possibleTopOptions.has(topOptionId) ?
-      CellText.X : possibleTopOptions.size === 1 ?
-        CellText.O :
-        CellText.EMPTY;
-  });
+  /** The value the user entered that the grid contradicts, and the deduced value while there is none. */
+  cellValue = computed(() =>
+    this.store.invalidCellValues().get(this.cell().id) ?? this.logicService.deducedValue(this.cell().id));
 
   /**
    * Moves the keyboard onto this cell whenever the grid picks it as the selected one.
@@ -72,19 +64,11 @@ export class CellComponent extends BaseDirective {
   }
 
   /**
-   * Writes the value onto the cell and records it as one move, leaving a cell already holding that value alone.
+   * Writes the value onto this cell, holding it aside instead when the grid contradicts it.
    * @param newValue
    */
   updateCellValue(newValue: CellText) {
-    const {id, userValue} = this.cell();
-
-    if (userValue === newValue) return;
-
-    this.store.updateCell(id, {userValue: newValue});
-    this.store.recordMove({
-      moveFn: MoveFnEnum.UPDATE,
-      moveArgs: {cellId: id, oldValue: userValue as CellText, newValue}
-    });
+    this.storeService.updateCellValue(this.cell().id, newValue);
   }
 
   /**

@@ -3,9 +3,11 @@ import {TestBed} from '@angular/core/testing';
 import {StoreService} from './store.service';
 import {GridStore} from '../store/store';
 import {GRID_SEED} from '../store/grid.token';
-import {MOCK_SMALL_GRID_SEED} from '../mocks/grid.mock';
+import {MOCK_FOUR_OPTION_GRID_SEED, MOCK_SMALL_GRID_SEED} from '../mocks/grid.mock';
 import {CellText} from '../types/tile.model';
-import {FeatureId, OptionId} from '../types/entities.model';
+import {CellId, FeatureId, OptionId} from '../types/entities.model';
+import {LogicService} from './logic.service';
+import {MoveFnEnum} from '../types/move.model';
 
 describe('StoreService', () => {
   let service: StoreService;
@@ -310,6 +312,171 @@ describe('StoreService', () => {
       const {cells} = service.clearCells();
 
       expect(cells.length).toBe(1);
+    });
+  });
+
+  describe('values the grid contradicts', () => {
+    const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+
+    const cellId = (nameA: string, nameB: string) =>
+      store.cellByOptions(optionId(nameA), optionId(nameB))!.id as CellId;
+
+    const invalidValue = (nameA: string, nameB: string) => store.invalidCellValues().get(cellId(nameA, nameB));
+
+    const userValue = (nameA: string, nameB: string) => store.cellById(cellId(nameA, nameB))!.userValue;
+
+    it('should hold the value aside rather than write it onto the cell', () => {
+      configure();
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      expect(invalidValue('Dog', 'Bike')).toBe(CellText.O);
+      expect(userValue('Dog', 'Bike')).toBe(CellText.EMPTY);
+    });
+
+    it('should hold aside a value the grid contradicts on a cell that shows nothing', () => {
+      configure(MOCK_FOUR_OPTION_GRID_SEED);
+      [['Cat', 'Tractor'], ['Cat', 'Kayak'], ['Dog', 'Tractor'], ['Dog', 'Kayak']]
+        .forEach(([pet, vehicle]) => service.updateCellValue(cellId(pet, vehicle), CellText.X));
+
+      expect(TestBed.inject(LogicService).deducedValue(cellId('Fish', 'Bike'))).toBe(CellText.EMPTY);
+
+      service.updateCellValue(cellId('Fish', 'Bike'), CellText.O);
+
+      expect(invalidValue('Fish', 'Bike')).toBe(CellText.O);
+    });
+
+    it('should discard the value that was on the cell when the new one is held aside', () => {
+      configure();
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.X);
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      expect(userValue('Dog', 'Bike')).toBe(CellText.EMPTY);
+    });
+
+    it('should let the next value come off a cell holding one the grid contradicts', () => {
+      configure();
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.EMPTY);
+
+      expect(invalidValue('Dog', 'Bike')).toBeUndefined();
+      expect(userValue('Dog', 'Bike')).toBe(CellText.EMPTY);
+    });
+
+    it('should leave the cell alone when the value matches the one it shows', () => {
+      configure();
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      expect(store.undoStack().length).toBe(2);
+    });
+
+    it('should keep the held-aside value out of the deductions', () => {
+      configure();
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      expect(TestBed.inject(LogicService).isContradicted()).toBe(false);
+      expect(TestBed.inject(LogicService).deducedValue(cellId('Dog', 'Bike'))).toBe(CellText.X);
+    });
+
+    it('should record where the value on each side of the write ended up', () => {
+      configure();
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      expect(store.undoStack().at(-1)).toEqual({
+        moveFn: MoveFnEnum.UPDATE,
+        moveArgs: {
+          cellId: cellId('Dog', 'Bike'),
+          oldValue: CellText.EMPTY,
+          oldInvalidValue: CellText.EMPTY,
+          newValue: CellText.EMPTY,
+          newInvalidValue: CellText.O,
+          newlyValidCells: new Map()
+        }
+      });
+    });
+
+    it('should empty the held-aside values along with the cells', () => {
+      configure();
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      service.clearCells();
+
+      expect(store.invalidCellValues().size).toBe(0);
+    });
+  });
+
+  describe('putting held-aside values back', () => {
+    const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
+
+    const cellId = (nameA: string, nameB: string) =>
+      store.cellByOptions(optionId(nameA), optionId(nameB))!.id as CellId;
+
+    it('should leave the value aside while the deductions still contradict it', () => {
+      configure();
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      service.promoteInvalidCellValues();
+
+      expect(store.invalidCellValues().get(cellId('Dog', 'Bike'))).toBe(CellText.O);
+    });
+
+    it('should put the value back once nothing contradicts it', () => {
+      configure();
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.EMPTY);
+
+      expect(store.invalidCellValues().size).toBe(0);
+      expect(store.cellById(cellId('Dog', 'Bike'))!.userValue).toBe(CellText.O);
+    });
+
+    it('should leave the value aside when a cell showing nothing is still contradicted', () => {
+      configure(MOCK_FOUR_OPTION_GRID_SEED);
+      [['Cat', 'Tractor'], ['Cat', 'Kayak'], ['Dog', 'Tractor'], ['Dog', 'Kayak']]
+        .forEach(([pet, vehicle]) => service.updateCellValue(cellId(pet, vehicle), CellText.X));
+      service.updateCellValue(cellId('Fish', 'Bike'), CellText.O);
+
+      service.promoteInvalidCellValues();
+
+      expect(store.invalidCellValues().get(cellId('Fish', 'Bike'))).toBe(CellText.O);
+      expect(store.cellById(cellId('Fish', 'Bike'))!.userValue).toBe(CellText.EMPTY);
+    });
+
+    it('should record the cells the write put a value back on', () => {
+      configure();
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      service.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
+
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.EMPTY);
+
+      expect((store.undoStack().at(-1)!.moveArgs as {newlyValidCells: Map<CellId, CellText>}).newlyValidCells)
+        .toEqual(new Map([[cellId('Dog', 'Bike'), CellText.O]]));
+    });
+
+    it('should put the value back without a second pass when the deductions already give it', () => {
+      configure();
+      service.updateCellValue(cellId('Cat', 'Bike'), CellText.O);
+      store.setInvalidCellValue(cellId('Dog', 'Bike'), CellText.X);
+
+      service.promoteInvalidCellValues();
+
+      expect(store.invalidCellValues().size).toBe(0);
+      expect(store.cellById(cellId('Dog', 'Bike'))!.userValue).toBe(CellText.X);
     });
   });
 });

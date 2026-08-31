@@ -48,12 +48,11 @@
     </div>
   }
 </div>
-<div class="grid-buttons">
-  <button
-    class="clear-button"
-    (keydown.shift.tab)="onTabBackIntoGrid($event)"
-    (click)="onClickClearCells()">{{ 'grid.clearCells' | translate }}
-  </button>
+<div class="grid-buttons" (keydown.shift.tab)="onTabBackIntoGrid($event)">
   <button [disabled]="!store.canUndo()" (click)="undo()">{{ 'grid.undo' | translate }}</button>
   <button [disabled]="!store.canRedo()" (click)="redo()">{{ 'grid.redo' | translate }}</button>
+  @if (store.invalidCellValues().size) {
+    <span class="invalid-tag">{{ 'grid.invalidGrid' | translate }}</span>
+  }
+  <button class="clear-button" (click)="onClickClearCells()">{{ 'grid.clearCells' | translate }}</button>
 </div>

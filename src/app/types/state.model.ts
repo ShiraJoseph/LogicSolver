@@ -1,5 +1,6 @@
 import {CellId} from './entities.model';
 import {MoveStack} from './move.model';
+import {CellText} from './tile.model';
 
 /** The grid state that belongs to no single entity. */
 export interface GridState {
@@ -13,6 +14,8 @@ export interface GridState {
   undoStack: MoveStack;
   /** The moves the user has walked back, newest last. A new move clears them. */
   redoStack: MoveStack;
+  /** The values the user entered that the grid contradicts, keyed by cell. */
+  invalidCellValues: Map<CellId, CellText>;
 }
 
 /** The grid state before anything is on the board. */
@@ -22,4 +25,5 @@ export const initialState: GridState = {
   lastSelectedCellId: undefined,
   undoStack: [],
   redoStack: [],
+  invalidCellValues: new Map(),
 };

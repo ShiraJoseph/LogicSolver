@@ -2,7 +2,7 @@ import {computed, inject, Service, signal} from '@angular/core';
 import {Tile, TileType} from '../types/tile.model';
 import {CellId, FeatureId, OptionId} from '../types/entities.model';
 import {GridStore} from '../store/store';
-import {BLACK, FEATURE_COLORS, WHITE} from '../constants/color.const';
+import {BLACK, FADED_RED, FEATURE_COLORS, WHITE} from '../constants/color.const';
 
 /** The colors each tile takes from its feature and from what the pointer is over. */
 @Service()
@@ -19,12 +19,15 @@ export class ColorService {
   hoveredTopOptionId = computed(() => this.store.cellById(this.hoveredCellId() as CellId)?.optionIds?.[1]);
 
   /**
-   * White for non-hovered cells. Cells in a hovered row or column take a pale tint of that line's
-   * feature color, and the hovered cell itself mixes both.  Once active the cell will be white.
+   * Red for a cell holding a value the grid contradicts. Otherwise white for non-hovered cells, while cells in a
+   * hovered row or column take a pale tint of that line's feature color, and the hovered cell itself mixes both.
+   * Once active the cell will be white.
    * @param tile
    */
   getCellColor(tile: Tile) {
     const cellId = tile.entityId as CellId;
+
+    if (this.store.invalidCellValues().has(cellId)) return FADED_RED;
 
     if (cellId === this.store.selectedCellId?.()) return WHITE;
 

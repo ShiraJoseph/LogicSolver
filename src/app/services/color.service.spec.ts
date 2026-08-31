@@ -5,9 +5,10 @@ import {GridStore} from '../store/store';
 import {StoreService} from './store.service';
 import {GRID_SEED} from '../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../mocks/grid.mock';
-import {BLACK, FEATURE_COLORS, WHITE} from '../constants/color.const';
+import {BLACK, FADED_RED, FEATURE_COLORS, WHITE} from '../constants/color.const';
 import {Tile, TileType} from '../types/tile.model';
 import {CellId, OptionId} from '../types/entities.model';
+import {CellText} from '../types/tile.model';
 
 describe('ColorService', () => {
   let service: ColorService;
@@ -44,6 +45,19 @@ describe('ColorService', () => {
   });
 
   describe('getCellColor', () => {
+    it('should be red for a cell holding a value the grid contradicts', () => {
+      store.setInvalidCellValue(cellId('Cat', 'Bike') as CellId, CellText.O);
+
+      expect(service.getCellColor(cellTile(cellId('Cat', 'Bike')))).toBe(FADED_RED);
+    });
+
+    it('should stay red for a cell holding a contradicted value while the keyboard is on it', () => {
+      store.setInvalidCellValue(cellId('Cat', 'Bike') as CellId, CellText.O);
+      store.setSelectedCellId(cellId('Cat', 'Bike') as CellId);
+
+      expect(service.getCellColor(cellTile(cellId('Cat', 'Bike')))).toBe(FADED_RED);
+    });
+
     it('should be white for a cell on neither hovered line', () => {
       service.hoveredCellId.set(cellId('Cat', 'Bike'));
 

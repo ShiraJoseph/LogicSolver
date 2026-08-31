@@ -2,6 +2,7 @@ import {patchState, signalStore, withComputed, withMethods, withState} from '@ng
 import {withEntities} from '@ngrx/signals/entities';
 import {withDevtools} from '@angular-architects/ngrx-toolkit';
 import {CellId, FeatureId, OptionId} from '../types/entities.model';
+import {CellText} from '../types/tile.model';
 import {withEntityAccessors, withEntityRelationship, withTransitiveRelationship} from 'signalkin';
 import {GridState, initialState} from '../types/state.model';
 import {NON_CELL_COLUMN_COUNT} from '../constants/grid.const';
@@ -28,6 +29,22 @@ export const GridStore = signalStore(
     /** Sets the cell the keyboard is on, or takes it off every cell when given nothing, remembering the last one. */
     setSelectedCellId: (selectedCellId: CellId | undefined) => {
       patchState(store, {selectedCellId, lastSelectedCellId: selectedCellId ?? store.lastSelectedCellId?.()});
+    },
+    /** Sets the value the grid contradicts on this cell, or drops it when given none. */
+    setInvalidCellValue: (cellId: CellId, invalidValue: CellText) => {
+      const invalidCellValues = new Map(store.invalidCellValues());
+
+      if (invalidValue) {
+        invalidCellValues.set(cellId, invalidValue);
+      } else {
+        invalidCellValues.delete(cellId);
+      }
+
+      patchState(store, {invalidCellValues});
+    },
+    /** Replaces every value the grid contradicts at once. */
+    setInvalidCellValues: (invalidCellValues: Map<CellId, CellText>) => {
+      patchState(store, {invalidCellValues});
     },
     /** Adds a new move to the undo stack and clears the redo stack */
     recordMove: (move: Move) => {

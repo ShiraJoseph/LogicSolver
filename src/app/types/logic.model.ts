@@ -14,3 +14,6 @@ export type ChangedFeatures = Set<FeatureId>;
 
 /** A map of each option that had its candidate sets updated during a logic pass */
 export type ChangedSets = Map<OptionId, ChangedFeatures>;
+
+/** The candidate sets from one pass, and if that pass ran an option out of candidates. */
+export type Deduction = {candidates: Candidates; isContradicted: boolean};

@@ -1,6 +1,7 @@
 {
   "cell": {
     "column": "column",
+    "invalidValue": "invalid value",
     "row": "row",
     "value": "value"
   },
@@ -8,6 +9,7 @@
     "addFeature": "Add a feature",
     "addOption": "Add an option to every feature",
     "clearCells": "Clear Cells",
+    "invalidGrid": "Invalid grid",
     "redo": "Redo",
     "undo": "Undo"
   },

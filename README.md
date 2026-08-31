@@ -86,6 +86,8 @@ Only the user's Xs and Os are stored. Everything the grid shows is derived from 
 
 A cell reads as an O when one candidate is left, an X when the pairing is gone from the set, and stays empty otherwise.
 
+If a value the user enters contradicts the current grid state (causes all Xs in an option row set, for example), it is shown in the grid in red but ignored by the `LogicService` until the user resolves the contradiction.
+
 ---
 
 ## Project structure
@@ -93,7 +95,7 @@ A cell reads as an O when one candidate is left, an X when the pairing is gone f
 | Path | Holds |
 |---|---|
 | `store/` | The signal store, its entity config, and the stacks of moves to undo and redo |
-| `services/store.service.ts` | Adds and deletes features, options and cells, and hands back what an undo of that needs |
+| `services/store.service.ts` | Adds and deletes features, options and cells, writes cell values and judges them, and hands back what an undo of that needs |
 | `services/undo-redo.service.ts` | Walks the grid back and forward through the recorded moves |
 | `services/logic.service.ts` | Candidate sets and the deduction rules |
 | `services/tile.service.ts` | Builds the flat tile array the grid renders, row by row |
