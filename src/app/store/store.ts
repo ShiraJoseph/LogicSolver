@@ -32,6 +32,8 @@ export const GridStore = signalStore(
     },
     /** Sets the value the grid contradicts on this cell, or drops it when given none. */
     setInvalidCellValue: (cellId: CellId, invalidValue: CellText) => {
+      if ((store.invalidCellValues().get(cellId) ?? CellText.EMPTY) === invalidValue) return;
+
       const invalidCellValues = new Map(store.invalidCellValues());
 
       if (invalidValue) {
