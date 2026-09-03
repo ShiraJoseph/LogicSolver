@@ -5,7 +5,7 @@ export const BLACK = '#000000';
 export const FADED_RED = 'var(--faded-red)';
 
 /**
- * Feature header backgrounds paired with their label text color, applied in
+ * Feature base-header backgrounds paired with their label text color, applied in
  * the order features appear on the grid. Wraps when there are more features
  * than colors.
  */

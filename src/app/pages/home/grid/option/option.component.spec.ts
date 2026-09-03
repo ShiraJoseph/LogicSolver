@@ -1,14 +1,14 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {OptionComponent} from './option.component';
-import {GridStore} from '../../../store/store';
-import {StoreService} from '../../../services/store.service';
-import {ColorService} from '../../../services/color.service';
-import {GRID_SEED} from '../../../store/grid.token';
-import {MOCK_SMALL_GRID_SEED} from '../../../mocks/grid.mock';
-import {Tile, TileType} from '../../../types/tile.model';
-import {OptionId} from '../../../types/entities.model';
-import {TRANSLATION_PROVIDERS} from '../../../app.config';
+import {GridStore} from '../../../../store/store';
+import {StoreService} from '../../../../services/store.service';
+import {ColorService} from '../../../../services/color.service';
+import {GRID_SEED} from '../../../../store/grid.token';
+import {MOCK_SMALL_GRID_SEED} from '../../../../mocks/grid.mock';
+import {Tile, TileType} from '../../../../types/tile.model';
+import {OptionId} from '../../../../types/entities.model';
+import {TRANSLATION_PROVIDERS} from '../../../../app.config';
 
 describe('OptionComponent', () => {
   let component: OptionComponent;
@@ -42,8 +42,8 @@ describe('OptionComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should draw a header', () => {
-    expect(fixture.nativeElement.querySelector('app-header')).not.toBeNull();
+  it('should draw a base-header', () => {
+    expect(fixture.nativeElement.querySelector('app-base-header')).not.toBeNull();
   });
 
   describe('entityLabel', () => {
@@ -51,7 +51,7 @@ describe('OptionComponent', () => {
       expect(component.entityLabel()).toBe('Vehicle option');
     });
 
-    it('should be the bare word for a header with no entity', async () => {
+    it('should be the bare word for a base-header with no entity', async () => {
       await showHeader(TileType.TOP_OPTION_HEADER, 'Bike');
 
       expect(component.entityLabel()).toBe('option');
@@ -65,11 +65,11 @@ describe('OptionComponent', () => {
   });
 
   describe('isVertical', () => {
-    it('should be true for a top option header', () => {
+    it('should be true for a top option base-header', () => {
       expect(component.isVertical()).toBe(true);
     });
 
-    it('should be false for a left option header', async () => {
+    it('should be false for a left option base-header', async () => {
       await showHeader(TileType.LEFT_OPTION_HEADER, 'Bike', optionId('Bike'));
 
       expect(component.isVertical()).toBe(false);

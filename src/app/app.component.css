@@ -1,6 +1,7 @@
-/* wrappers that group markup only, so the grid and the button are laid out by the body */
+/* wrappers that group markup only, so the grid and the buttons are laid out by the body */
 :host,
 .main,
-.content {
+.content,
+router-outlet {
   display: contents;
 }

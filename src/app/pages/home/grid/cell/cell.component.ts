@@ -1,10 +1,10 @@
 import {Component, computed, effect, ElementRef, inject, input, viewChild} from '@angular/core';
-import {CellText, Tile} from '../../../types/tile.model';
-import {CellId} from '../../../types/entities.model';
-import {LogicService} from '../../../services/logic.service';
-import {BaseDirective} from '../../../directives/base.directive';
-import {ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, BACKSPACE_KEY, DELETE_KEY, ENTER_KEY, ESCAPE_KEY, O_KEY, PRIMARY_POINTER_BUTTON, SPACE_KEY, X_KEY} from '../../../constants/keyboard.const';
-import {NEXT_CELL_TEXT} from '../../../constants/grid.const';
+import {CellText, Tile} from '../../../../types/tile.model';
+import {CellId} from '../../../../types/entities.model';
+import {LogicService} from '../../../../services/logic.service';
+import {BaseDirective} from '../../../../directives/base.directive';
+import {ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY, BACKSPACE_KEY, DELETE_KEY, ENTER_KEY, ESCAPE_KEY, O_KEY, PRIMARY_POINTER_BUTTON, SPACE_KEY, X_KEY} from '../../../../constants/keyboard.const';
+import {NEXT_CELL_TEXT} from '../../../../constants/grid.const';
 import {TranslateService} from '@ngx-translate/core';
 
 /** One square where two options cross, taking an X or an O by click or keystroke. */

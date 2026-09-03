@@ -71,7 +71,7 @@ export class TileService {
   });
 
   /**
-   * Pushes the corner, then a header per feature after the first, collecting their option headers for the row below.
+   * Pushes the corner, then a base-header per feature after the first, collecting their option headers for the row below.
    * @param tiles
    * @param optionCount
    * @param topOptionTiles
@@ -127,7 +127,7 @@ export class TileService {
   }
 
   /**
-   * Pushes one row per option of the given left feature: the option header, the cells, and the blanks on the right side that hold the grid shape.
+   * Pushes one row per option of the given left feature: the option base-header, the cells, and the blanks on the right side that hold the grid shape.
    * @param feature
    * @param tiles
    * @param rowCellCount

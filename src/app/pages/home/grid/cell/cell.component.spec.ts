@@ -1,17 +1,17 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {CellComponent} from './cell.component';
-import {GridStore} from '../../../store/store';
-import {StoreService} from '../../../services/store.service';
-import {ColorService} from '../../../services/color.service';
-import {GRID_SEED} from '../../../store/grid.token';
-import {MOCK_SMALL_GRID_SEED} from '../../../mocks/grid.mock';
-import {CELL_TILE} from '../../../constants/tile.const';
-import {CellText} from '../../../types/tile.model';
-import {CellId} from '../../../types/entities.model';
-import {MoveFnEnum} from '../../../types/move.model';
-import {TRANSLATION_PROVIDERS} from '../../../app.config';
-import {PRIMARY_POINTER_BUTTON} from '../../../constants/keyboard.const';
+import {GridStore} from '../../../../store/store';
+import {StoreService} from '../../../../services/store.service';
+import {ColorService} from '../../../../services/color.service';
+import {GRID_SEED} from '../../../../store/grid.token';
+import {MOCK_SMALL_GRID_SEED} from '../../../../mocks/grid.mock';
+import {CELL_TILE} from '../../../../constants/tile.const';
+import {CellText} from '../../../../types/tile.model';
+import {CellId} from '../../../../types/entities.model';
+import {MoveFnEnum} from '../../../../types/move.model';
+import {TRANSLATION_PROVIDERS} from '../../../../app.config';
+import {PRIMARY_POINTER_BUTTON} from '../../../../constants/keyboard.const';
 
 const SECONDARY_POINTER_BUTTON = 2;
 

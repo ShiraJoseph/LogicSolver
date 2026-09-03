@@ -1,35 +1,11 @@
 :host {
   display: contents;
-  font-family: arial, sans-serif;
 }
 
 .grid {
   display: grid;
   overflow: auto;
   min-height: 0;
-}
-
-.grid-buttons {
-  position: relative;
-  display: flex;
-  align-self: stretch;
-  margin-top: var(--page-margin);
-}
-
-.clear-button {
-  margin-left: auto;
-}
-
-.invalid-tag {
-  position: absolute;
-  inset: 0;
-  width: fit-content;
-  height: fit-content;
-  margin: auto;
-  padding: var(--page-margin);
-  background-color: var(--faded-red);
-  color: black;
-  border: var(--red-border);
 }
 
 .tile {

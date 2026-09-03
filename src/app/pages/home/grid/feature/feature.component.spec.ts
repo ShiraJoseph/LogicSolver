@@ -1,14 +1,14 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {FeatureComponent} from './feature.component';
-import {GridStore} from '../../../store/store';
-import {StoreService} from '../../../services/store.service';
-import {ColorService} from '../../../services/color.service';
-import {GRID_SEED} from '../../../store/grid.token';
-import {MOCK_SMALL_GRID_SEED} from '../../../mocks/grid.mock';
-import {Tile, TileType} from '../../../types/tile.model';
-import {FeatureId} from '../../../types/entities.model';
-import {TRANSLATION_PROVIDERS} from '../../../app.config';
+import {GridStore} from '../../../../store/store';
+import {StoreService} from '../../../../services/store.service';
+import {ColorService} from '../../../../services/color.service';
+import {GRID_SEED} from '../../../../store/grid.token';
+import {MOCK_SMALL_GRID_SEED} from '../../../../mocks/grid.mock';
+import {Tile, TileType} from '../../../../types/tile.model';
+import {FeatureId} from '../../../../types/entities.model';
+import {TRANSLATION_PROVIDERS} from '../../../../app.config';
 
 describe('FeatureComponent', () => {
   let component: FeatureComponent;
@@ -42,8 +42,8 @@ describe('FeatureComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should draw a header', () => {
-    expect(fixture.nativeElement.querySelector('app-header')).not.toBeNull();
+  it('should draw a base-header', () => {
+    expect(fixture.nativeElement.querySelector('app-base-header')).not.toBeNull();
   });
 
   describe('featureIndex', () => {
@@ -51,7 +51,7 @@ describe('FeatureComponent', () => {
       expect(component.featureIndex()).toBe(1);
     });
 
-    it('should be undefined for a header with no entity', async () => {
+    it('should be undefined for a base-header with no entity', async () => {
       await showHeader(TileType.TOP_FEATURE_HEADER, 'Vehicle');
 
       expect(component.featureIndex()).toBeUndefined();
@@ -69,13 +69,13 @@ describe('FeatureComponent', () => {
   });
 
   describe('isVertical', () => {
-    it('should be true for a left feature header', async () => {
+    it('should be true for a left feature base-header', async () => {
       await showHeader(TileType.LEFT_FEATURE_HEADER, 'Pet', featureId('Pet'));
 
       expect(component.isVertical()).toBe(true);
     });
 
-    it('should be false for a top feature header', () => {
+    it('should be false for a top feature base-header', () => {
       expect(component.isVertical()).toBe(false);
     });
   });

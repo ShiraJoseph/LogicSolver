@@ -1,6 +1,8 @@
 import {TestBed} from '@angular/core/testing';
 
 import {AppComponent} from './app.component';
+import {provideRouter, Router} from '@angular/router';
+import {routes} from './app.routes';
 import {GRID_SEED} from './store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from './mocks/grid.mock';
 import {TRANSLATION_PROVIDERS} from './app.config';
@@ -9,7 +11,11 @@ describe('AppComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [TRANSLATION_PROVIDERS, {provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
+      providers: [
+        TRANSLATION_PROVIDERS,
+        provideRouter(routes),
+        {provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}
+      ]
     });
   });
 
@@ -19,11 +25,12 @@ describe('AppComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should render the grid', async () => {
+  it('should render the routed page', async () => {
     const fixture = TestBed.createComponent(AppComponent);
 
+    await TestBed.inject(Router).navigate(['']);
     await fixture.whenStable();
 
-    expect(fixture.nativeElement.querySelector('app-grid')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('app-home')).not.toBeNull();
   });
 });

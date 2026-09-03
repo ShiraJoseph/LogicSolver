@@ -1,9 +1,11 @@
 import {ApplicationConfig, provideBrowserGlobalErrorListeners} from '@angular/core';
+import {provideRouter} from '@angular/router';
 import {provideTranslateService, TranslateService} from '@ngx-translate/core';
 import {of} from 'rxjs';
 import {GRID_SEED} from './store/grid.token';
 import {environment} from '../environments/environment';
 import {DEFAULT_LOCALE, MESSAGES_BY_LOCALE} from './constants/locale.const';
+import {routes} from './app.routes';
 
 /** The browser's language when the app ships messages for it, and English otherwise. */
 export const getBrowserLocale = () => {
@@ -22,6 +24,7 @@ export const TRANSLATION_PROVIDERS = provideTranslateService({
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideRouter(routes),
     TRANSLATION_PROVIDERS,
     {provide: GRID_SEED, useValue: environment.gridSeed},
   ],

@@ -1,28 +1,28 @@
 import {Component, computed, ElementRef, inject, input, viewChild} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
-import {Tile} from '../../../types/tile.model';
-import {FeatureId, OptionId} from '../../../types/entities.model';
-import {BaseDirective} from '../../../directives/base.directive';
-import {MoveArgs, MoveFnEnum} from '../../../types/move.model';
-import {ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY} from '../../../constants/keyboard.const';
+import {Tile} from '../../types/tile.model';
+import {FeatureId, OptionId} from '../../types/entities.model';
+import {BaseDirective} from '../../directives/base.directive';
+import {MoveArgs, MoveFnEnum} from '../../types/move.model';
+import {ARROW_DOWN_KEY, ARROW_LEFT_KEY, ARROW_RIGHT_KEY, ARROW_UP_KEY} from '../../constants/keyboard.const';
 
-/** The rename and delete controls for a grid header. */
+/** The rename and delete controls for a grid base-header. */
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrl: './header.component.css',
+  selector: 'app-base-header',
+  templateUrl: './base-header.component.html',
+  styleUrl: './base-header.component.css',
 })
-export class HeaderComponent extends BaseDirective {
+export class BaseHeaderComponent extends BaseDirective {
   headerInput = viewChild<ElementRef<HTMLInputElement>>('headerInput');
 
   deleteButton = viewChild<ElementRef<HTMLButtonElement>>('deleteButton');
 
   tile = input.required<Tile>();
 
-  /** The header type string, such as "feature" or "Vehicle option". */
+  /** The base-header type string, such as "feature" or "Vehicle option". */
   entityLabel = input.required<string>();
 
-  /** Fill color for the header. */
+  /** Fill color for the base-header. */
   backgroundColor = input.required<string>();
 
   /** The label color, which contrasts the fill. */
@@ -49,7 +49,7 @@ export class HeaderComponent extends BaseDirective {
   /** The screen reader label for the delete button. */
   deleteLabel = computed(() => `${this.lang().delete} ${this.entityLabel()} ${this.tile().text}`.trim());
 
-  /** The key that reaches the delete button, which sits below a vertical header and beside a horizontal one. */
+  /** The key that reaches the delete button, which sits below a vertical base-header and beside a horizontal one. */
   toDeleteKey = computed(() => this.isVertical() ? ARROW_DOWN_KEY : ARROW_RIGHT_KEY);
 
   /** The key that reaches the name field back from the delete button. */
@@ -59,7 +59,7 @@ export class HeaderComponent extends BaseDirective {
   deleteShortcut = computed(() => this.isVertical() ? 'ArrowDown' : 'ArrowRight');
 
   /**
-   * Moves from the name field to the delete button, along the axis this header lays them out on.
+   * Moves from the name field to the delete button, along the axis this base-header lays them out on.
    * @param event
    */
   onNameKeydown(event: KeyboardEvent) {

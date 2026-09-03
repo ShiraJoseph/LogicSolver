@@ -1,11 +1,11 @@
 import {Component, signal} from '@angular/core';
-import {GridComponent} from './components/grid/grid.component';
+import {RouterOutlet} from '@angular/router';
 
-/** The application shell, which hosts the grid. */
+/** The application shell, which hosts the routed page. */
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [GridComponent],
+  imports: [RouterOutlet],
   styleUrl: './app.component.css',
 })
 export class AppComponent {

@@ -1,13 +1,13 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import {HeaderComponent} from './header.component';
-import {GridStore} from '../../../store/store';
-import {GRID_SEED} from '../../../store/grid.token';
-import {MOCK_SMALL_GRID_SEED} from '../../../mocks/grid.mock';
-import {Tile, TileType} from '../../../types/tile.model';
-import {FeatureId} from '../../../types/entities.model';
-import {MoveArgs, MoveFnEnum} from '../../../types/move.model';
-import {TRANSLATION_PROVIDERS} from '../../../app.config';
+import {BaseHeaderComponent} from './base-header.component';
+import {GridStore} from '../../store/store';
+import {GRID_SEED} from '../../store/grid.token';
+import {MOCK_SMALL_GRID_SEED} from '../../mocks/grid.mock';
+import {Tile, TileType} from '../../types/tile.model';
+import {FeatureId} from '../../types/entities.model';
+import {MoveArgs, MoveFnEnum} from '../../types/move.model';
+import {TRANSLATION_PROVIDERS} from '../../app.config';
 
 /** The feature id the fake rename returns. */
 const RENAMED_ID = 'renamed-feature' as FeatureId;
@@ -16,8 +16,8 @@ const RENAMED_ID = 'renamed-feature' as FeatureId;
 const DELETED_MOVE_ARGS = {features: [], featureIndex: 1} as MoveArgs<MoveFnEnum.DELETE>;
 
 describe('HeaderComponent', () => {
-  let component: HeaderComponent;
-  let fixture: ComponentFixture<HeaderComponent>;
+  let component: BaseHeaderComponent;
+  let fixture: ComponentFixture<BaseHeaderComponent>;
   let store: InstanceType<typeof GridStore>;
   let renamedName: string | undefined;
   let deleteCount: number;
@@ -63,14 +63,14 @@ describe('HeaderComponent', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      imports: [HeaderComponent],
+      imports: [BaseHeaderComponent],
       providers: [TRANSLATION_PROVIDERS, {provide: GRID_SEED, useValue: MOCK_SMALL_GRID_SEED}]
     });
     store = TestBed.inject(GridStore);
     renamedName = undefined;
     deleteCount = 0;
 
-    fixture = TestBed.createComponent(HeaderComponent);
+    fixture = TestBed.createComponent(BaseHeaderComponent);
     component = fixture.componentInstance;
     await showHeader();
   });
@@ -80,7 +80,7 @@ describe('HeaderComponent', () => {
   });
 
   describe('what the wrapper passes in', () => {
-    it('should paint the header with the fill', () => {
+    it('should paint the base-header with the fill', () => {
       expect(fixture.nativeElement.querySelector('.header').style.backgroundColor).toBe('purple');
     });
 
@@ -118,7 +118,7 @@ describe('HeaderComponent', () => {
       expect(component.deleteLabel()).toBe('Delete feature Vehicle');
     });
 
-    it('should name the delete button of a header with no name yet', async () => {
+    it('should name the delete button of a base-header with no name yet', async () => {
       await showHeader({tile: {text: '', cols: 1, rows: 1, type: TileType.TOP_FEATURE_HEADER, entityId: RENAMED_ID}});
 
       expect(component.deleteLabel()).toBe('Delete feature');
@@ -135,13 +135,13 @@ describe('HeaderComponent', () => {
       expect(fixture.nativeElement.querySelector('.delete').getAttribute('tabindex')).toBe('-1');
     });
 
-    it('should take focus on arrow right in a horizontal header', () => {
+    it('should take focus on arrow right in a horizontal base-header', () => {
       pressKey('input', 'ArrowRight');
 
       expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.delete'));
     });
 
-    it('should take focus on arrow down in a vertical header', async () => {
+    it('should take focus on arrow down in a vertical base-header', async () => {
       await showHeader({isVertical: true});
 
       pressKey('input', 'ArrowDown');
@@ -149,7 +149,7 @@ describe('HeaderComponent', () => {
       expect(document.activeElement).toBe(fixture.nativeElement.querySelector('.delete'));
     });
 
-    it('should leave the caret alone on the axis the header does not run on', () => {
+    it('should leave the caret alone on the axis the base-header does not run on', () => {
       const input = fixture.nativeElement.querySelector('input');
       input.focus();
 
@@ -166,7 +166,7 @@ describe('HeaderComponent', () => {
       expect(pressKey('.delete', 'ArrowLeft').defaultPrevented).toBe(true);
     });
 
-    it('should hand focus back on arrow left in a horizontal header', () => {
+    it('should hand focus back on arrow left in a horizontal base-header', () => {
       fixture.nativeElement.querySelector('.delete').focus();
 
       pressKey('.delete', 'ArrowLeft');
@@ -174,7 +174,7 @@ describe('HeaderComponent', () => {
       expect(document.activeElement).toBe(fixture.nativeElement.querySelector('input'));
     });
 
-    it('should hand focus back on arrow up in a vertical header', async () => {
+    it('should hand focus back on arrow up in a vertical base-header', async () => {
       await showHeader({isVertical: true});
       fixture.nativeElement.querySelector('.delete').focus();
 
@@ -183,11 +183,11 @@ describe('HeaderComponent', () => {
       expect(document.activeElement).toBe(fixture.nativeElement.querySelector('input'));
     });
 
-    it('should name the key that reaches it for a horizontal header', () => {
+    it('should name the key that reaches it for a horizontal base-header', () => {
       expect(fixture.nativeElement.querySelector('input').getAttribute('aria-keyshortcuts')).toBe('ArrowRight');
     });
 
-    it('should name the key that reaches it for a vertical header', async () => {
+    it('should name the key that reaches it for a vertical base-header', async () => {
       await showHeader({isVertical: true});
 
       expect(fixture.nativeElement.querySelector('input').getAttribute('aria-keyshortcuts')).toBe('ArrowDown');
@@ -225,7 +225,7 @@ describe('HeaderComponent', () => {
       }]);
     });
 
-    it('should do nothing for a header with no entity', async () => {
+    it('should do nothing for a base-header with no entity', async () => {
       await showHeader({tile: {text: 'Vehicle', cols: 1, rows: 1, type: TileType.TOP_FEATURE_HEADER}});
 
       rename('Transport');
@@ -289,7 +289,7 @@ describe('HeaderComponent', () => {
       expect(store.undoStack()).toEqual([{moveFn: MoveFnEnum.DELETE, moveArgs: DELETED_MOVE_ARGS}]);
     });
 
-    it('should do nothing for a header with no entity', async () => {
+    it('should do nothing for a base-header with no entity', async () => {
       await showHeader({tile: {text: 'Vehicle', cols: 1, rows: 1, type: TileType.TOP_FEATURE_HEADER}});
 
       component.onClickDelete();

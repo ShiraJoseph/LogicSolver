@@ -24,7 +24,7 @@ describe('TileService', () => {
     service = TestBed.inject(TileService);
   };
 
-  describe('the header rows', () => {
+  describe('the base-header rows', () => {
     it('should open with the corner, a top feature per feature after the first, and the add feature button', () => {
       configure();
 

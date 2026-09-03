@@ -88,7 +88,7 @@ export const GridStore = signalStore(
 
       return positionMap;
     },
-    /** A column per option of every feature after the first, plus the header and button columns. */
+    /** A column per option of every feature after the first, plus the base-header and button columns. */
     columnCount: () => store.optionCountPerFeature() * (store.featureCount() - 1) + NON_CELL_COLUMN_COUNT,
     /** Whether there is a move left to walk back. */
     canUndo: () => store.undoStack().length > 0,

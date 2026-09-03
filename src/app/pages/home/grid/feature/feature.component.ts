@@ -1,23 +1,23 @@
 import {Component, computed, inject, input} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
-import {HeaderComponent} from '../header/header.component';
-import {Tile, TileType} from '../../../types/tile.model';
-import {BaseDirective} from '../../../directives/base.directive';
-import {FeatureId} from '../../../types/entities.model';
-import {MIN_FEATURE_COUNT} from '../../../constants/grid.const';
-import {MoveArgs, MoveFnEnum} from '../../../types/move.model';
+import {BaseHeaderComponent} from '../../../../components/base-header/base-header.component';
+import {Tile, TileType} from '../../../../types/tile.model';
+import {BaseDirective} from '../../../../directives/base.directive';
+import {FeatureId} from '../../../../types/entities.model';
+import {MIN_FEATURE_COUNT} from '../../../../constants/grid.const';
+import {MoveArgs, MoveFnEnum} from '../../../../types/move.model';
 
-/** A feature label on the top or left axis, and the values its header needs. */
+/** A feature label on the top or left axis, and the values its base-header needs. */
 @Component({
   selector: 'app-feature',
-  imports: [HeaderComponent],
+  imports: [BaseHeaderComponent],
   templateUrl: './feature.component.html',
   styleUrl: './feature.component.css',
 })
 export class FeatureComponent extends BaseDirective {
   tile = input.required<Tile>();
 
-  /** The header type string. */
+  /** The base-header type string. */
   entityLabel = inject(TranslateService).translate('header.feature');
 
   /** The index of this feature in the feature list */
@@ -29,7 +29,7 @@ export class FeatureComponent extends BaseDirective {
   /** The label color, which contrasts the feature fill. */
   textColor = computed(() => this.colorService.getFeatureTextColor(this.featureIndex()));
 
-  /** If this is the left axis feature header */
+  /** If this is the left axis feature base-header */
   isVertical = computed(() => this.tile().type === TileType.LEFT_FEATURE_HEADER);
 
   /** If deleting would leave fewer than two features */
