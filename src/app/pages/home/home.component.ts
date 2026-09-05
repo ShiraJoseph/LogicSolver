@@ -27,6 +27,17 @@ export class HomeComponent extends BaseDirective {
   }
 
   /**
+   * Clears the selected cell when focus moves to an element outside the grid, so no cell keeps the selected
+   * highlight while the grid does not have focus.
+   * @param event
+   */
+  protected onFocusOutOfGrid(event: FocusEvent) {
+    if (this.grid().contains(event.relatedTarget)) return;
+
+    this.store.setSelectedCellId(undefined);
+  }
+
+  /**
    * Sends Shift Tab off the first button below the grid back into the cells.
    * @param event
    */

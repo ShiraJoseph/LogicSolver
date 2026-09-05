@@ -1,15 +1,46 @@
-:host {
-  display: contents;
-}
-
 .grid-buttons {
   position: relative;
   display: flex;
   align-self: stretch;
+  justify-content: space-between;
   margin-top: var(--page-margin);
+  gap: var(--page-margin);
+  align-items: center;
+
+  .button-group {
+    display: flex;
+    width: fit-content;
+    align-items: center;
+    gap: var(--page-margin);
+  }
+
+  button {
+    border: var(--grey-border);
+    outline: none;
+    background-color: var(--white);
+    height: var(--button-height);
+    min-width: calc(2 * var(--button-height));
+
+    [disabled] {
+      color: var(--grey);
+    }
+    &:focus {
+      outline: var(--thick-border)
+    }
+
+    &:hover:not([disabled]) {
+      background-color: var(--button-hover);
+      cursor: pointer;
+    }
+  }
 }
 
-.clear-button {
+.brute-force.no-single-solution {
+  background-color: var(--faded-red);
+  border: var(--red-border);
+}
+
+.clear-button, .brute-force {
   margin-left: auto;
 }
 

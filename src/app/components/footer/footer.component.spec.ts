@@ -7,12 +7,15 @@ import {GRID_SEED} from '../../store/grid.token';
 import {MOCK_SMALL_GRID_SEED} from '../../mocks/grid.mock';
 import {CellText} from '../../types/tile.model';
 import {TRANSLATION_PROVIDERS} from '../../app.config';
+import {SOLUTION_LIMIT} from '../../constants/grid.const';
 
 describe('FooterComponent', () => {
   let component: FooterComponent;
   let fixture: ComponentFixture<FooterComponent>;
   let store: InstanceType<typeof GridStore>;
   let storeService: StoreService;
+
+  const optionId = (name: string) => store.options().find(option => option.name === name)!.id;
 
   const gridButton = (label: string): HTMLButtonElement =>
     [...fixture.nativeElement.querySelectorAll('.grid-buttons button')]
@@ -33,6 +36,53 @@ describe('FooterComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('the brute force button', () => {
+    const bruteForceButton = (): HTMLButtonElement => fixture.nativeElement.querySelector('.brute-force');
+
+    it('should name itself after what it does while the grid is still open', () => {
+      expect(bruteForceButton().textContent!.trim()).toBe('Brute Force');
+      expect(bruteForceButton().classList).not.toContain('no-single-solution');
+    });
+
+    it('should run the solver when it is clicked', async () => {
+      bruteForceButton().click();
+      await fixture.whenStable();
+
+      expect(store.solutionCount()).toBeGreaterThan(SOLUTION_LIMIT);
+    });
+
+    it('should say in red that there are more solutions than it can name', async () => {
+      bruteForceButton().click();
+      await fixture.whenStable();
+
+      expect(bruteForceButton().textContent!.trim()).toBe('More Than 5 Solutions');
+      expect(bruteForceButton().classList).toContain('no-single-solution');
+    });
+
+    it('should name the number of solutions while there are few enough of them', async () => {
+      ['Bike', 'Alice'].forEach(name =>
+        storeService.updateCellValue(store.cellByOptions(optionId('Cat'), optionId(name))!.id, CellText.O));
+      storeService.updateCellValue(store.cellByOptions(optionId('Bike'), optionId('Alice'))!.id, CellText.O);
+
+      bruteForceButton().click();
+      await fixture.whenStable();
+
+      expect(bruteForceButton().textContent!.trim()).toBe('4 Solutions');
+      expect(bruteForceButton().classList).toContain('no-single-solution');
+    });
+
+    it('should go back to naming what it does once the user changes a cell', async () => {
+      bruteForceButton().click();
+      await fixture.whenStable();
+
+      storeService.updateCellValue(store.cells()[0].id, CellText.X);
+      await fixture.whenStable();
+
+      expect(bruteForceButton().textContent!.trim()).toBe('Brute Force');
+      expect(bruteForceButton().classList).not.toContain('no-single-solution');
+    });
   });
 
   describe('the clear button', () => {
@@ -121,7 +171,7 @@ describe('FooterComponent', () => {
       storeService.updateCellValue(cellId('Dog', 'Bike'), CellText.O);
       await fixture.whenStable();
 
-      expect(invalidTag().textContent.trim()).toBe('Invalid grid');
+      expect(invalidTag().textContent.trim()).toBe('Invalid Grid');
     });
 
     it('should go once the last held-aside value is back on the grid', async () => {

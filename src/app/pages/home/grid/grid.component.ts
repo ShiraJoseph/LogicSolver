@@ -56,6 +56,14 @@ export class GridComponent extends BaseDirective {
   }
 
   /**
+   * Whether the element sits inside the grid.
+   * @param target
+   */
+  contains(target: EventTarget | null) {
+    return target instanceof Node && this.element.nativeElement.contains(target);
+  }
+
+  /**
    * Every base-header name field, in the order they run through the grid.
    * @private
    */

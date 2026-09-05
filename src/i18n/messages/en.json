@@ -8,11 +8,16 @@
   "grid": {
     "addFeature": "Add a feature",
     "addOption": "Add an option to every feature",
-    "clearCells": "Clear Cells",
-    "invalidGrid": "Invalid grid",
-    "name": "Logic Solver Grid",
+    "name": "Logic Solver Grid"
+  },
+  "footer": {
     "redo": "Redo",
-    "undo": "Undo"
+    "undo": "Undo",
+    "clearCells": "Clear Cells",
+    "invalidGrid": "Invalid Grid",
+    "bruteForce": "Brute Force",
+    "solutionCount": "{{count}} Solutions",
+    "moreThanMaxSolutions": "More Than {{max}} Solutions"
   },
   "header": {
     "delete": "Delete",

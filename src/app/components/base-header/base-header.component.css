@@ -14,6 +14,10 @@
   height: 100%;
   border: var(--grey-border);
 
+  .delete {
+    background-color: var(--white);
+    border-left: var(--grey-border);
+  }
   &:hover,
   &:focus-within {
     .delete {
@@ -28,6 +32,7 @@
     .delete {
       width: 100%;
       height: 0;
+      border-top: var(--grey-border);
     }
 
     &:hover,

@@ -16,6 +16,10 @@ export interface GridState {
   redoStack: MoveStack;
   /** The values the user entered that the grid contradicts, keyed by cell. */
   invalidCellValues: Map<CellId, CellText>;
+  /** The ids of the cells the solver filled in, so those cells can show that the solver filled them. */
+  solvedCellIds: Set<CellId>;
+  /** How many solutions the last solver run found, set only when that number is not 1 and cleared by the next move. */
+  solutionCount: number | undefined;
 }
 
 /** The grid state before anything is on the board. */
@@ -26,4 +30,6 @@ export const initialState: GridState = {
   undoStack: [],
   redoStack: [],
   invalidCellValues: new Map(),
+  solvedCellIds: new Set(),
+  solutionCount: undefined,
 };

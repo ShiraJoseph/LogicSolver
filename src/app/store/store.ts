@@ -30,7 +30,7 @@ export const GridStore = signalStore(
     setSelectedCellId: (selectedCellId: CellId | undefined) => {
       patchState(store, {selectedCellId, lastSelectedCellId: selectedCellId ?? store.lastSelectedCellId?.()});
     },
-    /** Sets the value the grid contradicts on this cell, or drops it when given none. */
+    /** Sets the value the grid contradicts in this cell, or drops it when given none. */
     setInvalidCellValue: (cellId: CellId, invalidValue: CellText) => {
       if ((store.invalidCellValues().get(cellId) ?? CellText.EMPTY) === invalidValue) return;
 
@@ -48,9 +48,21 @@ export const GridStore = signalStore(
     setInvalidCellValues: (invalidCellValues: Map<CellId, CellText>) => {
       patchState(store, {invalidCellValues});
     },
+    /** Replaces the ids of the cells the solver filled in. */
+    setSolvedCellIds: (solvedCellIds: Set<CellId>) => {
+      patchState(store, {solvedCellIds});
+    },
+    /** Replaces the number of solutions the last solver run found. */
+    setSolutionCount: (solutionCount: number | undefined) => {
+      patchState(store, {solutionCount});
+    },
+    /** Empties the redo stack and leaves the undo stack as it is. */
+    clearRedoStack: () => {
+      patchState(store, {redoStack: []});
+    },
     /** Adds a new move to the undo stack and clears the redo stack */
     recordMove: (move: Move) => {
-      patchState(store, {redoStack: [], undoStack: [...store.undoStack(), move]});
+      patchState(store, {redoStack: [], undoStack: [...store.undoStack(), move], solutionCount: undefined});
     },
     /** Takes the newest move off the undo stack, hands it back, and parks it on the redo stack. */
     popUndoMove: () => {
@@ -60,7 +72,8 @@ export const GridStore = signalStore(
 
       patchState(store, {
         undoStack: store.undoStack().slice(0, -1),
-        redoStack: [...store.redoStack(), move]
+        redoStack: [...store.redoStack(), move],
+        solutionCount: undefined
       });
 
       return move;
@@ -73,7 +86,8 @@ export const GridStore = signalStore(
 
       patchState(store, {
         redoStack: store.redoStack().slice(0, -1),
-        undoStack: [...store.undoStack(), move]
+        undoStack: [...store.undoStack(), move],
+        solutionCount: undefined
       });
 
       return move;

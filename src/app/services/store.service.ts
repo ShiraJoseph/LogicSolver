@@ -116,7 +116,7 @@ export class StoreService {
   }
 
   /**
-   * Writes the value onto the cell and records it as one move, leaving a cell already showing that value alone.
+   * Writes the value into the cell and records it as one move, leaving a cell already showing that value alone.
    * A value the grid contradicts comes straight back off the cell and is held aside instead.
    * @param cellId
    * @param newValue

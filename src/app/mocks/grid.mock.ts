@@ -19,3 +19,15 @@ export const MOCK_FOUR_OPTION_GRID_SEED: GridSeed = {
   featureNames: ['Pet', 'Vehicle'],
   optionNames: ['Cat', 'Dog', 'Fish', 'Bird', 'Bike', 'Canoe', 'Tractor', 'Kayak']
 };
+
+/** 5 features of 5 options, large enough for a puzzle that needs guesses as well as deductions. */
+export const MOCK_FIVE_BY_FIVE_GRID_SEED: GridSeed = {
+  featureNames: ['Pet', 'Vehicle', 'Name', 'Job', 'Hat'],
+  optionNames: [
+    'Cat', 'Dog', 'Fish', 'Bird', 'Snake',
+    'Bike', 'Canoe', 'Tractor', 'Kayak', 'Scooter',
+    'Alice', 'Bob', 'Carol', 'Dave', 'Erin',
+    'Baker', 'Cook', 'Driver', 'Editor', 'Farmer',
+    'Beret', 'Cap', 'Fedora', 'Helmet', 'Visor'
+  ]
+};

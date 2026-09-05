@@ -1,8 +1,17 @@
 <div class="grid-buttons">
-  <button [disabled]="!store.canUndo()" (click)="undo()">{{ 'grid.undo' | translate }}</button>
-  <button [disabled]="!store.canRedo()" (click)="redo()">{{ 'grid.redo' | translate }}</button>
+  <div class="button-group">
+  <button class="undo-redo" [disabled]="!store.canUndo()" (click)="undo()">{{ 'footer.undo' | translate }}</button>
+  <button class="undo-redo" [disabled]="!store.canRedo()" (click)="redo()">{{ 'footer.redo' | translate }}</button>
+  </div>
   @if (store.invalidCellValues().size) {
-    <span class="invalid-tag">{{ 'grid.invalidGrid' | translate }}</span>
+    <span class="invalid-tag">{{ 'footer.invalidGrid' | translate }}</span>
   }
-  <button class="clear-button" (click)="onClickClearCells()">{{ 'grid.clearCells' | translate }}</button>
+  <div class="button-group">
+  <button
+    class="brute-force"
+    [class.no-single-solution]="store.solutionCount() != undefined"
+    (click)="onClickBruteForce()">{{ bruteForceLabel() | translate: {count: store.solutionCount(), max: SOLUTION_LIMIT} }}
+  </button>
+  <button class="clear-button" (click)="onClickClearCells()">{{ 'footer.clearCells' | translate }}</button>
+  </div>
 </div>

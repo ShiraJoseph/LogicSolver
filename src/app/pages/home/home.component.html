@@ -1,2 +1,2 @@
-<app-grid (keydown.tab)="onTabOutOfGrid($event)"/>
+<app-grid (keydown.tab)="onTabOutOfGrid($event)" (focusout)="onFocusOutOfGrid($event)"/>
 <app-footer (keydown.shift.tab)="onTabBackIntoGrid($event)"/>

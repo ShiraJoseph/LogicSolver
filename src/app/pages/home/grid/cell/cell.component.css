@@ -25,6 +25,10 @@
     outline: none;
   }
 
+  &.solved {
+    border: var(--grey) var(--thick-border-width) dashed;
+  }
+
   &.selected {
     border: var(--thick-border);
   }

@@ -7,6 +7,7 @@ export enum MoveFnEnum {
   UPDATE,
   DELETE,
   CLEAR,
+  SOLVE,
 }
 
 /** Which entity an UPDATE move renamed or rewrote. */
@@ -18,7 +19,7 @@ export enum MoveEntityEnum {
 
 /**
  * Cell value before and after an update, on whichever side of the split it sat.
- * At most one of each pair is filled: a value lives either on the cell or in the invalid map, never both.
+ * At most one of each pair is filled: a value lives either in the cell or in the invalid map, never both.
  */
 type CellUpdateMoveArgs = {
   cellId: CellId;
@@ -38,6 +39,9 @@ type FeatureUpdateMoveArgs = {featureId: FeatureId, oldValue: string; newValue: 
 
 /** Cell values and held-aside invalid values before clearing the grid */
 type ClearMoveArgs = {oldCells: Array<Cell>; oldInvalidCellValues: Map<CellId, CellText>};
+
+/** The value the solver wrote into each cell it filled in, keyed by cell id */
+type SolveMoveArgs = {solvedCells: Map<CellId, CellText>};
 
 /** The entities an ADD or DELETE move changed, with their index slots */
 type CollectionMoveArgs =  {
@@ -60,6 +64,7 @@ export type MoveArgs<T extends MoveFnEnum, E extends MoveEntityEnum = never> =
         FeatureUpdateMoveArgs
     ) :
     T extends MoveFnEnum.CLEAR ? ClearMoveArgs:
+      T extends MoveFnEnum.SOLVE ? SolveMoveArgs:
   CollectionMoveArgs;
 
 /** One move paired with its undo record */
@@ -72,6 +77,7 @@ type BaseMove<T extends MoveFnEnum, E extends MoveEntityEnum = never> = {
 export type Move = BaseMove<MoveFnEnum.ADD>
   | BaseMove<MoveFnEnum.DELETE>
   | BaseMove<MoveFnEnum.CLEAR>
+  | BaseMove<MoveFnEnum.SOLVE>
   | BaseMove<MoveFnEnum.UPDATE, MoveEntityEnum.FEATURE | MoveEntityEnum.OPTION | MoveEntityEnum.CELL>;
 
 /** Moves waiting to be undone or redone, oldest first. */

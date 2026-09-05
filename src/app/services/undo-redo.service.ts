@@ -34,6 +34,9 @@ export class UndoRedoService {
         this.store.upsertCells(move.moveArgs.oldCells);
         this.store.setInvalidCellValues(move.moveArgs.oldInvalidCellValues);
         break;
+      case MoveFnEnum.SOLVE:
+        this.setSolvedCells(move.moveArgs.solvedCells, true);
+        break;
       default:
         return;
     }
@@ -61,13 +64,31 @@ export class UndoRedoService {
         this.store.updateAllCells({userValue: CellText.EMPTY});
         this.store.setInvalidCellValues(new Map());
         break;
+      case MoveFnEnum.SOLVE:
+        this.setSolvedCells(move.moveArgs.solvedCells, false);
+        break;
       default:
         return;
     }
   }
 
   /**
-   * Writes one of the two recorded values onto the cell, option or feature the move names.
+   * Empties the cells the solver filled in, or writes its values back into them, and updates `solvedCellIds`
+   * to match.
+   * @param solvedCells
+   * @param isUndo whether to empty the cells instead of filling them in
+   * @private
+   */
+  private setSolvedCells(solvedCells: Map<CellId, CellText>, isUndo: boolean) {
+    solvedCells.forEach((solvedValue, cellId) => {
+      this.store.updateCell(cellId, {userValue: isUndo ? CellText.EMPTY : solvedValue});
+    });
+
+    this.store.setSolvedCellIds(isUndo ? new Set() : new Set(solvedCells.keys()));
+  }
+
+  /**
+   * Writes one of the two recorded values into the cell, option or feature the move names.
    * @param moveArgs
    * @param isUndo whether to write the value from before the move rather than the one from after it
    */

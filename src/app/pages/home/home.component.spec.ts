@@ -55,7 +55,7 @@ describe('HomeComponent', () => {
     it('should send tab off a cell on to the buttons below the grid', async () => {
       await pressKey('Tab', {}, cellTabStop());
 
-      expect(document.activeElement).toBe(gridButton('Clear Cells'));
+      expect(document.activeElement).toBe(gridButton('Brute Force'));
     });
 
     it('should send tab off a cell on to undo once there is a move to walk back', async () => {
@@ -78,9 +78,44 @@ describe('HomeComponent', () => {
     });
   });
 
+  describe('a footer button that changes the grid', () => {
+    const addFeature = async () => {
+      fixture.nativeElement.querySelector('[data-tile-type="ADD_FEATURE"] button').click();
+      await fixture.whenStable();
+    };
+
+    const clickButton = async (label: string) => {
+      const button = gridButton(label);
+      button.focus();
+      button.click();
+      await fixture.whenStable();
+
+      return button;
+    };
+
+    it('should keep the keyboard on undo rather than let a cell take it back', async () => {
+      cellTabStop().focus();
+      await fixture.whenStable();
+      await addFeature();
+
+      const undo = await clickButton('Undo');
+
+      expect(document.activeElement).toBe(undo);
+    });
+
+    it('should let go of the selected cell once the keyboard lands on a button', async () => {
+      cellTabStop().focus();
+      await fixture.whenStable();
+
+      await clickButton('Clear Cells');
+
+      expect(store.selectedCellId?.()).toBeUndefined();
+    });
+  });
+
   describe('the way back into the grid', () => {
     it('should send shift tab off the first button below the grid back into the cells', async () => {
-      await pressKey('Tab', {shiftKey: true}, gridButton('Clear Cells'));
+      await pressKey('Tab', {shiftKey: true}, gridButton('Brute Force'));
 
       expect(document.activeElement).toBe(cellTabStop());
     });
@@ -99,9 +134,10 @@ describe('HomeComponent', () => {
       await fixture.whenStable();
       const tab = new KeyboardEvent('keydown', {key: 'Tab', shiftKey: true, bubbles: true, cancelable: true});
 
-      gridButton('Clear Cells').dispatchEvent(tab);
+      gridButton('Brute Force').dispatchEvent(tab);
 
       expect(tab.defaultPrevented).toBe(false);
     });
   });
+
 });

@@ -29,6 +29,9 @@ export class CellComponent extends BaseDirective {
   /** If the keyboard is on this cell */
   isSelected = computed(() => this.store.selectedCellId?.() === this.cell().id);
 
+  /** If the solver filled this cell in and its value is still there */
+  isSolved = computed(() => this.store.solvedCellIds().has(this.cell().id) && !!this.cell().userValue);
+
   /** If this cell holds the grid's one tab stop */
   isTabStop = computed(() => this.store.tabStopCellId() === this.cell().id);
 
@@ -64,7 +67,7 @@ export class CellComponent extends BaseDirective {
   }
 
   /**
-   * Writes the value onto this cell, holding it aside instead when the grid contradicts it.
+   * Writes the value into this cell, holding it aside instead when the grid contradicts it.
    * @param newValue
    */
   updateCellValue(newValue: CellText) {
